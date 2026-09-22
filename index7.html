@@ -614,37 +614,6 @@ function validLeadEmail(){
  const el=document.getElementById("leadEmail");
  return el && el.checkValidity() && el.value.trim();
 }
-/* ===== LEAD CAPTURE =========================================================
-   Paste your endpoint URL into LEAD_ENDPOINT below to record EVERY unlock as a
-   lead (email + calculator profile + modelled figures). Leave blank to disable
-   (the page still works; unlock just won't record). Fastest option: a free
-   Formspree form at https://formspree.io — see the notes given at handoff.
-============================================================================ */
-const WEB3FORMS_KEY = "d924d751-50fc-4a7c-97c5-1422af447027";   // Web3Forms → emails leads to ashish@ashishduacorporation.com
-const LEAD_ENDPOINT = "https://api.web3forms.com/submit";
-let leadRecorded = false;
-function leadSnapshot(email){
- const g=id=>document.getElementById(id);
- const goals=[...document.querySelectorAll(".goal.on")].map(b=>b.dataset.goal).join(", ");
- return {
-  email, page:"duadesk.com — Value Lab", ts:new Date().toISOString(),
-  turnover_cr:val("turnover"), materials_pct:val("mat"), itc_cr:val("itc"),
-  finance_fte:val("fte"), fte_cost_l:val("ftecost"), invoices_month:val("inv"),
-  audit_hours:val("audit"), vendors:val("vendors"),
-  complexity:g("complexity")?g("complexity").value:"", priorities:goals,
-  total:(g("totalValue")||{}).textContent||"", opportunity:(g("hard")||{}).textContent||"",
-  upside:(g("upside")||{}).textContent||"", year1_net:(g("net")||{}).textContent||"",
-  payback:(g("payback")||{}).textContent||""
- };
-}
-function recordLead(email){
- if(leadRecorded) return;
- if(!LEAD_ENDPOINT || LEAD_ENDPOINT.indexOf("http")!==0) return;  // not configured yet
- leadRecorded=true;
- try{
-  fetch(LEAD_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({access_key:WEB3FORMS_KEY,subject:"DuaDesk Value Lab lead — "+email,from_name:"DuaDesk website · Value Lab",...leadSnapshot(email)}),keepalive:true}).catch(()=>{});
- }catch(e){/* never block the unlock */}
-}
 function unlockValue(){
  const el=document.getElementById("leadEmail"), err=document.getElementById("gateError");
  if(!el || !el.checkValidity() || !el.value.trim()){
@@ -656,7 +625,6 @@ function unlockValue(){
  document.querySelector(".calcresult")?.classList.remove("locked");
  if(err) err.textContent="";
  calc();
- recordLead(el.value.trim());
  return true;
 }
 function emailEstimate(){
@@ -684,7 +652,7 @@ function closeDemo(){
  modal.classList.remove("on");
  modal.setAttribute("aria-hidden","true");
 }
-async function submitDemo(e){
+function submitDemo(e){
  e.preventDefault();
  const f=document.getElementById("demoForm");
  if(!f.checkValidity()){f.reportValidity();return;}
@@ -698,34 +666,22 @@ async function submitDemo(e){
   erp:document.getElementById("demoERP").value,
   need:document.getElementById("demoNeed").value.trim()
  };
- const showToast=(m)=>{const t=document.getElementById("toast");if(t){t.textContent=m;t.classList.add("on");setTimeout(()=>t.classList.remove("on"),4500);}};
- const mailtoFallback=()=>{
-  const subject=encodeURIComponent("DuaDesk 2.0 Demo Request — "+vals.company);
-  const body=encodeURIComponent(
-   "DuaDesk 2.0 Demo Request\n\n"+
-   "Name: "+vals.name+"\n"+"Company: "+vals.company+"\n"+"Work email: "+vals.email+"\n"+
-   "Phone: "+(vals.phone||"Not provided")+"\n"+"Country: "+vals.country+"\n"+
-   "Product / demo: "+vals.product+"\n"+"ERP / finance system: "+vals.erp+"\n"+
-   "What they want to see: "+(vals.need||"Not specified")+"\n"
-  );
-  window.location.href="mailto:ashish@ashishduacorporation.com?subject="+subject+"&body="+body;
- };
- // Send for real via Web3Forms; fall back to the visitor's email app only if it fails.
- if(WEB3FORMS_KEY && WEB3FORMS_KEY.indexOf("PASTE")!==0){
-  try{
-   const res=await fetch("https://api.web3forms.com/submit",{
-    method:"POST",
-    headers:{"Content-Type":"application/json","Accept":"application/json"},
-    body:JSON.stringify({access_key:WEB3FORMS_KEY,subject:"DuaDesk 2.0 Demo Request — "+(vals.company||"(company)"),from_name:"DuaDesk website · Demo form",...vals})
-   });
-   const data=await res.json();
-   if(data && data.success){ showToast("Demo request sent — Ashish has received it and will reply soon."); closeDemo(); return false; }
-   throw new Error("send failed");
-  }catch(err){
-   mailtoFallback(); showToast("Opening your email app to send the request to DuaDesk."); closeDemo(); return false;
-  }
- }
- mailtoFallback(); showToast("Opening your email app to send the request to DuaDesk."); closeDemo(); return false;
+ const subject=encodeURIComponent("DuaDesk 2.0 Demo Request — "+vals.company);
+ const body=encodeURIComponent(
+  "DuaDesk 2.0 Demo Request\n\n"+
+  "Name: "+vals.name+"\n"+
+  "Company: "+vals.company+"\n"+
+  "Work email: "+vals.email+"\n"+
+  "Phone: "+(vals.phone||"Not provided")+"\n"+
+  "Country: "+vals.country+"\n"+
+  "Product / demo: "+vals.product+"\n"+
+  "ERP / finance system: "+vals.erp+"\n"+
+  "What they want to see: "+(vals.need||"Not specified")+"\n"
+ );
+ window.location.href="mailto:ashish@ashishduacorporation.com?subject="+subject+"&body="+body;
+ const toast=document.getElementById("toast");
+ if(toast){toast.textContent="Demo request prepared — your email client will open to send it to DuaDesk.";toast.classList.add("on");setTimeout(()=>toast.classList.remove("on"),4500);}
+ closeDemo();
 }
 document.addEventListener("keydown",function(e){
  if(e.key==="Escape"){
