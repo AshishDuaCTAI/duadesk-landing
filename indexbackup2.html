@@ -77,55 +77,13 @@ h1 em{color:var(--gold2);font-style:normal}.lead{font-size:20px;color:#c4d1df;ma
 .country-link:hover{opacity:.82; transform:translateY(-1px)}
 .country-link span{font-size:.75em; opacity:.7}
 
-
-.valuegate{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px;background:linear-gradient(180deg,rgba(7,18,29,.96),rgba(7,18,29,.985));border:1px solid rgba(233,196,106,.22);border-radius:18px;backdrop-filter:blur(8px)}
-.valuegate .gateicon{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(233,196,106,.45);color:#e9c46a;font-size:18px;margin-bottom:10px}
-.valuegate.unlocked{display:none}
-#leadEmail{border-color:rgba(233,196,106,.45)}
-#leadEmail:invalid:not(:placeholder-shown){border-color:#d97a7a}
-
-.demoformbox{max-width:760px}
-.demo-fields{grid-template-columns:1fr 1fr}
-.demo-fields .full{grid-column:1 / -1}
-.demo-fields textarea{resize:vertical;min-height:88px}
-.demo-note{font-size:10px;color:#71869b;margin-top:12px;line-height:1.55}
-@media(max-width:700px){.demo-fields{grid-template-columns:1fr}.demo-fields .full{grid-column:auto}.navcta{gap:5px}.navcta .btn{padding:9px 11px;font-size:10px}}
-
-
-.launchidea{color:#d8b36a;font-weight:700}
-.audience-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px}
-.audience-card{appearance:none;text-align:left;border:1px solid var(--line);background:linear-gradient(180deg,#101c28,#0c151f);color:var(--text);border-radius:18px;padding:20px;cursor:pointer;min-height:178px;transition:border-color .2s ease,transform .2s ease,background .2s ease}
-.audience-card:hover{transform:translateY(-2px)}
-.audience-card.active{border-color:#d8b36a;background:linear-gradient(180deg,#162330,#0d1721);box-shadow:inset 0 0 0 1px rgba(216,179,106,.18)}
-.audience-kicker{display:block;font-size:9px;letter-spacing:.15em;color:#d8b36a;margin-bottom:13px;font-weight:800}
-.audience-card strong{display:block;font-size:17px;line-height:1.25;margin-bottom:12px}
-.audience-card>span:last-child{display:block;color:var(--muted);font-size:11px;line-height:1.5}
-.outcome-banner{margin-top:14px;border:1px solid rgba(216,179,106,.32);background:linear-gradient(120deg,rgba(216,179,106,.08),rgba(57,216,193,.035));border-radius:20px;padding:25px}
-.outcome-main{font-family:Georgia,serif;font-size:30px;line-height:1.1;color:#f5efe2}
-.outcome-copy{color:#b8c8d6;font-size:13px;max-width:850px;margin-top:9px;line-height:1.6}
-.outcome-pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}
-.outcome-pillars div{border-top:1px solid rgba(255,255,255,.1);padding-top:12px}
-.outcome-pillars b{display:block;color:#d8b36a;font-size:10px;letter-spacing:.08em}
-.outcome-pillars span{display:block;color:#91a6b8;font-size:10px;line-height:1.45;margin-top:5px}
-.change-grid{border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-top:20px}
-.change-row{display:grid;grid-template-columns:1fr 1.2fr;border-top:1px solid var(--line)}
-.change-row span,.change-row b{padding:14px 16px;font-size:12px;line-height:1.45}
-.change-row span{color:#8da2b5}
-.change-row b{color:#dce8f1;font-weight:600}
-.change-row.head{border-top:0;background:#101c28}
-.change-row.head span{color:#d8b36a;font-size:9px;letter-spacing:.13em;font-weight:800}
-.change-tagline{text-align:center;font-family:Georgia,serif;font-size:25px;margin-top:22px;color:#e9efe9}
-.change-tagline em{color:#d8b36a;font-style:normal}
-@media(max-width:1000px){.audience-grid{grid-template-columns:1fr 1fr}.outcome-pillars{grid-template-columns:1fr 1fr}}
-@media(max-width:600px){.audience-grid{grid-template-columns:1fr}.outcome-pillars{grid-template-columns:1fr}.outcome-main{font-size:25px}.change-row{grid-template-columns:1fr}.change-row.head{display:none}.change-row span{padding-bottom:4px}.change-row b{padding-top:4px}}
-
 </style>
 </head>
 <body>
 <nav class="nav"><div class="navin">
   <div class="brand">DUA <span>DESK</span></div>
-  <div class="navlinks"><a href="#outcomes">Why DuaDesk</a><a href="#connect">ERP Connect</a><a href="#command">Command Centres</a><a href="#agents">Agents at Work</a><a href="#value">Value Lab</a><a href="#trust">Trust</a></div>
-  <div class="navcta"><button class="btn ghost" onclick="openDemo()">Request a Demo →</button><button class="btn ghost" onclick="openExperience()">Experience</button><button class="btn gold" onclick="document.getElementById('value').scrollIntoView()">Calculate Value →</button></div>
+  <div class="navlinks"><a href="#platform">Platform</a><a href="#connect">ERP Connect</a><a href="#command">Command Centres</a><a href="#agents">Agents at Work</a><a href="#value">Value Lab</a><a href="#trust">Trust</a></div>
+  <div class="navcta"><button class="btn ghost" onclick="openExperience()">Experience</button><button class="btn gold" onclick="document.getElementById('value').scrollIntoView()">Calculate Value →</button></div>
 </div></nav>
 
 <header class="hero">
@@ -139,12 +97,12 @@ h1 em{color:var(--gold2);font-style:normal}.lead{font-size:20px;color:#c4d1df;ma
    <span class="launchdot">·</span>
    <span class="launchitem">Balance Sheet IQ</span>
    <span class="launchdot">·</span>
-   <span class="launchitem">Video → Ledger</span><span class="launchdot">·</span><span class="launchidea">One AI workforce for your business</span>
+   <span class="launchitem">Video → Ledger</span>
   </div>
   <div class="eyebrow">Enterprise AI · Command Centres · Governed Execution</div>
   <h1>AI that <em>does the work.</em><br>Not just AI that talks.</h1>
-  <p class="lead">DuaDesk turns finance, procurement, audit and advisory work into AI-powered operating teams — helping businesses lower the cost of work, reduce manual dependence, strengthen compliance and turn their data into intelligence for growth. Your systems stay. Your controls stay. AI does more of the work.</p>
-  <div class="heroactions"><button class="btn gold" onclick="openDemo()">Request a Demo →</button><button class="btn ghost" onclick="openExperience()">▶ Enter the Experience Centre</button><button class="btn ghost" onclick="document.getElementById('value').scrollIntoView()">₹ Calculate your opportunity</button></div>
+  <p class="lead">DuaDesk turns enterprise functions into AI operating teams — agents connect to your systems, compute from source data, reason through exceptions, prepare the work and leave a governed decision trail for the professional who signs.</p>
+  <div class="heroactions"><button class="btn gold" onclick="openExperience()">▶ Enter the Experience Centre</button><button class="btn ghost" onclick="document.getElementById('value').scrollIntoView()">₹ Calculate your opportunity</button></div>
   <div class="proofrow">
    <div class="proof"><b>18</b> AI CFO desks</div><div class="proof"><b>16</b> CPO desks + co-pilot</div><div class="proof"><b>20</b> audit types</div><div class="proof"><b>47</b> advisory agents</div><div class="proof"><b>6</b> country layers</div>
   </div>
@@ -158,46 +116,6 @@ h1 em{color:var(--gold2);font-style:normal}.lead{font-size:20px;color:#c4d1df;ma
  </div>
 </header>
 
-
-<section class="outcomes section" id="outcomes">
-  <div class="sectionhead">
-    <div><div class="eyebrow">WHY DUADESK 2.0</div><h2>Don't buy AI features. Change what your business can do.</h2></div>
-    <p>The technology is underneath. The outcome is the point: less repetitive work, lower operating cost, stronger control and more intelligence available to the people running the business.</p>
-  </div>
-  <div class="audience-grid">
-    <button class="audience-card active" type="button" data-audience="owner">
-      <span class="audience-kicker">BUSINESS OWNER / CEO</span>
-      <strong>Spend less time running finance. Spend more time running the business.</strong>
-      <span>Lower finance cost · less manual dependence · stronger control · intelligence for growth</span>
-    </button>
-    <button class="audience-card" type="button" data-audience="cfo">
-      <span class="audience-kicker">CFO / FINANCE LEADER</span>
-      <strong>Turn finance into a 24×7 AI-powered intelligence function.</strong>
-      <span>Connect your ERP · automate work · monitor compliance · find savings · improve cash</span>
-    </button>
-    <button class="audience-card" type="button" data-audience="ca">
-      <span class="audience-kicker">CA / ACCOUNTING FIRM</span>
-      <strong>Scale expertise, not headcount. Build global capability.</strong>
-      <span>More clients · more advisory capacity · AI-assisted audit · country-specific intelligence</span>
-    </button>
-    <button class="audience-card" type="button" data-audience="enterprise">
-      <span class="audience-kicker">ENTERPRISE / TRANSFORMATION</span>
-      <strong>Move from AI assistance to governed AI operations.</strong>
-      <span>AI agents · evidence · permissions · sign-gates · controlled execution</span>
-    </button>
-  </div>
-  <div class="outcome-banner">
-    <div class="outcome-main" id="audienceHeadline">Your business deserves an AI workforce.</div>
-    <div class="outcome-copy" id="audienceCopy">Keep your ERP. Keep your people. Reduce the repetitive work, strengthen control and turn financial data into decisions.</div>
-    <div class="outcome-pillars">
-      <div><b>LOWER COST</b><span>Automate repetitive finance work</span></div>
-      <div><b>LESS MANUAL DEPENDENCE</b><span>AI captures, reconciles and prepares</span></div>
-      <div><b>BETTER CONTROL</b><span>Evidence, compliance and governed action</span></div>
-      <div><b>MORE INTELLIGENCE</b><span>Cash, margins, risk and growth insight</span></div>
-    </div>
-  </div>
-</section>
-
 <section class="section" id="platform">
  <div class="sectionhead"><div><div class="eyebrow">THE OPERATING MODEL</div><h2>From enterprise signals to controlled action.</h2></div><p>Every command centre uses the same underlying pattern: connect to the existing estate, compute from evidence, reason through the problem, prove the result and keep a human decision gate where professional judgement is required.</p></div>
  <div class="arch">
@@ -206,24 +124,6 @@ h1 em{color:var(--gold2);font-style:normal}.lead{font-size:20px;color:#c4d1df;ma
   <div class="archcard"><div class="num">03 · REASON</div><h3>Agent workforce</h3><p>Specialist agents interpret the evidence, challenge hypotheses, identify exceptions, prepare outputs and hand off only what requires human judgement.</p></div>
   <div class="archcard"><div class="num">04 · PROVE</div><h3>Trust ledger</h3><p>Source-stamped figures, confidence/provisionality, audit trail, escalation and four-eyes sign-gates turn AI output into reviewable enterprise work.</p></div>
  </div>
-</section>
-
-
-<section class="section change-section" id="change">
-  <div class="sectionhead">
-    <div><div class="eyebrow">WHAT CHANGES</div><h2>From people processing work to AI running the work.</h2></div>
-    <p>Functionality is the proof. The transformation is what matters.</p>
-  </div>
-  <div class="change-grid">
-    <div class="change-row head"><span>TRADITIONAL WORKFLOW</span><span>WITH DUADESK 2.0</span></div>
-    <div class="change-row"><span>People collect and prepare data</span><b>AI connects, captures and structures the work</b></div>
-    <div class="change-row"><span>People reconcile and check</span><b>AI computes, reconciles and surfaces exceptions</b></div>
-    <div class="change-row"><span>Compliance is checked periodically</span><b>AI continuously tests authorised data against relevant rules and controls</b></div>
-    <div class="change-row"><span>Management asks for analysis</span><b>AI continuously prepares intelligence, explanations and recommendations</b></div>
-    <div class="change-row"><span>Scale requires more specialist capacity</span><b>AI agents expand the operating capacity of the existing team</b></div>
-    <div class="change-row"><span>AI output can be difficult to trust</span><b>Source evidence + deterministic computation + sign-gates create a reviewable trail</b></div>
-  </div>
-  <div class="change-tagline">Your ERP records the business. <em>DuaDesk helps you run it.</em></div>
 </section>
 
 <section class="section" id="connect">
@@ -271,7 +171,6 @@ h1 em{color:var(--gold2);font-style:normal}.lead{font-size:20px;color:#c4d1df;ma
  <div class="sectionhead"><div><div class="eyebrow">DUADESK VALUE LAB</div><h2>Model the opportunity before you buy.</h2></div><p>The Value Lab is designed as an explainable model: business profile → priorities → value levers → hard vs modelled value → indicative investment → payback. Results remain illustrative until validated against your own data.</p></div>
  <div class="calcgrid">
   <div class="calcbox"><h3>1 · Business profile</h3><div class="fields">
-   <div class="field"><label>Work email <span style="color:#e9c46a">*</span></label><input id="leadEmail" type="email" required placeholder="you@company.com" autocomplete="email"><small id="emailHelp" style="color:#71869b;font-size:9px;display:block;margin-top:4px">Required to unlock your personalised opportunity model.</small></div>
    <div class="field"><label>Annual turnover · ₹ Cr</label><input id="turnover" type="number" value="250"></div>
    <div class="field"><label>Procurement / materials · % turnover</label><input id="mat" type="number" value="60"></div>
    <div class="field"><label>Annual GST / ITC · ₹ Cr</label><input id="itc" type="number" value="12"></div>
@@ -293,16 +192,7 @@ h1 em{color:var(--gold2);font-style:normal}.lead{font-size:20px;color:#c4d1df;ma
    <div class="field"><label>Implementation period · months</label><input id="months" type="number" value="3"></div>
    <div class="field"><label>Organisation complexity</label><select id="complexity"><option value="1">Single entity / simple</option><option value="1.08" selected>Multi-entity / moderate</option><option value="1.16">Complex / multi-country</option></select></div>
   </div></div>
-  <div class="calcresult" style="position:relative">
-   <div class="valuegate" id="valueGate">
-    <div class="gateicon">✉</div>
-    <div class="eyebrow">UNLOCK YOUR VALUE MODEL</div>
-    <h3 style="margin:6px 0 8px;font-size:22px;color:#f4f7fb">Enter your work email to see the calculation</h3>
-    <p style="color:var(--muted);max-width:520px;margin:0 auto 14px;font-size:12px;line-height:1.6">We use your email to identify the opportunity and enable a follow-up discussion. Your calculation remains illustrative until validated against your own data.</p>
-    <button class="btn gold" type="button" onclick="unlockValue()">Unlock Value →</button>
-    <div id="gateError" style="color:#f2a7a7;font-size:10px;margin-top:9px;min-height:14px"></div>
-   </div>
-   <div class="eyebrow">ILLUSTRATIVE VALUE OPPORTUNITY</div><div class="bigvalue" id="totalValue">₹0.00 Cr / year</div><div style="color:var(--muted)">Selected priorities · recalculated live · every lever is explainable</div>
+  <div class="calcresult"><div class="eyebrow">ILLUSTRATIVE VALUE OPPORTUNITY</div><div class="bigvalue" id="totalValue">₹0.00 Cr / year</div><div style="color:var(--muted)">Selected priorities · recalculated live · every lever is explainable</div>
    <div class="resultgrid"><div class="rk"><small>MODELLABLE OPPORTUNITY</small><b id="hard">₹0.00 Cr</b></div><div class="rk"><small>MODELLED UPSIDE</small><b id="upside">₹0.00 Cr</b></div><div class="rk"><small>YEAR-1 NET</small><b id="net">₹0.00 Cr</b></div><div class="rk"><small>PAYBACK</small><b id="payback">—</b></div></div>
    <div class="eyebrow" style="margin-top:12px">VALUE BRIDGE</div><div class="bridge" id="bridge"></div>
    <div class="explain"><h4>Make every number explainable.</h4><div style="color:var(--muted);font-size:11px">DuaDesk should let a CFO move from the headline number to the exact input, assumption and formula behind it.</div><div class="flow"><div class="node"><small>01 · INPUT</small><b id="xInput">Your business data</b><span>The exact business input used by this lever.</span></div><div class="node"><small>02 · ASSUMPTION</small><b id="xAssumption">The explicit assumption applied.</b><span>Explicit, editable modelling assumption.</span></div><div class="node"><small>03 · FORMULA</small><b id="xFormula">Input × assumption × complexity</b><span>Visible calculation — not a black-box score.</span></div><div class="node"><small>04 · RESULT</small><b id="xResult">₹0.00 Cr</b><span>Illustrative value; not realized value.</span></div></div><div class="assumptions"><div><b>Evidence status:</b> illustrative model until validated against client data.</div><div><b>Attribution:</b> modelled opportunity is not the same as realized value.</div></div></div>
@@ -366,34 +256,7 @@ h1 em{color:var(--gold2);font-style:normal}.lead{font-size:20px;color:#c4d1df;ma
  </div><div class="calcbox"><h3>The strategic idea</h3><p style="color:var(--muted)">The global layer is not six separate products. It is a common operating model with local intelligence: regulation, tax, language, data residency, filing standards, ERP ecosystem and country-specific controls.</p><p style="color:#dce7f1">That is how DuaDesk can move from a collection of AI features toward a repeatable enterprise application architecture.</p></div></div>
 </section>
 
-<section class="final"><div class="eyebrow">THE NEXT STEP</div><h2>Ready to see DuaDesk running on your business?</h2><p>Request a live demonstration, run an AI workflow, or calculate an illustrative value opportunity for your organisation.</p><button class="btn gold" onclick="openDemo()">Request a Demo →</button> <button class="btn ghost" onclick="openExperience()">Run an AI agent →</button> <button class="btn ghost" onclick="document.getElementById('value').scrollIntoView()">Calculate Value</button></section>
-
-
-<div class="modal" id="demoModal" aria-hidden="true">
-  <div class="modalbox demoformbox">
-    <button class="close" type="button" onclick="closeDemo()">Close ×</button>
-    <div class="eyebrow">DUADESK 2.0 · REQUEST A DEMO</div>
-    <h2>See DuaDesk on your business.</h2>
-    <div class="sub">Tell us a little about your finance or enterprise environment and what you would like to see. We will use this information to prepare the right demonstration.</div>
-    <form id="demoForm" onsubmit="submitDemo(event)">
-      <div class="fields demo-fields">
-        <div class="field"><label for="demoName">Name *</label><input id="demoName" name="name" required autocomplete="name" placeholder="Your name"></div>
-        <div class="field"><label for="demoCompany">Company *</label><input id="demoCompany" name="company" required autocomplete="organization" placeholder="Company / organisation"></div>
-        <div class="field"><label for="demoEmail">Work email *</label><input id="demoEmail" name="email" type="email" required autocomplete="email" placeholder="you@company.com"></div>
-        <div class="field"><label for="demoPhone">Phone</label><input id="demoPhone" name="phone" type="tel" autocomplete="tel" placeholder="+91 ..."></div>
-        <div class="field"><label for="demoCountry">Country</label><select id="demoCountry" name="country"><option>India</option><option>Germany</option><option>Netherlands</option><option>Japan</option><option>UAE</option><option>Saudi Arabia</option><option>Other</option></select></div>
-        <div class="field"><label for="demoProduct">What would you like to see?</label><select id="demoProduct" name="product"><option>AI CFO</option><option>AI CPO</option><option>Dua Pramaan</option><option>Dua Pragya</option><option>DuaDesk 2.0 — platform overview</option></select></div>
-        <div class="field"><label for="demoERP">ERP / finance system</label><select id="demoERP" name="erp"><option>SAP</option><option>Oracle</option><option>Microsoft Dynamics</option><option>Tally</option><option>QuickBooks</option><option>Zoho</option><option>DATEV</option><option>Lexware</option><option>Sage</option><option>NetSuite</option><option>Yayoi</option><option>freee</option><option>Money Forward</option><option>Excel / CSV</option><option>Other / multiple systems</option></select></div>
-        <div class="field full"><label for="demoNeed">What would you most like to see?</label><textarea id="demoNeed" name="need" rows="3" placeholder="For example: consolidation, compliance, Balance Sheet IQ, Video → Ledger, procurement savings, or a live agent workflow."></textarea></div>
-      </div>
-      <div class="demo-note">Your details will be sent directly to Ashish Dua for demo follow-up. Required fields are marked *.</div>
-      <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:16px">
-        <button class="btn gold" type="submit">Request Demo →</button>
-        <button class="btn ghost" type="button" onclick="closeDemo()">Cancel</button>
-      </div>
-    </form>
-  </div>
-</div>
+<section class="final"><div class="eyebrow">THE NEXT STEP</div><h2>Don't ask what AI can answer.<br>Ask what work it can run.</h2><p>Explore a command centre, run an agent workflow, or calculate an illustrative value opportunity for your organisation.</p><button class="btn gold" onclick="openExperience()">Run an AI agent →</button> <button class="btn ghost" onclick="document.getElementById('value').scrollIntoView()">Calculate Value</button> <a class="btn ghost" style="text-decoration:none;display:inline-block" href="mailto:ashish@ashishduacorporation.com">Talk to DuaDesk →</a></section>
 
 <div class="modal" id="modal"><div class="modalbox"><button class="close" onclick="closeModal()">Close ×</button><div class="eyebrow" id="mEyebrow">COMMAND CENTRE</div><h2 id="mTitle">AI CPO</h2><div class="sub" id="mSub"></div><div id="mBody"></div></div></div>
 <div class="toast" id="toast"></div>
@@ -504,125 +367,12 @@ function explainLever(i){
  document.getElementById("xInput").textContent=inputs[key];document.getElementById("xAssumption").textContent=m.assumption;document.getElementById("xFormula").textContent=m.formula+` · complexity ${cx.toFixed(2)}×`;
  document.getElementById("xResult").textContent=money(r[1]);
 }
-function validLeadEmail(){
- const el=document.getElementById("leadEmail");
- return el && el.checkValidity() && el.value.trim();
-}
-function unlockValue(){
- const el=document.getElementById("leadEmail"), err=document.getElementById("gateError");
- if(!el || !el.checkValidity() || !el.value.trim()){
-   if(err) err.textContent="Please enter a valid work email address.";
-   el && el.focus();
-   return false;
- }
- document.getElementById("valueGate").classList.add("unlocked");
- if(err) err.textContent="";
- calc();
- return true;
-}
 function emailEstimate(){
- if(!validLeadEmail()){
-   document.getElementById("valueGate").classList.remove("unlocked");
-   document.getElementById("leadEmail").focus();
-   return;
- }
- const lead=document.getElementById("leadEmail").value.trim();
  const subject=encodeURIComponent("DuaDesk Value Lab — discussion");
- const body=encodeURIComponent("I ran the DuaDesk Value Lab and would like to discuss the estimate.\n\nProspect email: "+lead+"\n\nIllustrative annual value: "+document.getElementById("totalValue").textContent+"\nModelled opportunity: "+document.getElementById("hard").textContent+"\nModelled upside: "+document.getElementById("upside").textContent+"\nYear-1 net: "+document.getElementById("net").textContent+"\nPayback: "+document.getElementById("payback").textContent);
+ const body=encodeURIComponent("I ran the DuaDesk Value Lab and would like to discuss the estimate.\n\nIllustrative annual value: "+document.getElementById("totalValue").textContent+"\nModelled opportunity: "+document.getElementById("hard").textContent+"\nModelled upside: "+document.getElementById("upside").textContent+"\nYear-1 net: "+document.getElementById("net").textContent+"\nPayback: "+document.getElementById("payback").textContent);
  location.href=`mailto:ashish@ashishduacorporation.com?subject=${subject}&body=${body}`;
 }
-
-function openDemo(){
- const modal=document.getElementById("demoModal");
- if(!modal)return;
- modal.classList.add("open");
- modal.setAttribute("aria-hidden","false");
- setTimeout(()=>document.getElementById("demoName")?.focus(),50);
-}
-function closeDemo(){
- const modal=document.getElementById("demoModal");
- if(!modal)return;
- modal.classList.remove("open");
- modal.setAttribute("aria-hidden","true");
-}
-function submitDemo(e){
- e.preventDefault();
- const f=document.getElementById("demoForm");
- if(!f.checkValidity()){f.reportValidity();return;}
- const vals={
-  name:document.getElementById("demoName").value.trim(),
-  company:document.getElementById("demoCompany").value.trim(),
-  email:document.getElementById("demoEmail").value.trim(),
-  phone:document.getElementById("demoPhone").value.trim(),
-  country:document.getElementById("demoCountry").value,
-  product:document.getElementById("demoProduct").value,
-  erp:document.getElementById("demoERP").value,
-  need:document.getElementById("demoNeed").value.trim()
- };
- const subject=encodeURIComponent("DuaDesk 2.0 Demo Request — "+vals.company);
- const body=encodeURIComponent(
-  "DuaDesk 2.0 Demo Request\n\n"+
-  "Name: "+vals.name+"\n"+
-  "Company: "+vals.company+"\n"+
-  "Work email: "+vals.email+"\n"+
-  "Phone: "+(vals.phone||"Not provided")+"\n"+
-  "Country: "+vals.country+"\n"+
-  "Product / demo: "+vals.product+"\n"+
-  "ERP / finance system: "+vals.erp+"\n"+
-  "What they want to see: "+(vals.need||"Not specified")+"\n"
- );
- window.location.href="mailto:ashish@ashishduacorporation.com?subject="+subject+"&body="+body;
- const toast=document.getElementById("toast");
- if(toast){toast.textContent="Demo request prepared — your email client will open to send it to DuaDesk.";toast.classList.add("show");setTimeout(()=>toast.classList.remove("show"),4500);}
- closeDemo();
-}
-document.addEventListener("keydown",function(e){
- if(e.key==="Escape"){
-  closeDemo();
-  if(typeof closeModal==="function")closeModal();
- }
-});
-
-
-const AUDIENCE_MESSAGES={
- owner:{
-  headline:"Your business deserves an AI workforce.",
-  copy:"Keep your ERP. Keep your people. Reduce repetitive finance work, strengthen control and turn financial data into intelligence for cash, margins, risk and growth."
- },
- cfo:{
-  headline:"Turn finance into a 24×7 AI-powered intelligence function.",
-  copy:"Connect your existing ERP and finance ecosystem. Let specialist agents reconcile, test compliance, analyse cash and performance, find opportunities and prepare the work — with governed review."
- },
- ca:{
-  headline:"Scale expertise, not headcount. Build global capability.",
-  copy:"Give every engagement an AI workforce across accounting, tax, audit and advisory. Serve more clients, expand higher-value advisory capacity and extend into country-specific intelligence."
- },
- enterprise:{
-  headline:"Move from AI assistance to governed AI operations.",
-  copy:"Deploy specialist agents against authorised enterprise data, with evidence, permissions, deterministic computation, sign-gates and an auditable trail for consequential work."
- }
-};
-document.querySelectorAll(".audience-card").forEach(card=>{
- card.addEventListener("click",()=>{
-  document.querySelectorAll(".audience-card").forEach(c=>c.classList.remove("active"));
-  card.classList.add("active");
-  const m=AUDIENCE_MESSAGES[card.dataset.audience];
-  document.getElementById("audienceHeadline").textContent=m.headline;
-  document.getElementById("audienceCopy").textContent=m.copy;
- });
-});
-
 resetScenario();calc();
-const leadEmail=document.getElementById("leadEmail");
-if(leadEmail){
-  leadEmail.addEventListener("input",()=>{
-    const ok=leadEmail.checkValidity() && leadEmail.value.trim();
-    if(ok && document.getElementById("valueGate").classList.contains("unlocked")===false){
-      // Keep the gate visible until the visitor explicitly clicks Unlock Value.
-    }
-  });
-  leadEmail.addEventListener("keydown",(e)=>{if(e.key==="Enter"){e.preventDefault();unlockValue();}});
-}
 </script>
 </body>
 </html>
