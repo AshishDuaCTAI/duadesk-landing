@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DuaDesk 2.0 — Global AI Workforce</title>
+<meta name="description" content="DuaDesk 2.0 — a global AI workforce for finance, procurement, audit and advisory. Lower cost. Less manual work. Better control. More intelligence for growth.">
+<style>
+:root{
+ --bg:#06101c;--bg2:#0b1727;--panel:#0f2033;--panel2:#0a1625;--line:#243a52;
+ --gold:#d6ae55;--gold2:#f0d18a;--cream:#f8f3e8;--muted:#9db0c5;
+ --cyan:#39d8c1;--blue:#62a4ff;--green:#50d69a;--rose:#ed8fa8;
+ --shadow:0 24px 80px rgba(0,0,0,.38);
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(1000px 600px at 75% -10%,rgba(214,174,85,.16),transparent 60%),radial-gradient(900px 600px at 5% 20%,rgba(57,216,193,.10),transparent 65%),linear-gradient(180deg,#081321,#040b13 72%);color:var(--cream);font:15px/1.55 Inter,Segoe UI,Arial,sans-serif}
+button,input,select{font:inherit}button{cursor:pointer}
+a{color:inherit}
+.nav{position:sticky;top:0;z-index:50;background:rgba(5,13,23,.78);backdrop-filter:blur(16px);border-bottom:1px solid rgba(214,174,85,.2)}
+.navin{max-width:1240px;margin:auto;padding:14px 22px;display:flex;align-items:center;gap:24px}
+.brand{font:700 23px Georgia,serif;letter-spacing:1px}.brand span{color:var(--gold2)}
+.navlinks{display:flex;gap:18px;margin-left:auto}.navlinks a{text-decoration:none;color:#b9c9dc;font-size:13px}.navlinks a:hover{color:white}
+.navcta{display:flex;gap:8px}.btn{border:0;border-radius:999px;padding:11px 17px;font-weight:800}.btn.gold{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#151006}.btn.ghost{background:transparent;border:1px solid var(--line);color:#dce8f4}
+.hero{max-width:1240px;margin:auto;padding:48px 22px 50px;display:grid;grid-template-columns:1.25fr .75fr;gap:44px;align-items:center}
+.launch20{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:0 0 22px;padding:8px 11px;border:1px solid rgba(214,174,85,.34);background:linear-gradient(90deg,rgba(214,174,85,.12),rgba(15,32,51,.62));border-radius:999px;width:max-content;max-width:100%;box-shadow:0 10px 35px rgba(0,0,0,.14)}
+.launchbadge{font-size:10px;letter-spacing:1.5px;font-weight:900;color:#151006;background:linear-gradient(135deg,var(--gold2),var(--gold));padding:5px 8px;border-radius:999px}
+.launchlabel{font-size:9px;letter-spacing:1.4px;font-weight:900;color:var(--gold2)}
+.launchitem{font-size:11px;color:#dbe6f1;font-weight:700;white-space:nowrap}
+.launchdot{color:#6f8297;font-size:11px}
+.eyebrow{color:var(--gold2);letter-spacing:3px;font-size:11px;font-weight:800;text-transform:uppercase}
+h1{font:700 clamp(48px,6.3vw,86px)/.98 Georgia,serif;margin:12px 0 20px;letter-spacing:-2px}
+h1 em{color:var(--gold2);font-style:normal}.lead{font-size:20px;color:#c4d1df;max-width:720px}
+.heroactions{display:flex;gap:12px;flex-wrap:wrap;margin:28px 0}.proofrow{display:flex;gap:10px;flex-wrap:wrap}
+.proof{padding:9px 12px;border:1px solid var(--line);background:rgba(15,32,51,.7);border-radius:12px;font-size:12px;color:#b8c8d9}
+.proof b{color:var(--gold2);font-size:15px;margin-right:4px}
+.orbit{min-height:430px;position:relative;display:grid;place-items:center}
+.core{width:190px;height:190px;border-radius:50%;display:grid;place-items:center;text-align:center;background:radial-gradient(circle,#193b52,#0a1a2b 68%);border:1px solid var(--cyan);box-shadow:0 0 70px rgba(57,216,193,.22),inset 0 0 45px rgba(57,216,193,.12);z-index:2}
+.core strong{display:block;font:700 27px Georgia,serif}.core small{color:#a8c5d8}
+.orb{position:absolute;width:145px;height:92px;padding:10px;border:1px solid var(--line);background:rgba(10,22,37,.9);border-radius:15px;text-align:center;box-shadow:var(--shadow)}
+.orb b{display:block;font-size:12px}.orb span{display:block;color:var(--muted);font-size:10px;margin-top:4px}.o1{top:0;left:8%}.o2{top:18%;right:0}.o3{bottom:8%;right:8%}.o4{bottom:0;left:2%}
+.section{max-width:1240px;margin:auto;padding:72px 22px}.sectionhead{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:26px}.section h2{font:700 clamp(31px,4vw,52px)/1.05 Georgia,serif;margin:5px 0}.sectionhead p{max-width:560px;color:var(--muted)}
+.arch{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.archcard{padding:22px;border:1px solid var(--line);background:linear-gradient(160deg,rgba(17,39,61,.9),rgba(8,19,32,.9));border-radius:18px;min-height:180px}.archcard .num{font:700 13px ui-monospace;color:var(--gold2)}.archcard h3{font:700 23px Georgia,serif;margin:16px 0 7px}.archcard p{color:var(--muted);font-size:13px}
+.rooms{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.room{border:1px solid var(--line);border-radius:20px;padding:20px;background:linear-gradient(160deg,#10243a,#091523);position:relative;overflow:hidden;transition:.2s}.room:hover{transform:translateY(-5px);border-color:var(--rc)}.room .tag{color:var(--rc);font-size:10px;font-weight:800;letter-spacing:1.5px}.room h3{font:700 28px Georgia,serif;margin:8px 0}.room p{color:var(--muted);font-size:12px;min-height:66px}.room .stats{display:flex;gap:7px;flex-wrap:wrap}.stat{font-size:10px;padding:5px 8px;border-radius:8px;background:#081321;border:1px solid var(--line)}.stat b{color:#fff}.room button{width:100%;margin-top:15px}
+.lab{border:1px solid rgba(214,174,85,.32);border-radius:24px;background:linear-gradient(145deg,rgba(17,37,59,.95),rgba(7,17,29,.96));box-shadow:var(--shadow);overflow:hidden}
+.labtop{padding:22px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:15px;align-items:center}.live{font-size:10px;color:var(--green);letter-spacing:1.3px;font-weight:800}.live i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green);margin-right:6px}
+.labbody{display:grid;grid-template-columns:280px 1fr 280px;min-height:430px}.agentrail{padding:18px;border-right:1px solid var(--line)}.agent{display:flex;gap:10px;padding:10px;border:1px solid transparent;border-radius:12px;margin-bottom:7px}.agent.on{background:#10283a;border-color:rgba(57,216,193,.3)}.bot{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:#07121f;color:var(--cyan);border:1px solid #23455b;font-weight:900}.agent b{font-size:12px}.agent small{display:block;color:var(--muted);font-size:10px}
+.work{padding:28px}.work .phase{font-size:10px;letter-spacing:2px;color:var(--cyan);font-weight:800}.work h3{font:700 32px Georgia,serif;margin:7px 0}.work .reads{color:#a9bdd1}.work .result{font:700 25px Georgia,serif;color:var(--gold2);margin:22px 0}.bar{height:7px;background:#091522;border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--gold));transition:width .7s}
+.evidence{padding:18px;border-left:1px solid var(--line);background:rgba(3,10,17,.3)}.evtitle{font-size:10px;letter-spacing:1.4px;color:var(--muted);font-weight:800}.ev{padding:11px 0;border-bottom:1px dashed #23364a;font-size:11px}.ev b{color:#dce9f5}.ev span{display:block;color:#7f96ab;font-size:10px;margin-top:2px}
+.exactions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.calcgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.calcbox{padding:22px;border:1px solid var(--line);border-radius:18px;background:#0a1828}.calcbox h3{font:700 23px Georgia,serif;margin:0 0 16px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field label{display:block;color:#9db0c5;font-size:10px;margin-bottom:5px;text-transform:uppercase;letter-spacing:.7px}.field input,.field select{width:100%;background:#071321;color:white;border:1px solid var(--line);border-radius:9px;padding:11px}.goalgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.goal{padding:10px;border:1px solid var(--line);border-radius:10px;color:#c7d6e5;background:#091625;text-align:left;font-size:11px}.goal.on{border-color:var(--gold);background:#17283b;color:white}.calcresult{grid-column:1/-1;padding:24px;border:1px solid rgba(214,174,85,.45);border-radius:20px;background:radial-gradient(circle at 85% 10%,rgba(214,174,85,.16),transparent 40%),#0b1a2a}.bigvalue{font:700 clamp(38px,5vw,66px) Georgia,serif;color:var(--gold2)}.resultgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:18px 0}.rk{padding:12px;background:#071321;border:1px solid var(--line);border-radius:12px}.rk small{display:block;color:#7f96ab;font-size:9px}.rk b{font:700 19px Georgia,serif;color:#f0d18a}.bridge{display:grid;gap:7px;margin-top:15px}.brow{display:grid;grid-template-columns:1fr 80px 80px;gap:10px;align-items:center;font-size:11px;padding:8px 0;border-bottom:1px dashed #20344a}.brow .kind{font-size:8px;text-transform:uppercase;padding:3px 5px;border-radius:5px;text-align:center}.hard{color:var(--green);background:rgba(80,214,154,.09)}.up{color:#e4a177;background:rgba(228,161,119,.09)}
+.trust{display:grid;grid-template-columns:1fr 1fr;gap:16px}.trustcard{padding:23px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(150deg,#102238,#091523)}.trustcard h3{font:700 24px Georgia,serif;margin:0 0 10px}.trustlist{display:grid;gap:9px}.trustitem{padding:10px 12px;border-radius:10px;background:#071421;border:1px solid #1b3146;color:#b6c9db;font-size:11px}.trustitem b{color:#fff}
+.global{display:grid;grid-template-columns:1fr 1fr;gap:18px}.countries{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.country{padding:13px;border:1px solid var(--line);border-radius:12px;background:#0a1828}.country b{font:700 18px Georgia,serif}.country span{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.final{padding:75px 22px 100px;text-align:center;background:radial-gradient(600px 260px at 50% 0,rgba(214,174,85,.15),transparent 70%)}.final h2{font:700 clamp(38px,5vw,65px) Georgia,serif;margin:0 auto 12px}.final p{color:var(--muted);max-width:650px;margin:0 auto 24px}
+.modal{position:fixed;inset:0;background:rgba(1,7,13,.82);backdrop-filter:blur(12px);z-index:100;display:none;align-items:center;justify-content:center;padding:18px}.modal.on{display:flex}.modalbox{max-width:960px;width:100%;max-height:92vh;overflow:auto;background:#091827;border:1px solid var(--gold);border-radius:22px;box-shadow:0 30px 100px #000;padding:24px}.close{float:right;border:1px solid var(--line);background:transparent;color:#b9c8d7;border-radius:8px;padding:6px 10px}.modalbox h2{font:700 35px Georgia,serif;margin:8px 0}.modalbox .sub{color:var(--muted);font-size:12px}.simgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}.simcard{padding:17px;border:1px solid var(--line);border-radius:15px;background:#071321}.simstep{font-size:10px;color:var(--cyan);letter-spacing:1.5px;font-weight:800}.simcard h3{font:700 23px Georgia,serif;margin:8px 0}.simresult{color:var(--gold2);font:700 22px Georgia,serif;margin:15px 0}.check{padding:7px 0;border-bottom:1px dashed #20344a;font-size:11px}.check.done{color:var(--green)}.check.done:before{content:"✓ ";}.check:not(.done):before{content:"○ ";color:#60788e}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;z-index:200;background:#102238;border:1px solid var(--cyan);padding:12px 18px;border-radius:999px;transition:.3s}.toast.on{opacity:1;transform:translate(-50%,0)}
+@media(max-width:900px){.hero{grid-template-columns:1fr}.rooms,.arch{grid-template-columns:1fr 1fr}.labbody{grid-template-columns:1fr}.agentrail,.evidence{border:0;border-bottom:1px solid var(--line)}.calcgrid,.trust,.global{grid-template-columns:1fr}.resultgrid{grid-template-columns:1fr 1fr}.navlinks{display:none}}
+@media(max-width:560px){.hero{padding-top:45px}.rooms,.arch,.fields,.goalgrid,.countries{grid-template-columns:1fr}.resultgrid{grid-template-columns:1fr 1fr}.navin{padding:11px 15px}.navcta .ghost{display:none}.section{padding:52px 15px}.hero{padding-left:15px;padding-right:15px}.orb{display:none}.orbit{min-height:260px}}
+
+/* V3 experience upgrades */
+.productlinks{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}.productlinks a{font-size:11px;text-decoration:none;padding:8px 11px;border:1px solid rgba(214,174,85,.35);border-radius:999px;background:rgba(214,174,85,.06);color:#f2d58e}.productlinks a:hover{background:rgba(214,174,85,.14);border-color:var(--gold2)}
+.explain{margin-top:18px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(160deg,rgba(11,27,44,.9),rgba(6,15,26,.9));padding:18px}.explain h4{margin:0 0 6px;font:700 19px Georgia,serif}.explain .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.explain .node{padding:12px;border:1px solid #263f58;border-radius:12px;background:#091727}.explain .node small{display:block;color:var(--gold2);text-transform:uppercase;letter-spacing:1px;font-size:9px}.explain .node b{display:block;margin-top:4px;font-size:13px}.explain .node span{display:block;color:var(--muted);font-size:10px;margin-top:3px}.assumptions{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px}.assumptions div{padding:10px;border-radius:10px;background:rgba(255,255,255,.025);font-size:10px;color:#a9bbcd}.assumptions b{color:#e5edf5}.autonomy{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.auto{padding:19px;border:1px solid var(--line);border-radius:17px;background:linear-gradient(160deg,#10253a,#081321);position:relative}.auto .level{font:700 10px ui-monospace;color:var(--gold2);letter-spacing:1px}.auto h3{margin:10px 0 6px;font:700 21px Georgia,serif}.auto p{color:var(--muted);font-size:12px}.auto .guard{margin-top:13px;padding:8px 9px;border-left:2px solid var(--cyan);background:rgba(57,216,193,.05);font-size:10px;color:#c5d7e6}.securitygrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.sec{padding:18px;border:1px solid var(--line);border-radius:16px;background:#091625}.sec .ico{font-size:19px}.sec h3{margin:9px 0 5px;font:700 19px Georgia,serif}.sec p{margin:0;color:var(--muted);font-size:12px}.disclaimer{font-size:10px;color:#71869b;margin-top:12px}.autoplay{font-size:11px!important;padding:9px 12px!important}.livepulse{display:inline-block;width:7px;height:7px;border-radius:50%;background:#50d69a;box-shadow:0 0 0 0 rgba(80,214,154,.7);animation:pulse 1.5s infinite;margin-right:6px}@keyframes pulse{70%{box-shadow:0 0 0 8px rgba(80,214,154,0)}}
+@media(max-width:900px){.explain .flow,.autonomy{grid-template-columns:1fr 1fr}.securitygrid{grid-template-columns:1fr}.assumptions{grid-template-columns:1fr}}
+
+.stackpanel{border:1px solid var(--line);border-radius:22px;background:rgba(10,22,37,.78);padding:24px;box-shadow:var(--shadow)}
+.stackgroup+.stackgroup{margin-top:20px;padding-top:20px;border-top:1px solid var(--line)}
+.stacktitle{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold2);font-weight:800;margin-bottom:12px}.erpgrid{display:flex;flex-wrap:wrap;gap:9px}.erpgrid span{padding:10px 13px;border:1px solid #2c4862;border-radius:10px;background:#0c1b2d;color:#dce8f4;font-weight:750;font-size:13px}.erpgrid.secondary span{font-weight:600;color:#b9c9dc}.connectflow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;gap:12px;align-items:center;margin-top:24px}.connectflow div{padding:14px;border-radius:13px;background:#0a1727;border:1px solid var(--line)}.connectflow b{display:block;color:var(--cream);font-size:12px}.connectflow small{color:var(--muted);font-size:10px}.connectflow i{color:var(--gold2);font-style:normal;font-size:24px}.prioritygrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.priority{border:1px solid var(--line);background:rgba(15,32,51,.7);border-radius:18px;padding:20px;min-height:210px}.pnum{color:var(--gold2);font-size:11px;letter-spacing:2px;font-weight:900}.priority h3{font:700 25px Georgia,serif;margin:10px 0}.priority p{color:#b9c9dc;font-size:13px}.priority b{font-size:11px;color:#dce8f4}.brow{cursor:pointer}.brow:hover{border-color:var(--gold);background:rgba(214,174,85,.08)}.explainhint{margin-top:10px;color:var(--gold2);font-size:10px}
+@media(max-width:900px){.prioritygrid{grid-template-columns:1fr 1fr}.connectflow{grid-template-columns:1fr}.connectflow i{transform:rotate(90deg);justify-self:center}.hero{padding-top:34px}.launch20{border-radius:18px}.launchdot{display:none}}
+
+.country-link{
+  color:inherit;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  gap:.28rem;
+  transition:opacity .2s ease, transform .2s ease;
+}
+.country-link:hover{opacity:.82; transform:translateY(-1px)}
+.country-link span{font-size:.75em; opacity:.7}
+
+
+.valuegate{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:42px 28px}
+.calcresult.locked>*:not(.valuegate){display:none}
+.gate-field{width:100%;max-width:360px;margin:16px auto 2px;text-align:left}
+.gate-field label{display:block;color:#9db0c5;font-size:10px;margin-bottom:5px;text-transform:uppercase;letter-spacing:.7px}
+.gate-field input{width:100%;background:#071321;color:#fff;border:1px solid rgba(233,196,106,.45);border-radius:10px;padding:12px}
+.gate-field small{display:block;color:#71869b;font-size:9px;margin-top:5px}
+.valuegate .gateicon{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(233,196,106,.45);color:#e9c46a;font-size:18px;margin-bottom:10px}
+.valuegate.unlocked{display:none}
+#leadEmail{border-color:rgba(233,196,106,.45)}
+#leadEmail:invalid:not(:placeholder-shown){border-color:#d97a7a}
+
+.demoformbox{max-width:760px}
+.demo-fields{grid-template-columns:1fr 1fr}
+.demo-fields .full{grid-column:1 / -1}
+.demo-fields textarea{resize:vertical;min-height:88px}
+.demo-note{font-size:10px;color:#71869b;margin-top:12px;line-height:1.55}
+@media(max-width:700px){.demo-fields{grid-template-columns:1fr}.demo-fields .full{grid-column:auto}.navcta{gap:5px}.navcta .btn{padding:9px 11px;font-size:10px}}
+
+
+.launchidea{color:#d8b36a;font-weight:700}
+.audience-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px}
+.audience-card{appearance:none;text-align:left;border:1px solid var(--line);background:linear-gradient(180deg,#101c28,#0c151f);color:var(--text);border-radius:18px;padding:20px;cursor:pointer;min-height:178px;transition:border-color .2s ease,transform .2s ease,background .2s ease}
+.audience-card:hover{transform:translateY(-2px)}
+.audience-card.active{border-color:#d8b36a;background:linear-gradient(180deg,#162330,#0d1721);box-shadow:inset 0 0 0 1px rgba(216,179,106,.18)}
+.audience-kicker{display:block;font-size:9px;letter-spacing:.15em;color:#d8b36a;margin-bottom:13px;font-weight:800}
+.audience-card strong{display:block;font-size:17px;line-height:1.25;margin-bottom:12px}
+.audience-card>span:last-child{display:block;color:var(--muted);font-size:11px;line-height:1.5}
+.outcome-banner{margin-top:14px;border:1px solid rgba(216,179,106,.32);background:linear-gradient(120deg,rgba(216,179,106,.08),rgba(57,216,193,.035));border-radius:20px;padding:25px}
+.outcome-main{font-family:Georgia,serif;font-size:30px;line-height:1.1;color:#f5efe2}
+.outcome-copy{color:#b8c8d6;font-size:13px;max-width:850px;margin-top:9px;line-height:1.6}
+.outcome-pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}
+.outcome-pillars div{border-top:1px solid rgba(255,255,255,.1);padding-top:12px}
+.outcome-pillars b{display:block;color:#d8b36a;font-size:10px;letter-spacing:.08em}
+.outcome-pillars span{display:block;color:#91a6b8;font-size:10px;line-height:1.45;margin-top:5px}
+.change-grid{border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-top:20px}
+.change-row{display:grid;grid-template-columns:1fr 1.2fr;border-top:1px solid var(--line)}
+.change-row span,.change-row b{padding:14px 16px;font-size:12px;line-height:1.45}
+.change-row span{color:#8da2b5}
+.change-row b{color:#dce8f1;font-weight:600}
+.change-row.head{border-top:0;background:#101c28}
+.change-row.head span{color:#d8b36a;font-size:9px;letter-spacing:.13em;font-weight:800}
+.change-tagline{text-align:center;font-family:Georgia,serif;font-size:25px;margin-top:22px;color:#e9efe9}
+.change-tagline em{color:#d8b36a;font-style:normal}
+@media(max-width:1000px){.audience-grid{grid-template-columns:1fr 1fr}.outcome-pillars{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.audience-grid{grid-template-columns:1fr}.outcome-pillars{grid-template-columns:1fr}.outcome-main{font-size:25px}.change-row{grid-template-columns:1fr}.change-row.head{display:none}.change-row span{padding-bottom:4px}.change-row b{padding-top:4px}}
+
+
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.langbox{margin-left:6px}.langbox select{background:#071321;color:#dce8f4;border:1px solid var(--line);border-radius:999px;padding:8px 10px;font-size:11px;font-weight:800;outline:none}
+html[dir="rtl"] body{text-align:right}
+html[dir="rtl"] .navin,html[dir="rtl"] .heroactions,html[dir="rtl"] .proofrow,html[dir="rtl"] .sectionhead{direction:rtl}
+html[dir="rtl"] .navlinks{margin-left:0;margin-right:auto}
+html[dir="rtl"] .heroactions{flex-direction:row-reverse}
+html[dir="rtl"] .launch20{direction:rtl}
+html[dir="rtl"] .langbox{margin-left:0;margin-right:6px}
+@media(max-width:900px){.langbox{margin-left:auto}.navcta{display:flex}}
+
+
+/* FINAL MOBILE PASS — optimized for 320–480px phones */
+html,body{max-width:100%;overflow-x:hidden}
+img,svg,video{max-width:100%;height:auto}
+.navin{min-width:0}
+.brand{white-space:nowrap}
+@media(max-width:900px){
+  .navin{gap:10px}
+  .navlinks{display:none}
+  .navcta{display:none}
+  .langbox{margin-left:auto}
+  .hero{grid-template-columns:1fr;gap:18px}
+  .hero h1{font-size:clamp(40px,12vw,58px);letter-spacing:-1.5px}
+  .hero .lead{font-size:16px;line-height:1.55}
+  .heroactions .btn{flex:1 1 100%;width:100%}
+  .proofrow{display:grid;grid-template-columns:1fr 1fr}
+  .proof{min-width:0}
+  .sectionhead{display:block}
+  .sectionhead>p{margin-top:12px}
+  .labtop{display:block}
+  .labtop .live{margin-top:8px}
+  .labbody{min-height:0}
+  .work{padding:22px 18px}
+  .work h3{font-size:28px}
+  .modal{padding:8px}
+  .modalbox{max-height:94vh;padding:18px;border-radius:16px}
+  .simgrid{grid-template-columns:1fr}
+  .demo-fields{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .navin{padding:10px 13px}
+  .brand{font-size:20px;letter-spacing:.5px}
+  .langbox select{padding:7px 9px;font-size:10px}
+  .hero{padding:28px 15px 34px}
+  .launch20{width:100%;max-width:100%;padding:9px 10px;gap:6px;border-radius:14px;line-height:1.35}
+  .launchitem{font-size:9px;white-space:normal}
+  .launchlabel{font-size:8px}
+  .hero h1{font-size:clamp(38px,12.5vw,52px);margin:10px 0 16px}
+  .hero .lead{font-size:15px}
+  .proofrow{grid-template-columns:1fr 1fr}
+  .proof{font-size:10px;padding:8px 9px}
+  .proof b{font-size:13px}
+  .section{padding:44px 15px}
+  .section h2{font-size:32px}
+  .audience-card{min-height:0;padding:17px}
+  .audience-card strong{font-size:16px}
+  .outcome-banner{padding:18px}
+  .outcome-main{font-size:24px}
+  .outcome-copy{font-size:12px}
+  .outcome-pillars{grid-template-columns:1fr 1fr}
+  .outcome-pillars b{font-size:9px}
+  .outcome-pillars span{font-size:9px}
+  .change-row{grid-template-columns:1fr}
+  .change-row.head{display:none}
+  .change-row span{padding:12px 13px 3px;font-size:10px}
+  .change-row b{padding:3px 13px 13px;font-size:11px}
+  .change-tagline{font-size:21px}
+  .arch,.rooms,.prioritygrid{grid-template-columns:1fr}
+  .archcard{min-height:0;padding:18px}
+  .archcard h3{font-size:21px}
+  .room{padding:17px}
+  .room h3{font-size:25px}
+  .calcgrid,.trust,.global{grid-template-columns:1fr}
+  .fields,.goalgrid{grid-template-columns:1fr}
+  .resultgrid{grid-template-columns:1fr 1fr}
+  .erpgrid{gap:7px}
+  .erpgrid span{font-size:11px;padding:8px 9px}
+  .connectflow{grid-template-columns:1fr}
+  .connectflow i{transform:rotate(90deg)}
+  .explain .flow,.autonomy{grid-template-columns:1fr}
+  .securitygrid{grid-template-columns:1fr}
+  .assumptions{grid-template-columns:1fr}
+  .countries{grid-template-columns:1fr}
+  .final{padding:52px 15px 70px}
+  .final h2{font-size:40px}
+}
+@media(max-width:380px){
+  .brand{font-size:18px}
+  .proofrow{grid-template-columns:1fr}
+  .outcome-pillars{grid-template-columns:1fr}
+  .resultgrid{grid-template-columns:1fr}
+}
+
+</style>
+</head>
+<body>
+<nav class="nav"><div class="navin">
+  <div class="brand">DUA <span>DESK</span></div>
+  <div class="navlinks"><a id="navWhy" href="#outcomes">Why DuaDesk</a><a id="navErp" href="#connect">ERP Connect</a><a id="navCmd" href="#command">Command Centres</a><a id="navAgents" href="#agents">Agents at Work</a><a id="navValue" href="#value">Value Lab</a><a id="navTrust" href="#trust">Trust</a></div>
+  <div class="langbox">
+  <label for="langSelect" class="sr-only">Language</label>
+  <select id="langSelect" aria-label="Language">
+    <option value="en">EN</option><option value="hi">हिन्दी</option><option value="de">DE</option>
+    <option value="nl">NL</option><option value="ja">日本語</option><option value="ar">العربية</option><option value="fr">FR</option>
+  </select>
+</div>
+<div class="navcta"><button id="demoTop" class="btn ghost" onclick="openDemo()">Request a Demo →</button><button id="experienceTop" class="btn ghost" onclick="openExperience()">Experience</button><button id="calculateTop" class="btn gold" onclick="document.getElementById('value').scrollIntoView()">Calculate Value →</button></div>
+</div></nav>
+
+<header class="hero">
+ <div>
+  <div class="launch20" aria-label="DuaDesk 2.0 launch announcement">
+   <span class="launchbadge">DUADESK 2.0</span>
+   <span class="launchlabel">NOW LAUNCHING</span>
+   <span class="launchitem">Consolidation</span>
+   <span class="launchdot">·</span>
+   <span class="launchitem">Direct Tax Bill 2025</span>
+   <span class="launchdot">·</span>
+   <span class="launchitem">Balance Sheet IQ</span>
+   <span class="launchdot">·</span>
+   <span class="launchitem">Video → Ledger</span><span class="launchdot">·</span><span class="launchidea">One AI workforce for your business</span>
+  </div>
+  <div class="eyebrow">Enterprise AI · Command Centres · Governed Execution</div>
+  <h1>AI that <em>does the work.</em><br>Not just AI that talks.</h1>
+  <p class="lead">DuaDesk turns finance, procurement, audit and advisory work into AI-powered operating teams — helping businesses lower the cost of work, reduce manual dependence, strengthen compliance and turn their data into intelligence for growth. Your systems stay. Your controls stay. AI does more of the work.</p>
+  <div class="heroactions"><button class="btn gold" onclick="openDemo()">Request a Demo →</button><button class="btn ghost" onclick="openExperience()">▶ Enter the Experience Centre</button><button class="btn ghost" onclick="document.getElementById('value').scrollIntoView()">₹ Calculate your opportunity</button></div>
+  <div class="proofrow">
+   <div class="proof"><b>18</b> AI CFO desks</div><div class="proof"><b>16</b> CPO desks + co-pilot</div><div class="proof"><b>20</b> audit types</div><div class="proof"><b>47</b> advisory agents</div><div class="proof"><b>6</b> country layers</div>
+  </div>
+ </div>
+ <div class="orbit">
+  <div class="core"><div><strong>DUA<br>DESK</strong><small>AI operating system<br>for enterprise functions</small></div></div>
+  <div class="orb o1"><b>CONNECT</b><span>ERP · banks · tax · documents</span></div>
+  <div class="orb o2"><b>COMPUTE</b><span>code · reconciliation · controls</span></div>
+  <div class="orb o3"><b>REASON</b><span>agents · hypotheses · exceptions</span></div>
+  <div class="orb o4"><b>PROVE</b><span>evidence · trace · sign-gates</span></div>
+ </div>
+</header>
+
+
+<section class="outcomes section" id="outcomes">
+  <div class="sectionhead">
+    <div><div class="eyebrow">WHY DUADESK 2.0</div><h2>Don't buy AI features. Change what your business can do.</h2></div>
+    <p>The technology is underneath. The outcome is the point: less repetitive work, lower operating cost, stronger control and more intelligence available to the people running the business.</p>
+  </div>
+  <div class="audience-grid">
+    <button class="audience-card active" type="button" data-audience="owner">
+      <span class="audience-kicker">BUSINESS OWNER / CEO</span>
+      <strong>Spend less time running finance. Spend more time running the business.</strong>
+      <span>Lower finance cost · less manual dependence · stronger control · intelligence for growth</span>
+    </button>
+    <button class="audience-card" type="button" data-audience="cfo">
+      <span class="audience-kicker">CFO / FINANCE LEADER</span>
+      <strong>Turn finance into a 24×7 AI-powered intelligence function.</strong>
+      <span>Connect your ERP · automate work · monitor compliance · find savings · improve cash</span>
+    </button>
+    <button class="audience-card" type="button" data-audience="ca">
+      <span class="audience-kicker">CA / ACCOUNTING FIRM</span>
+      <strong>Scale expertise, not headcount. Build global capability.</strong>
+      <span>More clients · more advisory capacity · AI-assisted audit · country-specific intelligence</span>
+    </button>
+    <button class="audience-card" type="button" data-audience="enterprise">
+      <span class="audience-kicker">ENTERPRISE / TRANSFORMATION</span>
+      <strong>Move from AI assistance to governed AI operations.</strong>
+      <span>AI agents · evidence · permissions · sign-gates · controlled execution</span>
+    </button>
+  </div>
+  <div class="outcome-banner">
+    <div class="outcome-main" id="audienceHeadline">Your business deserves an AI workforce.</div>
+    <div class="outcome-copy" id="audienceCopy">Keep your ERP. Keep your people. Reduce the repetitive work, strengthen control and turn financial data into decisions.</div>
+    <div class="outcome-pillars">
+      <div><b>LOWER COST</b><span>Automate repetitive finance work</span></div>
+      <div><b>LESS MANUAL DEPENDENCE</b><span>AI captures, reconciles and prepares</span></div>
+      <div><b>BETTER CONTROL</b><span>Evidence, compliance and governed action</span></div>
+      <div><b>MORE INTELLIGENCE</b><span>Cash, margins, risk and growth insight</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="platform">
+ <div class="sectionhead"><div><div class="eyebrow">THE OPERATING MODEL</div><h2>From enterprise signals to controlled action.</h2></div><p>Every command centre uses the same underlying pattern: connect to the existing estate, compute from evidence, reason through the problem, prove the result and keep a human decision gate where professional judgement is required.</p></div>
+ <div class="arch">
+  <div class="archcard"><div class="num">01 · CONNECT</div><h3>Enterprise signals</h3><p>ERP, accounting, banks, GST, statutory sources, documents, spreadsheets, market and regulatory feeds. Read-only where possible. No rip-and-replace starting point.</p></div>
+  <div class="archcard"><div class="num">02 · COMPUTE</div><h3>Deterministic work</h3><p>Reconciliation, calculations, population testing, controls, classifications, schedules and source-row checks are computed rather than guessed.</p></div>
+  <div class="archcard"><div class="num">03 · REASON</div><h3>Agent workforce</h3><p>Specialist agents interpret the evidence, challenge hypotheses, identify exceptions, prepare outputs and hand off only what requires human judgement.</p></div>
+  <div class="archcard"><div class="num">04 · PROVE</div><h3>Trust ledger</h3><p>Source-stamped figures, confidence/provisionality, audit trail, escalation and four-eyes sign-gates turn AI output into reviewable enterprise work.</p></div>
+ </div>
+</section>
+
+
+<section class="section change-section" id="change">
+  <div class="sectionhead">
+    <div><div class="eyebrow">WHAT CHANGES</div><h2>From people processing work to AI running the work.</h2></div>
+    <p>Functionality is the proof. The transformation is what matters.</p>
+  </div>
+  <div class="change-grid">
+    <div class="change-row head"><span>TRADITIONAL WORKFLOW</span><span>WITH DUADESK 2.0</span></div>
+    <div class="change-row"><span>People collect and prepare data</span><b>AI connects, captures and structures the work</b></div>
+    <div class="change-row"><span>People reconcile and check</span><b>AI computes, reconciles and surfaces exceptions</b></div>
+    <div class="change-row"><span>Compliance is checked periodically</span><b>AI continuously tests authorised data against relevant rules and controls</b></div>
+    <div class="change-row"><span>Management asks for analysis</span><b>AI continuously prepares intelligence, explanations and recommendations</b></div>
+    <div class="change-row"><span>Scale requires more specialist capacity</span><b>AI agents expand the operating capacity of the existing team</b></div>
+    <div class="change-row"><span>AI output can be difficult to trust</span><b>Source evidence + deterministic computation + sign-gates create a reviewable trail</b></div>
+  </div>
+  <div class="change-tagline">Your ERP records the business. <em>DuaDesk helps you run it.</em></div>
+</section>
+
+<section class="section" id="connect">
+ <div class="sectionhead"><div><div class="eyebrow">CONNECT TO YOUR FINANCE STACK</div><h2>Keep your ERP. Add an AI finance workforce.</h2></div><p>DuaDesk is designed around the systems finance teams already operate. The integration ecosystem spans major ERP, accounting, spreadsheet, banking, tax and regulatory pathways. Exact connector availability depends on the product, country and deployment.</p></div>
+ <div class="stackpanel">
+  <div class="stackgroup"><div class="stacktitle">ERP &amp; accounting</div><div class="erpgrid"><span>SAP</span><span>Oracle</span><span>Microsoft Dynamics</span><span>Tally</span><span>QuickBooks</span><span>Zoho</span><span>DATEV</span><span>Lexware</span><span>Sage</span><span>NetSuite</span><span>Yayoi</span><span>freee</span><span>Money Forward</span><span>Excel / CSV</span></div></div>
+  <div class="stackgroup"><div class="stacktitle">And the data around finance</div><div class="erpgrid secondary"><span>Banks</span><span>GST / tax systems</span><span>E-invoicing</span><span>FX data</span><span>Supplier data</span><span>Customer data</span><span>Regulatory sources</span></div></div>
+  <div class="connectflow"><div><b>CONNECT</b><small>Authorised data pathways</small></div><i>→</i><div><b>UNDERSTAND</b><small>AI maps the finance context</small></div><i>→</i><div><b>OPERATE</b><small>Specialist agents do the work</small></div><i>→</i><div><b>GOVERN</b><small>Permissions, evidence &amp; sign-gates</small></div></div>
+ </div>
+</section>
+
+<section class="section" id="command">
+ <div class="sectionhead"><div><div class="eyebrow">COMMAND CENTRES</div><h2>Four enterprise workforces. One architecture.</h2></div><p>Explore the current product family. The figures below are product capabilities represented in the supplied DuaDesk materials, not a claim that every task is autonomous.</p></div>
+ <div class="rooms">
+  <article class="room" style="--rc:#39d8c1"><div class="tag">AI CFO</div><h3>Finance</h3><p>Finance work organised into specialist AI desks — tax, close, treasury, planning, controls and balance-sheet intelligence.</p><div class="stats"><div class="stat"><b>18</b> desks</div><div class="stat"><b>6</b> Indian languages</div><div class="stat"><b>6</b> country editions</div></div><div style="color:#8ea3b7;font-size:10px;margin-top:7px">India · <a class="country-link" href="https://de.duadesk.com" target="_blank" rel="noopener">Germany <span aria-hidden="true">↗</span></a> · <a class="country-link" href="https://nl.duadesk.com" target="_blank" rel="noopener">Netherlands <span aria-hidden="true">↗</span></a> · <a class="country-link" href="https://jp.duadesk.com" target="_blank" rel="noopener">Japan <span aria-hidden="true">↗</span></a> · <a class="country-link" href="https://uae.duadesk.com" target="_blank" rel="noopener">UAE <span aria-hidden="true">↗</span></a> · <a class="country-link" href="https://sa.duadesk.com" target="_blank" rel="noopener">Saudi <span aria-hidden="true">↗</span></a> Arabia</div><button class="btn ghost" onclick="openRoom('cfo')">Explore CFO →</button><div class="productlinks"><a href="https://cfo.duadesk.com" target="_blank" rel="noopener">Open CFO product ↗</a></div></article>
+  <article class="room" style="--rc:#62a4ff"><div class="tag">AI CPO</div><h3>Procurement</h3><p>End-to-end procurement intelligence from spend and sourcing through P2P, supplier risk, customs, payments and audit.</p><div class="stats"><div class="stat"><b>16</b> desks</div><div class="stat"><b>Ask Aria</b> co-pilot</div><div class="stat"><b>100%</b> population audit</div></div><button class="btn ghost" onclick="openRoom('cpo')">Explore CPO →</button><div class="productlinks"><a href="https://cpo.duadesk.com" target="_blank" rel="noopener">Open CPO product ↗</a></div></article>
+  <article class="room" style="--rc:#50d69a"><div class="tag">DUA PRAMAAN</div><h3>Audit</h3><p>AI-assisted audit across 20 audit types with full-population testing, external corroboration and inspection-ready evidence.</p><div class="stats"><div class="stat"><b>20</b> audit types</div><div class="stat"><b>SA</b> aligned</div><div class="stat"><b>NFRA</b> ready</div></div><button class="btn ghost" onclick="openRoom('audit')">Explore Pramaan →</button><div class="productlinks"><a href="https://audit.duadesk.com" target="_blank" rel="noopener">Open Pramaan product ↗</a></div></article>
+  <article class="room" style="--rc:#d6ae55"><div class="tag">DUA PRAGYA</div><h3>Advisory</h3><p>AI consulting workforce spanning six practices, with named agents running analysis while a qualified professional signs the deliverable.</p><div class="stats"><div class="stat"><b>47</b> agents</div><div class="stat"><b>6</b> practices</div><div class="stat"><b>90</b> scenarios tested</div></div><button class="btn ghost" onclick="openRoom('pragya')">Explore Pragya →</button><div class="productlinks"><a href="https://consulting.duadesk.com" target="_blank" rel="noopener">Open Pragya / Consulting ↗</a></div></article>
+ </div>
+</section>
+
+<section class="section" id="compliance">
+ <div class="sectionhead"><div><div class="eyebrow">WHAT FINANCE TEAMS CARE ABOUT</div><h2>Connect. Comply. Find value. Explain it.</h2></div><p>The global story is deliberately practical: use the systems you already have, continuously test finance and compliance, surface opportunities and show the evidence behind every important number.</p></div>
+ <div class="prioritygrid">
+  <article class="priority"><div class="pnum">01</div><h3>Connect</h3><p>Bring ERP, accounting, bank, tax and supporting data into governed AI workflows.</p><b>SAP · Oracle · Dynamics · Tally · QuickBooks · Zoho + more</b></article>
+  <article class="priority"><div class="pnum">02</div><h3>Comply</h3><p>Run country-specific tax, statutory and regulatory checks as part of the finance workflow—not as a separate year-end exercise.</p><b>GST · VAT · CIT · TDS · e-invoicing · local reporting</b></article>
+  <article class="priority"><div class="pnum">03</div><h3>Find value</h3><p>Identify procurement leakage, working-capital opportunities, tax leakage, duplicate payments, productivity opportunities and financial risk.</p><b>Recover · Reduce · Release · Capture · Prevent</b></article>
+  <article class="priority"><div class="pnum">04</div><h3>Explain</h3><p>Move from headline result to source, calculation, evidence, confidence and recommended action.</p><b>Source → Compute → Prove → Govern</b></article>
+ </div>
+</section>
+
+<section class="section" id="agents">
+ <div class="sectionhead"><div><div class="eyebrow">AGENTS AT WORK</div><h2>Don't watch another chatbot demo.</h2></div><p>Run a workflow. Watch the agent read a source, compute or reason, surface an exception and emit a governed work product.</p></div>
+ <div class="lab">
+  <div class="labtop"><div><b id="scenarioTitle">AI CPO · Spend intelligence</b><div style="color:var(--muted);font-size:11px">Interactive simulated workflow using the current product concepts</div></div><div class="live"><i></i>AGENTS AT WORK</div></div>
+  <div class="labbody">
+   <div class="agentrail" id="agentRail"></div>
+   <div class="work"><div class="phase" id="phase">CONNECT → COMPUTE → REASON → PROVE</div><h3 id="workTitle">Select a scenario</h3><div class="reads" id="reads">Choose a command centre above or start a live scenario.</div><div class="result" id="result">—</div><div class="bar"><i id="bar"></i></div><div class="exactions"><button class="btn gold" onclick="runScenario()">Run next agent step ▶</button><button class="btn ghost autoplay" onclick="autoplayScenario()"><span class="livepulse"></span>Watch full run</button><button class="btn ghost" onclick="resetScenario()">Reset</button></div></div>
+   <div class="evidence"><div class="evtitle">TRUST LEDGER · LIVE</div><div class="ev"><b>Source</b><span id="ev1">Waiting for workflow</span></div><div class="ev"><b>Computation</b><span id="ev2">Deterministic checks where applicable</span></div><div class="ev"><b>Confidence</b><span id="ev3">—</span></div><div class="ev"><b>Gate</b><span id="ev4">Human review before consequential action</span></div><div class="ev"><b>Output</b><span id="ev5">—</span></div></div>
+  </div>
+ </div>
+</section>
+
+<section class="section" id="value">
+ <div class="sectionhead"><div><div class="eyebrow">DUADESK VALUE LAB</div><h2>Model the opportunity before you buy.</h2></div><p>The Value Lab is designed as an explainable model: business profile → priorities → value levers → hard vs modelled value → indicative investment → payback. Results remain illustrative until validated against your own data.</p></div>
+ <div class="calcgrid">
+  <div class="calcbox"><h3>1 · Business profile</h3><div class="fields">
+   <div class="field"><label>Annual turnover · ₹ Cr</label><input id="turnover" type="number" value="250"></div>
+   <div class="field"><label>Procurement / materials · % turnover</label><input id="mat" type="number" value="60"></div>
+   <div class="field"><label>Annual GST / ITC · ₹ Cr</label><input id="itc" type="number" value="12"></div>
+   <div class="field"><label>Finance / accounts team</label><input id="fte" type="number" value="8"></div>
+   <div class="field"><label>Loaded cost / finance FTE · ₹ L</label><input id="ftecost" type="number" value="8"></div>
+   <div class="field"><label>Purchase invoices / month</label><input id="inv" type="number" value="1800"></div>
+   <div class="field"><label>Audit effort / year · hours</label><input id="audit" type="number" value="1800"></div>
+   <div class="field"><label>Active vendors</label><input id="vendors" type="number" value="650"></div>
+  </div></div>
+  <div class="calcbox"><h3>2 · What matters?</h3><div class="goalgrid" id="goals">
+   <button class="goal on" data-goal="procure">Reduce procurement cost</button><button class="goal on" data-goal="itc">Recover ITC / tax leakage</button>
+   <button class="goal" data-goal="close">Accelerate close & reporting</button><button class="goal" data-goal="audit">Reduce audit effort / findings</button>
+   <button class="goal" data-goal="cash">Release working capital</button><button class="goal" data-goal="risk">Reduce leakage / duplicate payments</button>
+   <button class="goal" data-goal="advisory">Create advisory / new revenue</button><button class="goal" data-goal="listing">Improve readiness / transactions</button>
+  </div><div style="margin-top:15px;color:var(--muted);font-size:11px">Select the priorities you want the model to test. The model uses conservative illustrative drivers and clearly separates modelled opportunity from potential upside; nothing is presented as realized or banked value.</div></div>
+  <div class="calcbox"><h3>3 · Investment assumptions</h3><div class="fields">
+   <div class="field"><label>Platform / year · ₹ Cr</label><input id="platformCost" type="number" value="0.36"></div>
+   <div class="field"><label>Integration / setup · ₹ L</label><input id="setup" type="number" value="8"></div>
+   <div class="field"><label>Implementation period · months</label><input id="months" type="number" value="3"></div>
+   <div class="field"><label>Organisation complexity</label><select id="complexity"><option value="1">Single entity / simple</option><option value="1.08" selected>Multi-entity / moderate</option><option value="1.16">Complex / multi-country</option></select></div>
+  </div></div>
+  <div class="calcresult locked" style="position:relative">
+   <div class="valuegate" id="valueGate">
+    <div class="gateicon">✉</div>
+    <div class="eyebrow">UNLOCK YOUR VALUE MODEL</div>
+    <h3 style="margin:6px 0 8px;font-size:22px;color:#f4f7fb">Enter your work email to see the calculation</h3>
+    <p style="color:var(--muted);max-width:520px;margin:0 auto 14px;font-size:12px;line-height:1.6">We use your email to identify the opportunity and enable a follow-up discussion. Your calculation remains illustrative until validated against your own data.</p>
+    <div class="gate-field"><label id="leadEmailLabel">Work email *</label><input id="leadEmail" type="email" required placeholder="you@company.com" autocomplete="email"><small id="emailHelp">Required to unlock your personalised opportunity model.</small></div>
+    <button id="unlockValueBtn" class="btn gold" type="button" onclick="unlockValue()">Unlock Value →</button>
+    <div id="gateError" style="color:#f2a7a7;font-size:10px;margin-top:9px;min-height:14px"></div>
+   </div>
+   <div class="eyebrow">ILLUSTRATIVE VALUE OPPORTUNITY</div><div class="bigvalue" id="totalValue">₹0.00 Cr / year</div><div style="color:var(--muted)">Selected priorities · recalculated live · every lever is explainable</div>
+   <div class="resultgrid"><div class="rk"><small>MODELLABLE OPPORTUNITY</small><b id="hard">₹0.00 Cr</b></div><div class="rk"><small>MODELLED UPSIDE</small><b id="upside">₹0.00 Cr</b></div><div class="rk"><small>YEAR-1 NET</small><b id="net">₹0.00 Cr</b></div><div class="rk"><small>PAYBACK</small><b id="payback">—</b></div></div>
+   <div class="eyebrow" style="margin-top:12px">VALUE BRIDGE</div><div class="bridge" id="bridge"></div>
+   <div class="explain"><h4>Make every number explainable.</h4><div style="color:var(--muted);font-size:11px">DuaDesk should let a CFO move from the headline number to the exact input, assumption and formula behind it.</div><div class="flow"><div class="node"><small>01 · INPUT</small><b id="xInput">Your business data</b><span>The exact business input used by this lever.</span></div><div class="node"><small>02 · ASSUMPTION</small><b id="xAssumption">The explicit assumption applied.</b><span>Explicit, editable modelling assumption.</span></div><div class="node"><small>03 · FORMULA</small><b id="xFormula">Input × assumption × complexity</b><span>Visible calculation — not a black-box score.</span></div><div class="node"><small>04 · RESULT</small><b id="xResult">₹0.00 Cr</b><span>Illustrative value; not realized value.</span></div></div><div class="assumptions"><div><b>Evidence status:</b> illustrative model until validated against client data.</div><div><b>Attribution:</b> modelled opportunity is not the same as realized value.</div></div></div>
+   <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:18px"><button class="btn gold" onclick="emailEstimate()">Send this estimate →</button><button class="btn ghost" onclick="window.print()">Print / Save PDF</button></div>
+   <div style="font-size:10px;color:#71869b;margin-top:14px">Illustrative, assumption-led estimate. It is not a guarantee, audit, certification, tax/legal advice or engagement. Live DuaDesk work is computed from the client’s own data, reconciled and reviewed/sign-gated by a qualified professional.</div>
+  </div>
+ </div>
+</section>
+
+<section class="section" id="trust">
+ <div class="sectionhead"><div><div class="eyebrow">TRUST IS PART OF THE PRODUCT</div><h2>Autonomy without surrendering control.</h2></div><p>The supplied product materials consistently describe AI doing repetitive analysis and drafting while consequential filing, posting, payment or professional judgement remains behind a human gate.</p></div>
+ <div class="trust">
+  <div class="trustcard"><h3>Evidence before confidence</h3><div class="trustlist">
+   <div class="trustitem"><b>Source-stamped evidence</b> — findings trace back to source rows, documents or external corroboration.</div>
+   <div class="trustitem"><b>Deterministic computation</b> — code-based calculations and invariant checks where appropriate.</div>
+   <div class="trustitem"><b>Full-population testing</b> — where the product capability supports it, the system works across the population rather than relying only on a sample.</div>
+   <div class="trustitem"><b>Provisionality</b> — AI-drafted outputs are distinguished from reviewed/signed outputs.</div>
+  </div></div>
+  <div class="trustcard"><h3>Action behind a gate</h3><div class="trustlist">
+   <div class="trustitem"><b>Four-eyes approval</b> — professional review/sign-off before consequential output.</div>
+   <div class="trustitem"><b>Trust Ledger</b> — draft → advised → signed state.</div>
+   <div class="trustitem"><b>Escalation</b> — exceptions move to the human rather than being silently resolved.</div>
+   <div class="trustitem"><b>No invented figure</b> — product materials emphasise grounding outputs in connected/source data.</div>
+  </div></div>
+ </div>
+</section>
+
+<section class="section" id="autonomy">
+ <div class="sectionhead"><div><div class="eyebrow">THE AUTONOMY PATH</div><h2>More autonomy. More control.</h2></div><p>DuaDesk can progressively move from assistance toward bounded execution. The control model does not disappear as autonomy increases; it becomes explicit in permissions, policies, evidence, escalation and auditability.</p></div>
+ <div class="autonomy">
+  <div class="auto"><div class="level">LEVEL 01</div><h3>Assist</h3><p>AI reads, extracts, reconciles, analyses and drafts the work.</p><div class="guard"><b>Human:</b> decides and executes.</div></div>
+  <div class="auto"><div class="level">LEVEL 02</div><h3>Recommend</h3><p>AI reasons over evidence, identifies exceptions and proposes the next action.</p><div class="guard"><b>Human:</b> approves the recommendation.</div></div>
+  <div class="auto"><div class="level">LEVEL 03</div><h3>Controlled execution</h3><p>AI prepares a transaction or action inside an explicit workflow and policy boundary.</p><div class="guard"><b>Control:</b> sign-gate before consequential execution.</div></div>
+  <div class="auto"><div class="level">LEVEL 04</div><h3>Bounded autonomy</h3><p>Low-risk, pre-authorised actions can run within defined limits, with monitoring and escalation.</p><div class="guard"><b>Control:</b> permissions, thresholds, logs and exception escalation.</div></div>
+ </div>
+ <div style="margin-top:15px;padding:15px 17px;border:1px solid rgba(57,216,193,.25);border-radius:15px;background:rgba(57,216,193,.04);color:#d7e6ef;font-size:13px"><b style="color:var(--cyan)">The principle:</b> automate the repetitive work progressively — never hide the control boundary.</div>
+</section>
+
+<section class="section" id="security">
+ <div class="sectionhead"><div><div class="eyebrow">DATA · SECURITY · GOVERNANCE</div><h2>Your data. Your controls. Your evidence.</h2></div><p>The product materials describe read-only integrations, local hosting/data-region choices for specific products, source-grounded outputs, sign-gates and audit trails. The exact deployment controls should be agreed product-by-product with the customer.</p></div>
+ <div class="securitygrid">
+  <div class="sec"><div class="ico">↔</div><h3>Controlled access</h3><p>Connect existing ERP, accounting, banking and regulatory systems through defined interfaces. Read-only access is a core pattern across the supplied product materials.</p></div>
+  <div class="sec"><div class="ico">◎</div><h3>Data residency</h3><p>Country products can carry local deployment/data-region requirements — for example India hosting for Pramaan, EU Frankfurt for Germany/Netherlands, and Tokyo for Japan as documented in the supplied product materials.</p></div>
+  <div class="sec"><div class="ico">⌁</div><h3>Source provenance</h3><p>Important findings can carry source references, calculations and evidence so reviewers can trace the path from record to conclusion.</p></div>
+  <div class="sec"><div class="ico">▣</div><h3>Deterministic computation</h3><p>Where the task is mathematical or rule-based, use code/computation and invariant checks rather than relying on free-form model arithmetic.</p></div>
+  <div class="sec"><div class="ico">✓</div><h3>Human sign-gates</h3><p>Professional judgement, regulatory submissions, posting, payment and other consequential actions remain governed according to the product workflow.</p></div>
+  <div class="sec"><div class="ico">◫</div><h3>Audit trail</h3><p>The Trust Ledger records the progression from draft to advised to signed, with exceptions escalated rather than silently resolved.</p></div>
+ </div>
+ <div class="disclaimer">Security, privacy, residency and compliance commitments are deployment-specific. The website should publish only controls and certifications that have been formally established for the relevant product and customer environment.</div>
+</section>
+
+<section class="section">
+ <div class="sectionhead"><div><div class="eyebrow">GLOBAL BY DESIGN</div><h2>One architecture. Local regulatory intelligence.</h2></div><p>The international product materials show a common AI CFO pattern with country-specific regulatory, tax, invoicing, data-residency and language layers.</p></div>
+ <div class="global"><div class="countries">
+  <div class="country"><b>India</b><span>GST · Income-tax · TDS · Indian finance workflows</span></div>
+  <div class="country"><b>Germany</b><span>HGB/IFRS · ELSTER · GoBD · E-Rechnung</span></div>
+  <div class="country"><b>Netherlands</b><span>BTW · Vpb · reporting · EU finance workflows</span></div>
+  <div class="country"><b>Japan</b><span>Consumption tax · e-Tax/eLTAX · JP PINT</span></div>
+  <div class="country"><b>UAE</b><span>VAT · Corporate Tax · e-invoicing readiness</span></div>
+  <div class="country"><b>Saudi Arabia</b><span>VAT · Zakat/CIT · ZATCA e-invoicing</span></div>
+ </div><div class="calcbox"><h3>The strategic idea</h3><p style="color:var(--muted)">The global layer is not six separate products. It is a common operating model with local intelligence: regulation, tax, language, data residency, filing standards, ERP ecosystem and country-specific controls.</p><p style="color:#dce7f1">That is how DuaDesk can move from a collection of AI features toward a repeatable enterprise application architecture.</p></div></div>
+</section>
+
+<section class="final"><div class="eyebrow">THE NEXT STEP</div><h2>Ready to see DuaDesk running on your business?</h2><p>Request a live demonstration, run an AI workflow, or calculate an illustrative value opportunity for your organisation.</p><button class="btn gold" onclick="openDemo()">Request a Demo →</button> <button class="btn ghost" onclick="openExperience()">Run an AI agent →</button> <button class="btn ghost" onclick="document.getElementById('value').scrollIntoView()">Calculate Value</button></section>
+
+
+<div class="modal" id="demoModal" aria-hidden="true">
+  <div class="modalbox demoformbox">
+    <button class="close" type="button" onclick="closeDemo()">Close ×</button>
+    <div class="eyebrow">DUADESK 2.0 · REQUEST A DEMO</div>
+    <h2>See DuaDesk on your business.</h2>
+    <div class="sub">Tell us a little about your finance or enterprise environment and what you would like to see. We will use this information to prepare the right demonstration.</div>
+    <form id="demoForm" onsubmit="submitDemo(event)">
+      <div class="fields demo-fields">
+        <div class="field"><label for="demoName">Name *</label><input id="demoName" name="name" required autocomplete="name" placeholder="Your name"></div>
+        <div class="field"><label for="demoCompany">Company *</label><input id="demoCompany" name="company" required autocomplete="organization" placeholder="Company / organisation"></div>
+        <div class="field"><label for="demoEmail">Work email *</label><input id="demoEmail" name="email" type="email" required autocomplete="email" placeholder="you@company.com"></div>
+        <div class="field"><label for="demoPhone">Phone</label><input id="demoPhone" name="phone" type="tel" autocomplete="tel" placeholder="+91 ..."></div>
+        <div class="field"><label for="demoCountry">Country</label><select id="demoCountry" name="country"><option>India</option><option>Germany</option><option>Netherlands</option><option>Japan</option><option>UAE</option><option>Saudi Arabia</option><option>Other</option></select></div>
+        <div class="field"><label for="demoProduct">What would you like to see?</label><select id="demoProduct" name="product"><option>AI CFO</option><option>AI CPO</option><option>Dua Pramaan</option><option>Dua Pragya</option><option>DuaDesk 2.0 — platform overview</option></select></div>
+        <div class="field"><label for="demoERP">ERP / finance system</label><select id="demoERP" name="erp"><option>SAP</option><option>Oracle</option><option>Microsoft Dynamics</option><option>Tally</option><option>QuickBooks</option><option>Zoho</option><option>DATEV</option><option>Lexware</option><option>Sage</option><option>NetSuite</option><option>Yayoi</option><option>freee</option><option>Money Forward</option><option>Excel / CSV</option><option>Other / multiple systems</option></select></div>
+        <div class="field full"><label for="demoNeed">What would you most like to see?</label><textarea id="demoNeed" name="need" rows="3" placeholder="For example: consolidation, compliance, Balance Sheet IQ, Video → Ledger, procurement savings, or a live agent workflow."></textarea></div>
+      </div>
+      <div class="demo-note">Your details will be sent directly to Ashish Dua for demo follow-up. Required fields are marked *.</div>
+      <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:16px">
+        <button class="btn gold" type="submit">Request Demo →</button>
+        <button class="btn ghost" type="button" onclick="closeDemo()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="modal"><div class="modalbox"><button class="close" onclick="closeModal()">Close ×</button><div class="eyebrow" id="mEyebrow">COMMAND CENTRE</div><h2 id="mTitle">AI CPO</h2><div class="sub" id="mSub"></div><div id="mBody"></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const DATA={
+ cfo:{ey:"AI CFO · FINANCE WORKFORCE",title:"AI CFO Command Centre",sub:"18 finance desks · AI specialists · source-grounded work · human sign-gates",agents:["Trace","Reko","Tessa","Kairo","Aria"],steps:[
+  ["Trace","Controllership agent","Trial balance + ledgers","Reconcile → exception map","Trial balance tied; exceptions surfaced","Books / ERP","Reconciled","controlled review"],
+  ["Reko","Tax & reconciliation agent","GST / tax records","Cross-match → compute","ITC / tax mismatches identified","GST / books","Computed","professional review"],
+  ["Tessa","Compliance agent","TDS / statutory data","Test → schedule","TDS exceptions prepared for review","Tax source","Source-linked","sign-gate"],
+  ["Kairo","Working-capital agent","AR/AP / ageing","Analyse → prioritise","Cash-release opportunities ranked","Subledger","Modelled","CFO review"],
+  ["Aria","Planning co-pilot","Budgets + actuals","Variance → explain → draft","Board-ready management view prepared","FP&A","AI-drafted","CFO sign"]]},
+ cpo:{ey:"AI CPO · PROCUREMENT WORKFORCE",title:"AI CPO Command Centre",sub:"16 desks + Ask Aria · spend to payment · full-population controls",agents:["Nova","Rafi","Xeni","Ivy","Demi"],steps:[
+  ["Nova","Spend intelligence agent","Spend transactions","Classify → analyse","₹320 Cr spend classified in demo scenario","ERP / spend","Computed","controller review"],
+  ["Rafi","Savings agent","Contracts + categories","Should-cost → benchmark","Savings opportunities surfaced","Contracts / market","Modelled","CPO review"],
+  ["Ivy","P2P control agent","PO + invoice + GRN","Three-way match","Exceptions / duplicates flagged","ERP","Exception list","approval"],
+  ["Xeni","Customs agent","Bills of entry","Duty → entitlement → validate","₹5.22 Cr customs opportunity surfaced in demo","Customs data","Computed","professional review"],
+  ["Demi","Logistics agent","Shipments + charges","Analyse → draft dispute","Demurrage case prepared","Shipment data","AI-drafted","human approval"]]},
+ audit:{ey:"DUA PRAMAAN · AUDIT ENGINE",title:"Dua Pramaan",sub:"20 audit types · SA-aligned · full-population testing · corroboration",agents:["Trace","Sarvekshan","Satyapan","Chhadmveshi","Verdict"],steps:[
+  ["Trace","Planning agent","Trial balance + assertions","Risk → materiality","Risk map and planning memo prepared","Audit file","Computed","CA review"],
+  ["Sarvekshan","Full-population agent","Whole ledger","JET → Benford → duplicates","Population analytics and exceptions","Ledger","Computed","CA review"],
+  ["Satyapan","Corroboration agent","GSTN / MCA / AIS","Cross-check → reconcile","External corroboration map","External sources","Source-linked","CA review"],
+  ["Chhadmveshi","Fraud-lens agent","Ledgers + RPT","Red flags → investigate","Related-party / fraud leads surfaced","Ledger / RPT","AI-drafted","CA investigation"],
+  ["Verdict","Opinion agent","Findings + materiality","Assess → draft","Draft opinion / inspection pack","Working papers","AI-drafted","CA signs"]]},
+ pragya:{ey:"DUA PRAGYA · ADVISORY WORKFORCE",title:"Dua Pragya",sub:"47 named agents · 6 practices · 90 engagement scenarios tested",agents:["Gavesh","Mulyankan","Vivek","Purvanuman","Kavach"],steps:[
+  ["Gavesh","Diligence agent","Data room","Review → challenge → surface","High-priority diligence findings","Data room","AI-drafted","partner review"],
+  ["Vivek","QoE agent","Financial statements","Normalise → bridge","EBITDA / working-capital bridge","Financials","Computed","partner review"],
+  ["Mulyankan","Valuation agent","Comparables + DCF","Benchmark → value","Football-field valuation prepared","Market / financials","Modelled","partner sign"],
+  ["Purvanuman","Asset-management agent","Portfolio + covenants","Monitor → forecast","Covenant breach forecast prepared","Portfolio","Forecast","partner review"],
+  ["Kavach","IT risk agent","VAPT / threat data","Triage → prioritise","Critical issues triaged","Security data","AI-drafted","professional sign"]]}
+};
+let active=DATA.cpo,step=0,autoTimer=null;
+
+function money(x){return "₹"+x.toFixed(2)+" Cr";}
+function toast(s){let t=document.getElementById("toast");t.textContent=s;t.classList.add("on");clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove("on"),2600)}
+function renderAgents(){
+ const rail=document.getElementById("agentRail");
+ rail.innerHTML=active.agents.map((a,i)=>`<div class="agent ${i===step?'on':''}"><div class="bot">${a[0]}</div><div><b>${a}</b><small>${active.steps[i]?active.steps[i][1]:"AI specialist"}</small></div></div>`).join("");
+}
+function resetScenario(){step=0;document.getElementById("bar").style.width="0";document.getElementById("workTitle").textContent="Ready to run";document.getElementById("reads").textContent="The agent will read the next source and execute the next governed step.";document.getElementById("result").textContent="—";document.getElementById("ev1").textContent="Waiting for workflow";document.getElementById("ev3").textContent="—";renderAgents()}
+function runScenario(){
+ if(step>=active.steps.length){step=0}
+ const s=active.steps[step];
+ document.getElementById("scenarioTitle").textContent=active.title+" · "+s[0];
+ document.getElementById("workTitle").textContent=s[0]+" · "+s[1];
+ document.getElementById("reads").innerHTML="reads <b>"+s[2]+"</b> → "+s[3];
+ document.getElementById("result").textContent=s[4];
+ document.getElementById("ev1").textContent=s[5];
+ document.getElementById("ev2").textContent=s[3];
+ document.getElementById("ev3").textContent=s[6];
+ document.getElementById("ev4").textContent=s[7];
+ document.getElementById("ev5").textContent=s[4];
+ document.getElementById("bar").style.width=((step+1)/active.steps.length*100)+"%";
+ document.getElementById("phase").textContent=["CONNECT","COMPUTE","REASON","PROVE","GOVERN"][Math.min(4,step)]+" → ACT only within policy";
+ step++;renderAgents();
+}
+function autoplayScenario(){
+ clearInterval(autoTimer); resetScenario();
+ let count=0;
+ runScenario(); count++;
+ autoTimer=setInterval(()=>{ if(count>=active.steps.length){clearInterval(autoTimer); toast("Agent run complete — consequential action remains behind the control gate"); return;} runScenario(); count++; },900);
+}
+
+function openRoom(key){active=DATA[key];step=0;renderAgents();resetScenario();document.getElementById("mEyebrow").textContent=active.ey;document.getElementById("mTitle").textContent=active.title;document.getElementById("mSub").textContent=active.sub;
+ document.getElementById("mBody").innerHTML=`<div class="simgrid"><div class="simcard"><div class="simstep">WHAT THIS EXPERIENCE SHOWS</div><h3>AI specialist workflow</h3><p style="color:var(--muted)">This is a product demonstration model, not a live connection to your systems. It shows the operating pattern: source → computation/reasoning → exception or result → governed output.</p><button class="btn gold" onclick="closeModal();document.getElementById('agents').scrollIntoView();runScenario()">Run in Agent Lab →</button></div><div class="simcard"><div class="simstep">CURRENT PRODUCT POSITIONING</div><h3>${active.title}</h3><div class="check done">Specialist agents organised by enterprise function</div><div class="check done">Source-grounded computation / reasoning</div><div class="check done">Review and sign-gates where required</div><div class="check done">Audit trail / evidence orientation</div><div class="check">Consequential actions remain governed</div></div></div>`;
+ document.getElementById("modal").classList.add("on")}
+function openExperience(){document.getElementById("agents").scrollIntoView({behavior:"smooth"});toast("Welcome to the DuaDesk Experience Centre")}
+function closeModal(){document.getElementById("modal").classList.remove("on")}
+
+document.querySelectorAll(".goal").forEach(b=>b.onclick=()=>{b.classList.toggle("on");calc()});
+document.querySelectorAll("#value input,#value select").forEach(e=>e.addEventListener("input",calc));
+function val(id){return Math.max(0,parseFloat(document.getElementById(id).value)||0)}
+const LEVER_META={
+ procure:{label:"Procurement should-cost",input:"Materials spend",assumption:"1.5% of addressable materials spend",formula:"Materials spend × 1.5% × complexity",type:"opportunity"},
+ itc:{label:"ITC / tax leakage opportunity",input:"Annual GST / ITC pool",assumption:"3% of annual ITC pool",formula:"ITC pool × 3% × complexity",type:"opportunity"},
+ close:{label:"Finance productivity + AP processing",input:"Finance FTE + monthly purchase invoices",assumption:"30% of loaded finance capacity + ₹35 per invoice × 40%",formula:"(FTE × loaded cost × 30%) + (monthly invoices × 12 × ₹35 × 40%)",type:"opportunity"},
+ audit:{label:"Audit effort & rework",input:"Annual audit hours",assumption:"30% of hours at ₹1,500/hour",formula:"Audit hours × 30% × ₹1,500",type:"opportunity"},
+ cash:{label:"Working-capital opportunity",input:"Annual turnover",assumption:"0.25% cash-efficiency proxy",formula:"Turnover × 0.25% × complexity",type:"opportunity"},
+ risk:{label:"Duplicate / leakage controls",input:"Materials spend",assumption:"0.3% of addressable materials spend",formula:"Materials spend × 0.3% × complexity",type:"opportunity"},
+ advisory:{label:"New advisory revenue",input:"Active vendors",assumption:"₹0.003 Cr per active vendor, capped at ₹40 Cr",formula:"MIN(active vendors × ₹0.003 Cr, ₹40 Cr)",type:"upside"},
+ listing:{label:"Readiness / transaction upside",input:"Annual turnover",assumption:"0.05% of turnover",formula:"Turnover × 0.05%",type:"upside"}
+};
+let lastRows=[];
+function calc(){
+ const t=val("turnover"), mat=t*val("mat")/100, itc=val("itc"), fte=val("fte"), fc=val("ftecost")/100, inv=val("inv"), audit=val("audit"), vendors=val("vendors"), cx=parseFloat(document.getElementById("complexity").value)||1;
+ const on={};document.querySelectorAll(".goal.on").forEach(g=>on[g.dataset.goal]=1); const rows=[];
+ if(on.procure)rows.push(["procure",mat*.015*cx]);
+ if(on.itc)rows.push(["itc",itc*.03*cx]);
+ if(on.close)rows.push(["close",(fte*fc*.30 + inv*12*35*.40/1e7)*cx]);
+ if(on.audit)rows.push(["audit",audit*.30*1500/1e7*cx]);
+ if(on.cash)rows.push(["cash",t*.0025*cx]);
+ if(on.risk)rows.push(["risk",mat*.003*cx]);
+ if(on.advisory)rows.push(["advisory",Math.max(0,Math.min(40,vendors*.003))]);
+ if(on.listing)rows.push(["listing",Math.max(.05,t*.0005)]);
+ lastRows=rows;
+ const hard=rows.filter(x=>LEVER_META[x[0]].type==="opportunity").reduce((a,x)=>a+x[1],0), up=rows.filter(x=>LEVER_META[x[0]].type==="upside").reduce((a,x)=>a+x[1],0), total=hard+up;
+ const annual=val("platformCost"), setup=val("setup")/100, net=total-annual-setup, pay=hard>0?(annual+setup)/hard*12:0;
+ document.getElementById("totalValue").textContent=money(total)+" / year";
+ document.getElementById("hard").textContent=money(hard);document.getElementById("upside").textContent=money(up);document.getElementById("net").textContent=money(net);
+ document.getElementById("payback").textContent=pay?((pay<1?"<1":pay.toFixed(1))+" months"):"—";
+ document.getElementById("bridge").innerHTML=rows.length?rows.map((r,i)=>{const m=LEVER_META[r[0]];return `<div class="brow" onclick="explainLever(${i})"><div><b>${m.label}</b><div style="color:#7289a0;font-size:9px">${m.assumption}</div><div class="explainhint">Click to explain →</div></div><span class="kind ${m.type==="opportunity"?"hard":"up"}">${m.type}</span><b>${money(r[1])}</b></div>`}).join(""): `<div style="color:var(--muted)">Select at least one priority.</div>`;
+ explainLever(0);
+}
+function explainLever(i){
+ const r=lastRows[i]; if(!r){document.getElementById("xInput").textContent="Select a priority";document.getElementById("xAssumption").textContent="—";document.getElementById("xFormula").textContent="—";document.getElementById("xResult").textContent="₹0.00 Cr";return;}
+ const key=r[0], t=val("turnover"), mat=t*val("mat")/100, itc=val("itc"), fte=val("fte"), fc=val("ftecost")/100, inv=val("inv"), audit=val("audit"), vendors=val("vendors"), cx=parseFloat(document.getElementById("complexity").value)||1, m=LEVER_META[key];
+ const inputs={procure:`₹${mat.toFixed(2)} Cr materials spend`,itc:`₹${itc.toFixed(2)} Cr annual ITC pool`,close:`${fte} FTE + ${inv.toLocaleString()} purchase invoices/month`,audit:`${audit.toLocaleString()} audit hours/year`,cash:`₹${t.toFixed(2)} Cr turnover`,risk:`₹${mat.toFixed(2)} Cr materials spend`,advisory:`${vendors.toLocaleString()} active vendors`,listing:`₹${t.toFixed(2)} Cr turnover`};
+ document.getElementById("xInput").textContent=inputs[key];document.getElementById("xAssumption").textContent=m.assumption;document.getElementById("xFormula").textContent=m.formula+` · complexity ${cx.toFixed(2)}×`;
+ document.getElementById("xResult").textContent=money(r[1]);
+}
+function validLeadEmail(){
+ const el=document.getElementById("leadEmail");
+ return el && el.checkValidity() && el.value.trim();
+}
+/* ===== LEAD CAPTURE =========================================================
+   Paste your endpoint URL into LEAD_ENDPOINT below to record EVERY unlock as a
+   lead (email + calculator profile + modelled figures). Leave blank to disable
+   (the page still works; unlock just won't record). Fastest option: a free
+   Formspree form at https://formspree.io — see the notes given at handoff.
+============================================================================ */
+const WEB3FORMS_KEY = "d924d751-50fc-4a7c-97c5-1422af447027";   // Web3Forms → emails leads to ashish@ashishduacorporation.com
+const LEAD_ENDPOINT = "https://api.web3forms.com/submit";
+let leadRecorded = false;
+function leadSnapshot(email){
+ const g=id=>document.getElementById(id);
+ const goals=[...document.querySelectorAll(".goal.on")].map(b=>b.dataset.goal).join(", ");
+ return {
+  email, page:"duadesk.com — Value Lab", ts:new Date().toISOString(),
+  turnover_cr:val("turnover"), materials_pct:val("mat"), itc_cr:val("itc"),
+  finance_fte:val("fte"), fte_cost_l:val("ftecost"), invoices_month:val("inv"),
+  audit_hours:val("audit"), vendors:val("vendors"),
+  complexity:g("complexity")?g("complexity").value:"", priorities:goals,
+  total:(g("totalValue")||{}).textContent||"", opportunity:(g("hard")||{}).textContent||"",
+  upside:(g("upside")||{}).textContent||"", year1_net:(g("net")||{}).textContent||"",
+  payback:(g("payback")||{}).textContent||""
+ };
+}
+function recordLead(email){
+ if(leadRecorded) return;
+ if(!LEAD_ENDPOINT || LEAD_ENDPOINT.indexOf("http")!==0) return;  // not configured yet
+ leadRecorded=true;
+ try{
+  fetch(LEAD_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({access_key:WEB3FORMS_KEY,subject:"DuaDesk Value Lab lead — "+email,from_name:"DuaDesk website · Value Lab",...leadSnapshot(email)}),keepalive:true}).catch(()=>{});
+ }catch(e){/* never block the unlock */}
+}
+function unlockValue(){
+ const el=document.getElementById("leadEmail"), err=document.getElementById("gateError");
+ if(!el || !el.checkValidity() || !el.value.trim()){
+   if(err) err.textContent="Please enter a valid work email address.";
+   el && el.focus();
+   return false;
+ }
+ document.getElementById("valueGate").classList.add("unlocked");
+ document.querySelector(".calcresult")?.classList.remove("locked");
+ if(err) err.textContent="";
+ calc();
+ recordLead(el.value.trim());
+ return true;
+}
+function emailEstimate(){
+ if(!validLeadEmail()){
+   document.getElementById("valueGate").classList.remove("unlocked");
+   document.getElementById("leadEmail").focus();
+   return;
+ }
+ const lead=document.getElementById("leadEmail").value.trim();
+ const subject=encodeURIComponent("DuaDesk Value Lab — discussion");
+ const body=encodeURIComponent("I ran the DuaDesk Value Lab and would like to discuss the estimate.\n\nProspect email: "+lead+"\n\nIllustrative annual value: "+document.getElementById("totalValue").textContent+"\nModelled opportunity: "+document.getElementById("hard").textContent+"\nModelled upside: "+document.getElementById("upside").textContent+"\nYear-1 net: "+document.getElementById("net").textContent+"\nPayback: "+document.getElementById("payback").textContent);
+ location.href=`mailto:ashish@ashishduacorporation.com?subject=${subject}&body=${body}`;
+}
+
+function openDemo(){
+ const modal=document.getElementById("demoModal");
+ if(!modal)return;
+ modal.classList.add("on");
+ modal.setAttribute("aria-hidden","false");
+ setTimeout(()=>document.getElementById("demoName")?.focus(),50);
+}
+function closeDemo(){
+ const modal=document.getElementById("demoModal");
+ if(!modal)return;
+ modal.classList.remove("on");
+ modal.setAttribute("aria-hidden","true");
+}
+async function submitDemo(e){
+ e.preventDefault();
+ const f=document.getElementById("demoForm");
+ if(!f.checkValidity()){f.reportValidity();return;}
+ const vals={
+  name:document.getElementById("demoName").value.trim(),
+  company:document.getElementById("demoCompany").value.trim(),
+  email:document.getElementById("demoEmail").value.trim(),
+  phone:document.getElementById("demoPhone").value.trim(),
+  country:document.getElementById("demoCountry").value,
+  product:document.getElementById("demoProduct").value,
+  erp:document.getElementById("demoERP").value,
+  need:document.getElementById("demoNeed").value.trim()
+ };
+ const showToast=(m)=>{const t=document.getElementById("toast");if(t){t.textContent=m;t.classList.add("on");setTimeout(()=>t.classList.remove("on"),4500);}};
+ const mailtoFallback=()=>{
+  const subject=encodeURIComponent("DuaDesk 2.0 Demo Request — "+vals.company);
+  const body=encodeURIComponent(
+   "DuaDesk 2.0 Demo Request\n\n"+
+   "Name: "+vals.name+"\n"+"Company: "+vals.company+"\n"+"Work email: "+vals.email+"\n"+
+   "Phone: "+(vals.phone||"Not provided")+"\n"+"Country: "+vals.country+"\n"+
+   "Product / demo: "+vals.product+"\n"+"ERP / finance system: "+vals.erp+"\n"+
+   "What they want to see: "+(vals.need||"Not specified")+"\n"
+  );
+  window.location.href="mailto:ashish@ashishduacorporation.com?subject="+subject+"&body="+body;
+ };
+ // Send for real via Web3Forms; fall back to the visitor's email app only if it fails.
+ if(WEB3FORMS_KEY && WEB3FORMS_KEY.indexOf("PASTE")!==0){
+  try{
+   const res=await fetch("https://api.web3forms.com/submit",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","Accept":"application/json"},
+    body:JSON.stringify({access_key:WEB3FORMS_KEY,subject:"DuaDesk 2.0 Demo Request — "+(vals.company||"(company)"),from_name:"DuaDesk website · Demo form",...vals})
+   });
+   const data=await res.json();
+   if(data && data.success){ showToast("Demo request sent — Ashish has received it and will reply soon."); closeDemo(); return false; }
+   throw new Error("send failed");
+  }catch(err){
+   mailtoFallback(); showToast("Opening your email app to send the request to DuaDesk."); closeDemo(); return false;
+  }
+ }
+ mailtoFallback(); showToast("Opening your email app to send the request to DuaDesk."); closeDemo(); return false;
+}
+document.addEventListener("keydown",function(e){
+ if(e.key==="Escape"){
+  closeDemo();
+  if(typeof closeModal==="function")closeModal();
+ }
+});
+
+
+const AUDIENCE_MESSAGES={
+ owner:{
+  headline:"Your business deserves an AI workforce.",
+  copy:"Keep your ERP. Keep your people. Reduce repetitive finance work, strengthen control and turn financial data into intelligence for cash, margins, risk and growth."
+ },
+ cfo:{
+  headline:"Turn finance into a 24×7 AI-powered intelligence function.",
+  copy:"Connect your existing ERP and finance ecosystem. Let specialist agents reconcile, test compliance, analyse cash and performance, find opportunities and prepare the work — with governed review."
+ },
+ ca:{
+  headline:"Scale expertise, not headcount. Build global capability.",
+  copy:"Give every engagement an AI workforce across accounting, tax, audit and advisory. Serve more clients, expand higher-value advisory capacity and extend into country-specific intelligence."
+ },
+ enterprise:{
+  headline:"Move from AI assistance to governed AI operations.",
+  copy:"Deploy specialist agents against authorised enterprise data, with evidence, permissions, deterministic computation, sign-gates and an auditable trail for consequential work."
+ }
+};
+document.querySelectorAll(".audience-card").forEach(card=>{
+ card.addEventListener("click",()=>{
+  document.querySelectorAll(".audience-card").forEach(c=>c.classList.remove("active"));
+  card.classList.add("active");
+  const m=AUDIENCE_MESSAGES[card.dataset.audience];
+  document.getElementById("audienceHeadline").textContent=m.headline;
+  document.getElementById("audienceCopy").textContent=m.copy;
+ });
+});
+
+resetScenario();calc();
+const leadEmail=document.getElementById("leadEmail");
+if(leadEmail){
+  leadEmail.addEventListener("input",()=>{
+    const ok=leadEmail.checkValidity() && leadEmail.value.trim();
+    if(ok && document.getElementById("valueGate").classList.contains("unlocked")===false){
+      // Keep the gate visible until the visitor explicitly clicks Unlock Value.
+    }
+  });
+  leadEmail.addEventListener("keydown",(e)=>{if(e.key==="Enter"){e.preventDefault();unlockValue();}});
+}
+</script>
+
+<script>
+const DD_I18N = {"en": {"nav_why": "Why DuaDesk", "nav_erp": "ERP Connect", "nav_cmd": "Command Centres", "nav_agents": "Agents at Work", "nav_value": "Value Lab", "nav_trust": "Trust", "hero_eyebrow": "Enterprise AI · Command Centres · Governed Execution", "hero_h1": "AI that does the work. Not just AI that talks.", "hero_lead": "DuaDesk turns finance, procurement, audit and advisory work into AI-powered operating teams — helping businesses lower the cost of work, reduce manual dependence, strengthen compliance and turn their data into intelligence for growth. Your systems stay. Your controls stay. AI does more of the work.", "demo": "Request a Demo →", "experience": "▶ Enter the Experience Centre", "calculate": "₹ Calculate your opportunity", "why": "WHY DUADESK 2.0", "why_h": "Don't buy AI features. Change what your business can do.", "why_p": "The technology is underneath. The outcome is the point: less repetitive work, lower operating cost, stronger control and more intelligence available to the people running the business.", "owner": "BUSINESS OWNER / CEO", "owner_s": "Lower finance cost · less manual dependence · stronger control · intelligence for growth", "cfo": "CFO / FINANCE LEADER", "cfo_s": "Connect your ERP · automate work · monitor compliance · find savings · improve cash", "ca": "CA / ACCOUNTING FIRM", "ca_s": "More clients · more advisory capacity · AI-assisted audit · country-specific intelligence", "enterprise": "ENTERPRISE / TRANSFORMATION", "enterprise_s": "AI agents · evidence · permissions · sign-gates · controlled execution", "owner_h": "Your business deserves an AI workforce.", "owner_p": "Keep your ERP. Keep your people. Reduce repetitive finance work, strengthen control and turn financial data into intelligence for cash, margins, risk and growth.", "cfo_h": "Turn finance into a 24×7 AI-powered intelligence function.", "cfo_p": "Connect your existing ERP and finance ecosystem. Let specialist agents reconcile, test compliance, analyse cash and performance, find opportunities and prepare the work — with governed review.", "ca_h": "Scale expertise, not headcount. Build global capability.", "ca_p": "Give every engagement an AI workforce across accounting, tax, audit and advisory. Serve more clients, expand higher-value advisory capacity and extend into country-specific intelligence.", "ent_h": "Move from AI assistance to governed AI operations.", "ent_p": "Deploy specialist agents against authorised enterprise data, with evidence, permissions, deterministic computation, sign-gates and an auditable trail for consequential work.", "lower": "LOWER COST", "lower_s": "Automate repetitive finance work", "less": "LESS MANUAL DEPENDENCE", "less_s": "AI captures, reconciles and prepares", "control": "BETTER CONTROL", "control_s": "Evidence, compliance and governed action", "intel": "MORE INTELLIGENCE", "intel_s": "Cash, margins, risk and growth insight", "operating": "THE OPERATING MODEL", "operating_h": "From enterprise signals to controlled action.", "connect": "CONNECT", "compute": "COMPUTE", "reason": "REASON", "prove": "PROVE", "change": "WHAT CHANGES", "change_h": "From people processing work to AI running the work.", "change_p": "Functionality is the proof. The transformation is what matters.", "traditional": "TRADITIONAL WORKFLOW", "with": "WITH DUADESK 2.0", "erp_line": "Your ERP records the business. DuaDesk helps you run it.", "stack": "CONNECT TO YOUR FINANCE STACK", "stack_h": "Keep your ERP. Add an AI finance workforce.", "command": "COMMAND CENTRES", "command_h": "Four enterprise workforces. One architecture.", "financecare": "WHAT FINANCE TEAMS CARE ABOUT", "finance_h": "Connect. Comply. Find value. Explain it.", "agents": "AGENTS AT WORK", "agents_h": "Don't watch another chatbot demo.", "agents_p": "Run a workflow. Watch the agent read a source, compute or reason, surface an exception and emit a governed work product.", "value": "DUADESK VALUE LAB", "value_h": "Model the opportunity before you buy.", "value_email": "Work email", "value_unlock": "UNLOCK YOUR VALUE MODEL", "value_enter": "Enter your work email to see the calculation", "unlock": "Unlock Value →", "trust": "TRUST IS PART OF THE PRODUCT", "trust_h": "Autonomy without surrendering control.", "autonomy": "THE AUTONOMY PATH", "autonomy_h": "More autonomy. More control.", "security": "DATA · SECURITY · GOVERNANCE", "security_h": "Your data. Your controls. Your evidence.", "global": "GLOBAL BY DESIGN", "global_h": "One architecture. Local regulatory intelligence.", "next": "THE NEXT STEP", "next_h": "Ready to see DuaDesk running on your business?", "footer": "Finance. Procurement. Audit. Advisory. For a Smarter, More Prosperous World."}, "hi": {"nav_why": "DuaDesk क्यों", "nav_erp": "ERP कनेक्ट", "nav_cmd": "कमांड सेंटर", "nav_agents": "AI एजेंट काम पर", "nav_value": "वैल्यू लैब", "nav_trust": "विश्वास", "hero_eyebrow": "एंटरप्राइज़ AI · कमांड सेंटर · नियंत्रित निष्पादन", "hero_h1": "AI जो काम करता है। सिर्फ बात नहीं करता।", "hero_lead": "DuaDesk वित्त, खरीद, ऑडिट और एडवाइजरी कार्यों को AI-संचालित ऑपरेटिंग टीमों में बदलता है — काम की लागत घटाने, मैनुअल निर्भरता कम करने, अनुपालन मजबूत करने और डेटा को विकास की बुद्धिमत्ता में बदलने में मदद करता है। आपके सिस्टम बने रहते हैं। आपके नियंत्रण बने रहते हैं। AI अधिक काम करता है।", "demo": "डेमो का अनुरोध करें →", "experience": "▶ Experience Centre खोलें", "calculate": "₹ अपना अवसर गणना करें", "why": "DUADESK 2.0 क्यों", "why_h": "सिर्फ AI फीचर न खरीदें। बदलें कि आपका व्यवसाय क्या कर सकता है।", "why_p": "तकनीक नीचे काम करती है। असली उद्देश्य परिणाम है: कम दोहराव वाला काम, कम संचालन लागत, बेहतर नियंत्रण और निर्णय लेने वालों के लिए अधिक बुद्धिमत्ता।", "owner": "बिज़नेस ओनर / CEO", "owner_s": "कम वित्त लागत · कम मैनुअल निर्भरता · बेहतर नियंत्रण · विकास के लिए बुद्धिमत्ता", "cfo": "CFO / वित्त प्रमुख", "cfo_s": "ERP जोड़ें · काम ऑटोमेट करें · अनुपालन मॉनिटर करें · बचत खोजें · कैश सुधारें", "ca": "CA / अकाउंटिंग फर्म", "ca_s": "अधिक ग्राहक · अधिक एडवाइजरी क्षमता · AI-सहायित ऑडिट · देश-विशिष्ट बुद्धिमत्ता", "enterprise": "एंटरप्राइज़ / ट्रांसफॉर्मेशन", "enterprise_s": "AI एजेंट · प्रमाण · अनुमतियाँ · साइन-गेट · नियंत्रित निष्पादन", "owner_h": "आपके व्यवसाय को एक AI workforce चाहिए।", "owner_p": "अपना ERP और अपनी टीम बनाए रखें। दोहराए जाने वाले वित्तीय काम घटाएँ, नियंत्रण मजबूत करें और वित्तीय डेटा को कैश, मार्जिन, जोखिम और विकास की बुद्धिमत्ता में बदलें।", "cfo_h": "वित्त को 24×7 AI-संचालित intelligence function में बदलें।", "cfo_p": "अपने मौजूदा ERP और finance ecosystem को जोड़ें। विशेषज्ञ एजेंट reconciliation, compliance, cash और performance analysis तथा अवसरों की पहचान करें — मानव समीक्षा के साथ।", "ca_h": "हेडकाउंट नहीं, विशेषज्ञता बढ़ाएँ। वैश्विक क्षमता बनाएँ।", "ca_p": "हर engagement को accounting, tax, audit और advisory के लिए AI workforce दें। अधिक ग्राहकों की सेवा करें और उच्च-मूल्य advisory क्षमता बढ़ाएँ।", "ent_h": "AI सहायता से governed AI operations की ओर बढ़ें।", "ent_p": "अधिकृत enterprise data पर विशेषज्ञ एजेंट चलाएँ — evidence, permissions, deterministic computation, sign-gates और audit trail के साथ।", "lower": "कम लागत", "lower_s": "दोहराव वाला वित्तीय काम ऑटोमेट करें", "less": "कम मैनुअल निर्भरता", "less_s": "AI capture, reconcile और prepare करता है", "control": "बेहतर नियंत्रण", "control_s": "प्रमाण, अनुपालन और governed action", "intel": "अधिक बुद्धिमत्ता", "intel_s": "कैश, मार्जिन, जोखिम और विकास की अंतर्दृष्टि", "operating": "ऑपरेटिंग मॉडल", "operating_h": "एंटरप्राइज़ संकेतों से नियंत्रित कार्रवाई तक।", "connect": "कनेक्ट", "compute": "कम्प्यूट", "reason": "रीज़न", "prove": "प्रूव", "change": "क्या बदलता है", "change_h": "लोगों द्वारा processing से AI द्वारा काम चलाने तक।", "change_p": "फीचर प्रमाण हैं। असली बदलाव परिणाम है।", "traditional": "पारंपरिक कार्यप्रवाह", "with": "DUADESK 2.0 के साथ", "erp_line": "आपका ERP व्यवसाय को रिकॉर्ड करता है। DuaDesk आपको उसे चलाने में मदद करता है।", "stack": "अपने FINANCE STACK से कनेक्ट करें", "stack_h": "अपना ERP रखें। AI finance workforce जोड़ें।", "command": "कमांड सेंटर", "command_h": "चार enterprise workforces। एक architecture।", "financecare": "वित्त टीमों के लिए क्या महत्वपूर्ण है", "finance_h": "कनेक्ट करें। अनुपालन करें। मूल्य खोजें। समझाएँ।", "agents": "AI एजेंट काम पर", "agents_h": "एक और chatbot demo मत देखें।", "agents_p": "एक workflow चलाएँ। एजेंट को source पढ़ते, compute/reason करते, exception दिखाते और governed work product बनाते देखें।", "value": "DUADESK VALUE LAB", "value_h": "खरीदने से पहले अवसर को मॉडल करें।", "value_email": "वर्क ईमेल", "value_unlock": "अपना VALUE MODEL अनलॉक करें", "value_enter": "गणना देखने के लिए अपना work email दर्ज करें", "unlock": "Value अनलॉक करें →", "trust": "TRUST उत्पाद का हिस्सा है", "trust_h": "नियंत्रण छोड़े बिना autonomy।", "autonomy": "AUTONOMY PATH", "autonomy_h": "अधिक autonomy। अधिक control।", "security": "DATA · SECURITY · GOVERNANCE", "security_h": "आपका डेटा। आपके नियंत्रण। आपका प्रमाण।", "global": "GLOBAL BY DESIGN", "global_h": "एक architecture। स्थानीय regulatory intelligence।", "next": "अगला कदम", "next_h": "DuaDesk को अपने व्यवसाय पर चलते हुए देखना चाहते हैं?", "footer": "Finance. Procurement. Audit. Advisory. एक अधिक स्मार्ट, अधिक समृद्ध दुनिया के लिए।"}, "de": {"nav_why": "Warum DuaDesk", "nav_erp": "ERP-Anbindung", "nav_cmd": "Command Center", "nav_agents": "Agenten bei der Arbeit", "nav_value": "Value Lab", "nav_trust": "Vertrauen", "hero_eyebrow": "Enterprise AI · Command Center · Kontrollierte Ausführung", "hero_h1": "KI, die arbeitet. Nicht nur KI, die spricht.", "hero_lead": "DuaDesk verwandelt Finance-, Procurement-, Audit- und Advisory-Arbeit in KI-gestützte operative Teams — für geringere Arbeitskosten, weniger manuelle Abhängigkeit, stärkere Compliance und mehr Intelligence für Wachstum. Ihre Systeme bleiben. Ihre Kontrollen bleiben. Die KI übernimmt mehr Arbeit.", "demo": "Demo anfordern →", "experience": "▶ Experience Centre öffnen", "calculate": "₹ Potenzial berechnen", "why": "WARUM DUADESK 2.0", "why_h": "Kaufen Sie nicht nur KI-Funktionen. Verändern Sie, was Ihr Unternehmen leisten kann.", "why_p": "Die Technologie arbeitet im Hintergrund. Entscheidend ist das Ergebnis: weniger repetitive Arbeit, geringere Betriebskosten, bessere Kontrolle und mehr Intelligence für Entscheider.", "owner": "UNTERNEHMER / CEO", "owner_s": "Niedrigere Finance-Kosten · weniger manuelle Abhängigkeit · bessere Kontrolle · Intelligence für Wachstum", "cfo": "CFO / FINANCE LEADER", "cfo_s": "ERP anbinden · Arbeit automatisieren · Compliance überwachen · Einsparungen finden · Cash verbessern", "ca": "WP / STEUER- & RECHNUNGSWESEN", "ca_s": "Mehr Mandanten · mehr Advisory-Kapazität · KI-gestütztes Audit · länderspezifische Intelligence", "enterprise": "ENTERPRISE / TRANSFORMATION", "enterprise_s": "KI-Agenten · Evidenz · Berechtigungen · Sign-Gates · kontrollierte Ausführung", "owner_h": "Ihr Unternehmen verdient eine AI Workforce.", "owner_p": "Behalten Sie ERP und Team. Reduzieren Sie repetitive Finance-Arbeit, stärken Sie die Kontrolle und machen Sie Finanzdaten für Cash, Marge, Risiko und Wachstum nutzbar.", "cfo_h": "Machen Sie Finance zu einer 24×7 KI-gestützten Intelligence-Funktion.", "cfo_p": "Verbinden Sie Ihr bestehendes ERP- und Finance-Ökosystem. Spezialagenten übernehmen Abstimmungen, Compliance-Tests, Cash- und Performance-Analysen und bereiten die Arbeit für die Prüfung vor.", "ca_h": "Skalieren Sie Expertise, nicht Headcount. Bauen Sie globale Fähigkeiten auf.", "ca_p": "Geben Sie jedem Mandat eine AI Workforce für Accounting, Tax, Audit und Advisory. Betreuen Sie mehr Mandanten und erweitern Sie hochwertige Advisory-Kapazitäten.", "ent_h": "Von KI-Unterstützung zu kontrollierten KI-Operationen.", "ent_p": "Setzen Sie Spezialagenten auf autorisierten Unternehmensdaten ein — mit Evidenz, Berechtigungen, deterministischer Berechnung, Sign-Gates und Audit Trail.", "lower": "NIEDRIGERE KOSTEN", "lower_s": "Repetitive Finance-Arbeit automatisieren", "less": "WENIGER MANUELLE ABHÄNGIGKEIT", "less_s": "KI erfasst, gleicht ab und bereitet vor", "control": "BESSERE KONTROLLE", "control_s": "Evidenz, Compliance und kontrollierte Aktionen", "intel": "MEHR INTELLIGENCE", "intel_s": "Cash, Margen, Risiko und Wachstum", "operating": "DAS OPERATING MODEL", "operating_h": "Von Unternehmenssignalen zu kontrollierter Aktion.", "connect": "VERBINDEN", "compute": "BERECHNEN", "reason": "BEGRÜNDEN", "prove": "NACHWEISEN", "change": "WAS SICH ÄNDERT", "change_h": "Von manueller Verarbeitung zur KI, die Arbeit ausführt.", "change_p": "Funktionen sind der Beweis. Die Transformation ist das Ziel.", "traditional": "BISHERIGER WORKFLOW", "with": "MIT DUADESK 2.0", "erp_line": "Ihr ERP dokumentiert das Geschäft. DuaDesk hilft Ihnen, es zu steuern.", "stack": "MIT IHREM FINANCE-STACK VERBINDEN", "stack_h": "Behalten Sie Ihr ERP. Ergänzen Sie eine AI Finance Workforce.", "command": "COMMAND CENTER", "command_h": "Vier Enterprise Workforces. Eine Architektur.", "financecare": "WAS FINANCE-TEAMS BRAUCHEN", "finance_h": "Verbinden. Compliance sichern. Wert finden. Erklären.", "agents": "AGENTEN BEI DER ARBEIT", "agents_h": "Kein weiterer Chatbot-Demo.", "agents_p": "Starten Sie einen Workflow. Sehen Sie, wie ein Agent eine Quelle liest, berechnet oder schlussfolgert, Ausnahmen erkennt und ein kontrolliertes Arbeitsergebnis erstellt.", "value": "DUADESK VALUE LAB", "value_h": "Modellieren Sie das Potenzial, bevor Sie kaufen.", "value_email": "Geschäftliche E-Mail", "value_unlock": "VALUE MODEL FREISCHALTEN", "value_enter": "Geschäftliche E-Mail eingeben, um die Berechnung zu sehen", "unlock": "Potenzial freischalten →", "trust": "VERTRAUEN IST TEIL DES PRODUKTS", "trust_h": "Mehr Autonomie ohne Kontrollverlust.", "autonomy": "DER AUTONOMIEPFAD", "autonomy_h": "Mehr Autonomie. Mehr Kontrolle.", "security": "DATEN · SICHERHEIT · GOVERNANCE", "security_h": "Ihre Daten. Ihre Kontrollen. Ihre Evidenz.", "global": "GLOBAL GEDACHT", "global_h": "Eine Architektur. Lokale regulatorische Intelligence.", "next": "DER NÄCHSTE SCHRITT", "next_h": "Bereit, DuaDesk mit Ihren Geschäftsdaten zu sehen?", "footer": "Finance. Procurement. Audit. Advisory. Für eine intelligentere, prosperierende Welt."}, "nl": {"nav_why": "Waarom DuaDesk", "nav_erp": "ERP-koppeling", "nav_cmd": "Command Centers", "nav_agents": "Agents aan het werk", "nav_value": "Value Lab", "nav_trust": "Vertrouwen", "hero_eyebrow": "Enterprise AI · Command Centers · Gecontroleerde uitvoering", "hero_h1": "AI die het werk doet. Niet alleen AI die praat.", "hero_lead": "DuaDesk verandert finance-, procurement-, audit- en advisorywerk in AI-gestuurde operationele teams — voor lagere werkkosten, minder handmatig werk, sterkere compliance en meer intelligence voor groei. Uw systemen blijven. Uw controles blijven. AI doet meer van het werk.", "demo": "Demo aanvragen →", "experience": "▶ Experience Centre openen", "calculate": "₹ Bereken uw potentieel", "why": "WAAROM DUADESK 2.0", "why_h": "Koop geen losse AI-functies. Verander wat uw bedrijf kan doen.", "why_p": "De technologie werkt op de achtergrond. Het resultaat telt: minder repetitief werk, lagere operationele kosten, betere controle en meer intelligence voor beslissers.", "owner": "ONDERNEMER / CEO", "owner_s": "Lagere financekosten · minder handmatig werk · betere controle · intelligence voor groei", "cfo": "CFO / FINANCE LEADER", "cfo_s": "ERP koppelen · werk automatiseren · compliance bewaken · besparingen vinden · cash verbeteren", "ca": "ACCOUNTANTS- / ADVIESKANTOOR", "ca_s": "Meer klanten · meer adviescapaciteit · AI-ondersteunde audit · lokale intelligence", "enterprise": "ENTERPRISE / TRANSFORMATIE", "enterprise_s": "AI-agents · bewijs · rechten · sign-gates · gecontroleerde uitvoering", "owner_h": "Uw bedrijf verdient een AI-workforce.", "owner_p": "Behoud uw ERP en uw mensen. Verminder repetitief financewerk, versterk de controle en maak financiële data bruikbaar voor cash, marges, risico en groei.", "cfo_h": "Maak van finance een 24×7 AI-gestuurde intelligencefunctie.", "cfo_p": "Koppel uw bestaande ERP- en finance-ecosysteem. Specialistische agents voeren reconciliaties, compliance-tests, cash- en performanceanalyses uit en bereiden het werk voor — met menselijke review.", "ca_h": "Schaal expertise, niet headcount. Bouw wereldwijde capaciteit.", "ca_p": "Geef iedere opdracht een AI-workforce voor accounting, tax, audit en advisory. Bedien meer klanten en vergroot hoogwaardige adviescapaciteit.", "ent_h": "Van AI-assistentie naar gecontroleerde AI-operaties.", "ent_p": "Zet specialistische agents in op geautoriseerde bedrijfsdata, met bewijs, rechten, deterministische berekeningen, sign-gates en audit trail.", "lower": "LAGERE KOSTEN", "lower_s": "Repetitief financewerk automatiseren", "less": "MINDER HANDMATIG WERK", "less_s": "AI verzamelt, reconcilieert en bereidt voor", "control": "BETERE CONTROLE", "control_s": "Bewijs, compliance en beheerde acties", "intel": "MEER INTELLIGENCE", "intel_s": "Cash, marges, risico en groei", "operating": "HET OPERATING MODEL", "operating_h": "Van bedrijfssignalen naar gecontroleerde actie.", "connect": "KOPPELEN", "compute": "BEREKENEN", "reason": "REDENEREN", "prove": "BEWIJZEN", "change": "WAT VERANDERT", "change_h": "Van mensen die verwerken naar AI die het werk uitvoert.", "change_p": "Functionaliteit is het bewijs. De transformatie is het doel.", "traditional": "TRADITIONELE WORKFLOW", "with": "MET DUADESK 2.0", "erp_line": "Uw ERP registreert het bedrijf. DuaDesk helpt u het te runnen.", "stack": "KOPPEL UW FINANCE-STACK", "stack_h": "Behoud uw ERP. Voeg een AI-financeworkforce toe.", "command": "COMMAND CENTERS", "command_h": "Vier enterprise workforces. Eén architectuur.", "financecare": "WAT FINANCE-TEAMS BELANGRIJK VINDEN", "finance_h": "Koppelen. Comply. Waarde vinden. Uitleggen.", "agents": "AGENTS AAN HET WERK", "agents_h": "Geen zoveelste chatbotdemo.", "agents_p": "Start een workflow. Zie hoe de agent een bron leest, rekent of redeneert, een uitzondering vindt en een beheerst werkproduct oplevert.", "value": "DUADESK VALUE LAB", "value_h": "Modelleer de kans voordat u koopt.", "value_email": "Zakelijk e-mailadres", "value_unlock": "UW VALUE MODEL ONTGRENDELEN", "value_enter": "Voer uw zakelijke e-mail in om de berekening te zien", "unlock": "Waarde ontgrendelen →", "trust": "VERTROUWEN IS ONDERDEEL VAN HET PRODUCT", "trust_h": "Meer autonomie zonder controle te verliezen.", "autonomy": "HET AUTONOMIEPAD", "autonomy_h": "Meer autonomie. Meer controle.", "security": "DATA · SECURITY · GOVERNANCE", "security_h": "Uw data. Uw controles. Uw bewijs.", "global": "GLOBAL BY DESIGN", "global_h": "Eén architectuur. Lokale regulatory intelligence.", "next": "DE VOLGENDE STAP", "next_h": "Klaar om DuaDesk met uw bedrijfsdata te zien?", "footer": "Finance. Procurement. Audit. Advisory. Voor een slimmere, welvarendere wereld."}, "ja": {"nav_why": "DuaDeskとは", "nav_erp": "ERP連携", "nav_cmd": "コマンドセンター", "nav_agents": "AIエージェントの実行", "nav_value": "Value Lab", "nav_trust": "Trust", "hero_eyebrow": "Enterprise AI · Command Centers · ガバナンスされた実行", "hero_h1": "仕事をするAI。話すだけのAIではありません。", "hero_lead": "DuaDeskは、財務・調達・監査・アドバイザリー業務をAIによるオペレーションチームへ変えます。業務コストを下げ、手作業への依存を減らし、コンプライアンスを強化し、データを成長のためのインテリジェンスに変えます。既存システムも管理ルールも維持したまま、AIがより多くの仕事を担います。", "demo": "デモを依頼 →", "experience": "▶ Experience Centre", "calculate": "₹ 価値を計算", "why": "DUADESK 2.0とは", "why_h": "AI機能を買うだけではない。ビジネスの実行力を変える。", "why_p": "テクノロジーは裏側で動きます。重要なのは成果です。反復作業を減らし、運用コストを下げ、管理を強化し、経営判断に必要なインテリジェンスを増やします。", "owner": "経営者 / CEO", "owner_s": "財務コスト削減 · 手作業削減 · 管理強化 · 成長のためのインテリジェンス", "cfo": "CFO / 財務責任者", "cfo_s": "ERP接続 · 業務自動化 · コンプライアンス監視 · 削減機会発見 · キャッシュ改善", "ca": "会計・税務・監査ファーム", "ca_s": "顧客拡大 · アドバイザリー能力拡大 · AI監査 · 国別インテリジェンス", "enterprise": "エンタープライズ / 変革責任者", "enterprise_s": "AIエージェント · 証拠 · 権限 · サインゲート · 制御された実行", "owner_h": "あなたのビジネスにはAIワークフォースが必要です。", "owner_p": "ERPと人材はそのまま。反復的な財務作業を減らし、管理を強化し、財務データをキャッシュ、利益率、リスク、成長の意思決定につなげます。", "cfo_h": "財務を24×7のAIインテリジェンス機能へ。", "cfo_p": "既存のERPと財務環境を接続し、専門エージェントに照合、コンプライアンス検証、キャッシュ・業績分析、機会発見、作業準備を担わせます。", "ca_h": "人員ではなく専門性を拡張し、グローバルな能力を構築。", "ca_p": "会計・税務・監査・アドバイザリーの各案件にAIワークフォースを提供し、より多くの顧客と高付加価値業務を支援します。", "ent_h": "AI支援から、ガバナンスされたAIオペレーションへ。", "ent_p": "許可された企業データ上で専門エージェントを実行し、証拠、権限、決定論的計算、サインゲート、監査証跡を備えます。", "lower": "コスト削減", "lower_s": "反復的な財務作業を自動化", "less": "手作業への依存を削減", "less_s": "AIが収集・照合・準備", "control": "管理を強化", "control_s": "証拠、コンプライアンス、統制されたアクション", "intel": "インテリジェンスを拡大", "intel_s": "キャッシュ、利益率、リスク、成長", "operating": "オペレーティングモデル", "operating_h": "企業データから統制されたアクションへ。", "connect": "接続", "compute": "計算", "reason": "推論", "prove": "証明", "change": "何が変わるか", "change_h": "人が処理する業務から、AIが実行する業務へ。", "change_p": "機能は証拠。変革こそ目的です。", "traditional": "従来のワークフロー", "with": "DUADESK 2.0", "erp_line": "ERPは事業を記録します。DuaDeskは事業運営を支援します。", "stack": "財務システムに接続", "stack_h": "ERPはそのまま。AI財務ワークフォースを追加。", "command": "コマンドセンター", "command_h": "4つのエンタープライズ・ワークフォース。1つのアーキテクチャ。", "financecare": "財務チームが重視すること", "finance_h": "接続。コンプライアンス。価値。説明。", "agents": "AIエージェントの実行", "agents_h": "また別のチャットボットデモを見る必要はありません。", "agents_p": "ワークフローを実行し、エージェントがソースを読み、計算・推論し、例外を検出し、統制された成果物を作る様子をご覧ください。", "value": "DUADESK VALUE LAB", "value_h": "購入前にビジネス価値をモデル化。", "value_email": "業務用メール", "value_unlock": "VALUE MODELを解除", "value_enter": "計算を見るには業務用メールを入力してください", "unlock": "価値を表示 →", "trust": "TRUSTは製品の一部", "trust_h": "統制を失わずに自律性を高める。", "autonomy": "AUTONOMY PATH", "autonomy_h": "自律性を高める。管理も高める。", "security": "DATA · SECURITY · GOVERNANCE", "security_h": "あなたのデータ。あなたの統制。あなたの証拠。", "global": "GLOBAL BY DESIGN", "global_h": "共通アーキテクチャ。国別の規制インテリジェンス。", "next": "次のステップ", "next_h": "DuaDeskをあなたのビジネスデータでご覧になりますか？", "footer": "Finance. Procurement. Audit. Advisory. よりスマートで豊かな世界へ。"}, "ar": {"nav_why": "لماذا DuaDesk", "nav_erp": "ربط ERP", "nav_cmd": "مراكز القيادة", "nav_agents": "الوكلاء أثناء العمل", "nav_value": "مختبر القيمة", "nav_trust": "الثقة", "hero_eyebrow": "ذكاء اصطناعي للمؤسسات · مراكز قيادة · تنفيذ محكوم", "hero_h1": "ذكاء اصطناعي ينفّذ العمل. وليس مجرد ذكاء اصطناعي يتحدث.", "hero_lead": "تحوّل DuaDesk أعمال المالية والمشتريات والتدقيق والاستشارات إلى فرق تشغيلية مدعومة بالذكاء الاصطناعي — لخفض تكلفة العمل، وتقليل الاعتماد على العمل اليدوي، وتعزيز الامتثال، وتحويل البيانات إلى ذكاء للنمو. أنظمتك تبقى. ضوابطك تبقى. والذكاء الاصطناعي ينفذ المزيد من العمل.", "demo": "اطلب عرضاً →", "experience": "▶ افتح مركز التجربة", "calculate": "₹ احسب فرصتك", "why": "لماذا DUADESK 2.0", "why_h": "لا تشترِ ميزات ذكاء اصطناعي فقط. غيّر ما يستطيع عملك القيام به.", "why_p": "التقنية تعمل في الخلفية. النتيجة هي الأهم: عمل تكراري أقل، تكلفة تشغيل أقل، تحكم أفضل، وذكاء أكبر لمن يديرون الأعمال.", "owner": "صاحب العمل / الرئيس التنفيذي", "owner_s": "تكلفة مالية أقل · اعتماد أقل على العمل اليدوي · تحكم أفضل · ذكاء للنمو", "cfo": "المدير المالي / قائد المالية", "cfo_s": "ربط ERP · أتمتة العمل · مراقبة الامتثال · اكتشاف الوفورات · تحسين النقد", "ca": "شركة محاسبة / استشارات", "ca_s": "عملاء أكثر · قدرة استشارية أكبر · تدقيق مدعوم بالذكاء الاصطناعي · ذكاء محلي لكل دولة", "enterprise": "المؤسسة / التحول", "enterprise_s": "وكلاء AI · أدلة · صلاحيات · بوابات توقيع · تنفيذ محكوم", "owner_h": "عملك يستحق قوة عمل بالذكاء الاصطناعي.", "owner_p": "احتفظ بنظام ERP وفريقك. خفّض الأعمال المالية المتكررة، عزّز الرقابة، وحوّل البيانات المالية إلى ذكاء للنقد والهوامش والمخاطر والنمو.", "cfo_h": "حوّل المالية إلى وظيفة ذكاء مدعومة بالذكاء الاصطناعي تعمل على مدار الساعة.", "cfo_p": "اربط منظومة ERP والمالية الحالية. دع الوكلاء المتخصصين ينفذون المطابقة واختبارات الامتثال وتحليل النقد والأداء واكتشاف الفرص وإعداد العمل، مع مراجعة محكومة.", "ca_h": "وسّع الخبرة لا عدد الموظفين. وابنِ قدرة عالمية.", "ca_p": "امنح كل مهمة قوة عمل من AI للمحاسبة والضرائب والتدقيق والاستشارات. اخدم عملاء أكثر ووسّع القدرة على تقديم خدمات استشارية عالية القيمة.", "ent_h": "من مساعدة الذكاء الاصطناعي إلى عمليات AI محكومة.", "ent_p": "شغّل وكلاء متخصصين على بيانات مؤسسية مصرح بها، مع الأدلة والصلاحيات والحسابات الحتمية وبوابات التوقيع وسجل تدقيق.", "lower": "تكلفة أقل", "lower_s": "أتمتة الأعمال المالية المتكررة", "less": "اعتماد أقل على العمل اليدوي", "less_s": "الذكاء الاصطناعي يجمع ويطابق ويُعدّ العمل", "control": "تحكم أفضل", "control_s": "أدلة وامتثال وإجراءات محكومة", "intel": "ذكاء أكبر", "intel_s": "النقد والهوامش والمخاطر والنمو", "operating": "نموذج التشغيل", "operating_h": "من إشارات المؤسسة إلى إجراء محكوم.", "connect": "ربط", "compute": "حساب", "reason": "استدلال", "prove": "إثبات", "change": "ما الذي يتغير؟", "change_h": "من معالجة العمل بواسطة الأشخاص إلى تنفيذ العمل بواسطة AI.", "change_p": "الوظائف هي الدليل. التحول هو الهدف.", "traditional": "سير العمل التقليدي", "with": "مع DUADESK 2.0", "erp_line": "نظام ERP يسجل الأعمال. DuaDesk يساعدك على إدارتها.", "stack": "اربط منظومة المالية", "stack_h": "احتفظ بـ ERP وأضف قوة عمل مالية بالذكاء الاصطناعي.", "command": "مراكز القيادة", "command_h": "أربع قوى عمل مؤسسية. بنية واحدة.", "financecare": "ما يهم فرق المالية", "finance_h": "اربط. امتثل. اكتشف القيمة. اشرحها.", "agents": "الوكلاء أثناء العمل", "agents_h": "لا تشاهد عرض chatbot آخر.", "agents_p": "شغّل سير عمل وشاهد الوكيل يقرأ المصدر، يحسب أو يستدل، يكتشف الاستثناء ويُصدر منتج عمل محكوماً.", "value": "مختبر قيمة DUADESK", "value_h": "نمذج الفرصة قبل الشراء.", "value_email": "البريد الإلكتروني للعمل", "value_unlock": "افتح نموذج القيمة", "value_enter": "أدخل بريد العمل لرؤية الحساب", "unlock": "فتح القيمة →", "trust": "الثقة جزء من المنتج", "trust_h": "مزيد من الاستقلالية دون التخلي عن التحكم.", "autonomy": "مسار الاستقلالية", "autonomy_h": "مزيد من الاستقلالية. مزيد من التحكم.", "security": "البيانات · الأمن · الحوكمة", "security_h": "بياناتك. ضوابطك. أدلتك.", "global": "عالمي بتصميمه", "global_h": "بنية واحدة. ذكاء تنظيمي محلي.", "next": "الخطوة التالية", "next_h": "هل أنت مستعد لرؤية DuaDesk يعمل على بيانات أعمالك؟", "footer": "Finance. Procurement. Audit. Advisory. لعالم أذكى وأكثر ازدهاراً."}, "fr": {"nav_why": "Pourquoi DuaDesk", "nav_erp": "Connexion ERP", "nav_cmd": "Centres de commande", "nav_agents": "Agents au travail", "nav_value": "Value Lab", "nav_trust": "Confiance", "hero_eyebrow": "IA d'entreprise · Centres de commande · Exécution gouvernée", "hero_h1": "Une IA qui fait le travail. Pas seulement une IA qui parle.", "hero_lead": "DuaDesk transforme les activités finance, achats, audit et conseil en équipes opérationnelles augmentées par l’IA — pour réduire les coûts, le travail manuel et les risques de conformité, et transformer les données en intelligence de croissance. Vos systèmes restent. Vos contrôles restent. L’IA fait davantage du travail.", "demo": "Demander une démo →", "experience": "▶ Ouvrir l’Experience Centre", "calculate": "₹ Calculer votre potentiel", "why": "POURQUOI DUADESK 2.0", "why_h": "N’achetez pas seulement des fonctionnalités IA. Transformez ce que votre entreprise peut accomplir.", "why_p": "La technologie travaille en arrière-plan. Le résultat compte : moins de tâches répétitives, des coûts d’exploitation réduits, un meilleur contrôle et davantage d’intelligence pour les décideurs.", "owner": "DIRIGEANT / CEO", "owner_s": "Coût finance réduit · moins de dépendance manuelle · meilleur contrôle · intelligence pour la croissance", "cfo": "CFO / DIRECTION FINANCIÈRE", "cfo_s": "Connecter l’ERP · automatiser · surveiller la conformité · trouver des économies · améliorer la trésorerie", "ca": "CABINET COMPTABLE / CONSEIL", "ca_s": "Plus de clients · plus de capacité conseil · audit assisté par IA · intelligence locale", "enterprise": "ENTREPRISE / TRANSFORMATION", "enterprise_s": "Agents IA · preuves · autorisations · sign-gates · exécution contrôlée", "owner_h": "Votre entreprise mérite une force de travail IA.", "owner_p": "Conservez votre ERP et vos équipes. Réduisez les tâches financières répétitives, renforcez le contrôle et transformez les données financières en intelligence pour la trésorerie, les marges, les risques et la croissance.", "cfo_h": "Faites de la finance une fonction d’intelligence IA 24×7.", "cfo_p": "Connectez votre ERP et votre environnement financier existants. Des agents spécialisés rapprochent, testent la conformité, analysent la trésorerie et la performance, détectent les opportunités et préparent le travail, avec revue gouvernée.", "ca_h": "Développez l’expertise, pas les effectifs. Construisez une capacité mondiale.", "ca_p": "Donnez à chaque mission une force de travail IA pour la comptabilité, la fiscalité, l’audit et le conseil. Servez davantage de clients et développez les services à forte valeur.", "ent_h": "De l’assistance IA aux opérations IA gouvernées.", "ent_p": "Déployez des agents spécialisés sur les données autorisées de l’entreprise, avec preuves, permissions, calcul déterministe, sign-gates et piste d’audit.", "lower": "COÛT RÉDUIT", "lower_s": "Automatiser les tâches finance répétitives", "less": "MOINS DE TRAVAIL MANUEL", "less_s": "L’IA capture, rapproche et prépare", "control": "MEILLEUR CONTRÔLE", "control_s": "Preuves, conformité et actions gouvernées", "intel": "PLUS D’INTELLIGENCE", "intel_s": "Trésorerie, marges, risques et croissance", "operating": "MODÈLE OPÉRATIONNEL", "operating_h": "Des signaux de l’entreprise à l’action contrôlée.", "connect": "CONNECTER", "compute": "CALCULER", "reason": "RAISONNER", "prove": "PROUVER", "change": "CE QUI CHANGE", "change_h": "Du traitement humain à l’IA qui exécute le travail.", "change_p": "Les fonctionnalités sont la preuve. La transformation est l’objectif.", "traditional": "WORKFLOW TRADITIONNEL", "with": "AVEC DUADESK 2.0", "erp_line": "Votre ERP enregistre l’activité. DuaDesk vous aide à la piloter.", "stack": "CONNECTER VOTRE ÉCOSYSTÈME FINANCE", "stack_h": "Gardez votre ERP. Ajoutez une force de travail finance IA.", "command": "CENTRES DE COMMANDE", "command_h": "Quatre forces de travail d’entreprise. Une architecture.", "financecare": "CE QUI COMPTE POUR LES ÉQUIPES FINANCE", "finance_h": "Connecter. Être conforme. Créer de la valeur. L’expliquer.", "agents": "AGENTS AU TRAVAIL", "agents_h": "Pas une nouvelle démo de chatbot.", "agents_p": "Lancez un workflow. Voyez l’agent lire une source, calculer ou raisonner, détecter une exception et produire un livrable gouverné.", "value": "DUADESK VALUE LAB", "value_h": "Modélisez l’opportunité avant d’acheter.", "value_email": "E-mail professionnel", "value_unlock": "DÉVERROUILLER VOTRE VALUE MODEL", "value_enter": "Saisissez votre e-mail professionnel pour voir le calcul", "unlock": "Déverrouiller la valeur →", "trust": "LA CONFIANCE FAIT PARTIE DU PRODUIT", "trust_h": "Plus d’autonomie sans abandonner le contrôle.", "autonomy": "PARCOURS D’AUTONOMIE", "autonomy_h": "Plus d’autonomie. Plus de contrôle.", "security": "DONNÉES · SÉCURITÉ · GOUVERNANCE", "security_h": "Vos données. Vos contrôles. Vos preuves.", "global": "GLOBAL PAR CONCEPTION", "global_h": "Une architecture. Une intelligence réglementaire locale.", "next": "L’ÉTAPE SUIVANTE", "next_h": "Prêt à voir DuaDesk fonctionner avec vos données ?", "footer": "Finance. Procurement. Audit. Advisory. Pour un monde plus intelligent et plus prospère."}};
+const DD_MAP = {
+  "nav_why":"#navWhy","nav_erp":"#navErp","nav_cmd":"#navCmd","nav_agents":"#navAgents","nav_value":"#navValue","nav_trust":"#navTrust",
+  "hero_eyebrow":".hero .eyebrow","hero_h1":".hero h1","hero_lead":".hero .lead",
+  "demo":"#demoTop","experience":"#experienceTop","calculate":"#calculateTop",
+  "why":".outcomes .eyebrow","why_h":".outcomes h2","why_p":".outcomes .sectionhead p",
+  "owner":".audience-card[data-audience='owner'] .audience-kicker","owner_s":".audience-card[data-audience='owner']>span:last-child",
+  "cfo":".audience-card[data-audience='cfo'] .audience-kicker","cfo_s":".audience-card[data-audience='cfo']>span:last-child",
+  "ca":".audience-card[data-audience='ca'] .audience-kicker","ca_s":".audience-card[data-audience='ca']>span:last-child",
+  "enterprise":".audience-card[data-audience='enterprise'] .audience-kicker","enterprise_s":".audience-card[data-audience='enterprise']>span:last-child",
+  "owner_h":"#audienceHeadline","owner_p":"#audienceCopy",
+  "lower":".outcome-pillars div:nth-child(1) b","lower_s":".outcome-pillars div:nth-child(1) span",
+  "less":".outcome-pillars div:nth-child(2) b","less_s":".outcome-pillars div:nth-child(2) span",
+  "control":".outcome-pillars div:nth-child(3) b","control_s":".outcome-pillars div:nth-child(3) span",
+  "intel":".outcome-pillars div:nth-child(4) b","intel_s":".outcome-pillars div:nth-child(4) span",
+  "operating":".section#platform .eyebrow","operating_h":".section#platform h2",
+  "connect":".archcard:nth-child(1) h3","compute":".archcard:nth-child(2) h3","reason":".archcard:nth-child(3) h3","prove":".archcard:nth-child(4) h3",
+  "change":".change-section .eyebrow","change_h":".change-section h2","change_p":".change-section .sectionhead p",
+  "traditional":".change-row.head span:nth-child(1)","with":".change-row.head span:nth-child(2)","erp_line":".change-tagline",
+  "stack":"#connect .eyebrow","stack_h":"#connect h2",
+  "command":"#command .eyebrow","command_h":"#command h2",
+  "financecare":"#compliance .eyebrow","finance_h":"#compliance h2",
+  "agents":"#agents .eyebrow","agents_h":"#agents h2","agents_p":"#agents .sectionhead p",
+  "value":"#value .eyebrow","value_h":"#value h2","value_email":"#leadEmailLabel","value_unlock":"#valueGate .eyebrow","value_enter":"#valueGate h3","unlock":"#unlockValueBtn",
+  "trust":"#trust .eyebrow","trust_h":"#trust h2","autonomy":"#autonomy .eyebrow","autonomy_h":"#autonomy h2",
+  "security":"#security .eyebrow","security_h":"#security h2","global":".global .eyebrow","global_h":".global h2",
+  "next":".final .eyebrow","next_h":".final h2","footer":".footerline"
+};
+function ddSet(k, v){
+  const sel=DD_MAP[k]; if(!sel)return;
+  const el=document.querySelector(sel); if(!el)return;
+  if(k==="erp_line"){el.innerHTML=v.replace("DuaDesk","<em>DuaDesk</em>");}
+  else el.textContent=v;
+}
+function ddTranslate(lang){
+  const d=DD_I18N[lang]||DD_I18N.en;
+  document.documentElement.lang=lang;
+  document.documentElement.dir=(lang==="ar"?"rtl":"ltr");
+  Object.keys(DD_MAP).forEach(k=>{if(d[k])ddSet(k,d[k]);});
+  // CTA/button translations
+  const ctaMap=[["#demoTop","demo"],["#experienceTop","experience"],["#calculateTop","calculate"]];
+  ctaMap.forEach(([sel,key])=>{const e=document.querySelector(sel);if(e&&d[key])e.textContent=d[key];});
+  // Audience dynamic cards
+  document.querySelectorAll(".audience-card").forEach(card=>{
+    const a=card.dataset.audience, h=d[a+"_h"], p=d[a+"_p"];
+    if(a==="owner" && document.querySelector(".audience-card.active")===card){
+      document.getElementById("audienceHeadline").textContent=h; document.getElementById("audienceCopy").textContent=p;
+    }
+  });
+  // Store preference
+  try{localStorage.setItem("duadesk-language",lang)}catch(e){}
+}
+function ddInitLanguage(){
+  const s=document.getElementById("langSelect");
+  let lang="en"; try{lang=localStorage.getItem("duadesk-language")||"en"}catch(e){}
+  if(s){s.value=lang;s.addEventListener("change",()=>ddTranslate(s.value));}
+  ddTranslate(lang);
+}
+</script>
+
+<script>document.addEventListener('DOMContentLoaded',ddInitLanguage);</script>
+</body>
+</html>
