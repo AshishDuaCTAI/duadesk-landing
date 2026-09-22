@@ -78,12 +78,7 @@ h1 em{color:var(--gold2);font-style:normal}.lead{font-size:20px;color:#c4d1df;ma
 .country-link span{font-size:.75em; opacity:.7}
 
 
-.valuegate{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:42px 28px}
-.calcresult.locked>*:not(.valuegate){display:none}
-.gate-field{width:100%;max-width:360px;margin:16px auto 2px;text-align:left}
-.gate-field label{display:block;color:#9db0c5;font-size:10px;margin-bottom:5px;text-transform:uppercase;letter-spacing:.7px}
-.gate-field input{width:100%;background:#071321;color:#fff;border:1px solid rgba(233,196,106,.45);border-radius:10px;padding:12px}
-.gate-field small{display:block;color:#71869b;font-size:9px;margin-top:5px}
+.valuegate{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px;background:linear-gradient(180deg,rgba(7,18,29,.96),rgba(7,18,29,.985));border:1px solid rgba(233,196,106,.22);border-radius:18px;backdrop-filter:blur(8px)}
 .valuegate .gateicon{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(233,196,106,.45);color:#e9c46a;font-size:18px;margin-bottom:10px}
 .valuegate.unlocked{display:none}
 #leadEmail{border-color:rgba(233,196,106,.45)}
@@ -377,6 +372,7 @@ img,svg,video{max-width:100%;height:auto}
  <div class="sectionhead"><div><div class="eyebrow">DUADESK VALUE LAB</div><h2>Model the opportunity before you buy.</h2></div><p>The Value Lab is designed as an explainable model: business profile → priorities → value levers → hard vs modelled value → indicative investment → payback. Results remain illustrative until validated against your own data.</p></div>
  <div class="calcgrid">
   <div class="calcbox"><h3>1 · Business profile</h3><div class="fields">
+   <div class="field"><label id="leadEmailLabel">Work email <span style="color:#e9c46a">*</span></label><input id="leadEmail" type="email" required placeholder="you@company.com" autocomplete="email"><small id="emailHelp" style="color:#71869b;font-size:9px;display:block;margin-top:4px">Required to unlock your personalised opportunity model.</small></div>
    <div class="field"><label>Annual turnover · ₹ Cr</label><input id="turnover" type="number" value="250"></div>
    <div class="field"><label>Procurement / materials · % turnover</label><input id="mat" type="number" value="60"></div>
    <div class="field"><label>Annual GST / ITC · ₹ Cr</label><input id="itc" type="number" value="12"></div>
@@ -398,13 +394,12 @@ img,svg,video{max-width:100%;height:auto}
    <div class="field"><label>Implementation period · months</label><input id="months" type="number" value="3"></div>
    <div class="field"><label>Organisation complexity</label><select id="complexity"><option value="1">Single entity / simple</option><option value="1.08" selected>Multi-entity / moderate</option><option value="1.16">Complex / multi-country</option></select></div>
   </div></div>
-  <div class="calcresult locked" style="position:relative">
+  <div class="calcresult" style="position:relative">
    <div class="valuegate" id="valueGate">
     <div class="gateicon">✉</div>
     <div class="eyebrow">UNLOCK YOUR VALUE MODEL</div>
     <h3 style="margin:6px 0 8px;font-size:22px;color:#f4f7fb">Enter your work email to see the calculation</h3>
     <p style="color:var(--muted);max-width:520px;margin:0 auto 14px;font-size:12px;line-height:1.6">We use your email to identify the opportunity and enable a follow-up discussion. Your calculation remains illustrative until validated against your own data.</p>
-    <div class="gate-field"><label id="leadEmailLabel">Work email *</label><input id="leadEmail" type="email" required placeholder="you@company.com" autocomplete="email"><small id="emailHelp">Required to unlock your personalised opportunity model.</small></div>
     <button id="unlockValueBtn" class="btn gold" type="button" onclick="unlockValue()">Unlock Value →</button>
     <div id="gateError" style="color:#f2a7a7;font-size:10px;margin-top:9px;min-height:14px"></div>
    </div>
@@ -622,7 +617,6 @@ function unlockValue(){
    return false;
  }
  document.getElementById("valueGate").classList.add("unlocked");
- document.querySelector(".calcresult")?.classList.remove("locked");
  if(err) err.textContent="";
  calc();
  return true;
