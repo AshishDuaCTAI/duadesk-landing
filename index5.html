@@ -389,7 +389,7 @@ img,svg,video{max-width:100%;height:auto}
    <button class="goal" data-goal="advisory">Create advisory / new revenue</button><button class="goal" data-goal="listing">Improve readiness / transactions</button>
   </div><div style="margin-top:15px;color:var(--muted);font-size:11px">Select the priorities you want the model to test. The model uses conservative illustrative drivers and clearly separates modelled opportunity from potential upside; nothing is presented as realized or banked value.</div></div>
   <div class="calcbox"><h3>3 · Investment assumptions</h3><div class="fields">
-   <div class="field"><label>Platform / year · ₹ Cr</label><input id="platformCost" type="number" value="0.36"></div>
+   <div class="field"><label>Platform / year · ₹ Cr</label><input id="platform" type="number" value="0.36"></div>
    <div class="field"><label>Integration / setup · ₹ L</label><input id="setup" type="number" value="8"></div>
    <div class="field"><label>Implementation period · months</label><input id="months" type="number" value="3"></div>
    <div class="field"><label>Organisation complexity</label><select id="complexity"><option value="1">Single entity / simple</option><option value="1.08" selected>Multi-entity / moderate</option><option value="1.16">Complex / multi-country</option></select></div>
@@ -591,7 +591,7 @@ function calc(){
  if(on.listing)rows.push(["listing",Math.max(.05,t*.0005)]);
  lastRows=rows;
  const hard=rows.filter(x=>LEVER_META[x[0]].type==="opportunity").reduce((a,x)=>a+x[1],0), up=rows.filter(x=>LEVER_META[x[0]].type==="upside").reduce((a,x)=>a+x[1],0), total=hard+up;
- const annual=val("platformCost"), setup=val("setup")/100, net=total-annual-setup, pay=hard>0?(annual+setup)/hard*12:0;
+ const annual=val("platform"), setup=val("setup")/100, net=total-annual-setup, pay=hard>0?(annual+setup)/hard*12:0;
  document.getElementById("totalValue").textContent=money(total)+" / year";
  document.getElementById("hard").textContent=money(hard);document.getElementById("upside").textContent=money(up);document.getElementById("net").textContent=money(net);
  document.getElementById("payback").textContent=pay?((pay<1?"<1":pay.toFixed(1))+" months"):"—";
@@ -636,14 +636,14 @@ function emailEstimate(){
 function openDemo(){
  const modal=document.getElementById("demoModal");
  if(!modal)return;
- modal.classList.add("on");
+ modal.classList.add("open");
  modal.setAttribute("aria-hidden","false");
  setTimeout(()=>document.getElementById("demoName")?.focus(),50);
 }
 function closeDemo(){
  const modal=document.getElementById("demoModal");
  if(!modal)return;
- modal.classList.remove("on");
+ modal.classList.remove("open");
  modal.setAttribute("aria-hidden","true");
 }
 function submitDemo(e){
@@ -674,7 +674,7 @@ function submitDemo(e){
  );
  window.location.href="mailto:ashish@ashishduacorporation.com?subject="+subject+"&body="+body;
  const toast=document.getElementById("toast");
- if(toast){toast.textContent="Demo request prepared — your email client will open to send it to DuaDesk.";toast.classList.add("on");setTimeout(()=>toast.classList.remove("on"),4500);}
+ if(toast){toast.textContent="Demo request prepared — your email client will open to send it to DuaDesk.";toast.classList.add("show");setTimeout(()=>toast.classList.remove("show"),4500);}
  closeDemo();
 }
 document.addEventListener("keydown",function(e){
