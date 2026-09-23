@@ -466,19 +466,30 @@ html[lang="hi"] .audience-kicker,html[lang="ja"] .audience-kicker,html[lang="ar"
 </section>
 
 <section class="section" id="value">
- <div class="sectionhead"><div><div class="eyebrow">DUADESK VALUE LAB</div><h2>Model the opportunity before you buy.</h2></div><p>An explainable pricing model: client profile → cost reduction across all four command centres (CFO · CPO · Audit · Advisory) → tentative pricing, split into pass-through infrastructure (client-paid, at cost) and DuaDesk fees → payback on direct savings, and on direct + value recovered. Illustrative until validated against your own data.</p></div>
+ <div class="sectionhead"><div><div class="eyebrow">DUADESK VALUE LAB</div><h2>Model the opportunity before you buy.</h2></div><p>The Value Lab is designed as an explainable model: business profile → priorities → value levers → hard vs modelled value → indicative investment → payback. Results remain illustrative until validated against your own data.</p></div>
  <div class="calcgrid">
-  <div class="calcbox"><h3>1 · Client profile</h3><div class="fields">
-   <div class="field"><label>Industry</label><select id="v_ind"><option>Automobile</option><option>Chemical</option><option>Textile</option><option>Trading</option><option>Infrastructure</option><option>Electronics</option><option>Logistics</option><option>Petrochemical</option><option>Hotel</option><option>Real Estate</option></select></div>
-   <div class="field"><label>Annual turnover · ₹ Cr</label><input id="v_turn" type="number" value="500"></div>
-   <div class="field"><label>Number of locations</label><input id="v_loc" type="number" value="2"></div>
-   <div class="field"><label>ERP / finance system</label><select id="v_erp"><option>SAP</option><option>Oracle</option><option>Microsoft Dynamics</option><option>NetSuite</option><option>Tally</option><option>Zoho</option><option>Other</option></select></div>
+  <div class="calcbox"><h3 data-i18n="vl_box1">1 · Business profile</h3><div class="fields">
+   <div class="field"><label data-i18n="lbl_turnover">Annual turnover · ₹ Cr</label><input id="turnover" type="number" value="250"></div>
+   <div class="field"><label data-i18n="lbl_mat">Procurement / materials · % turnover</label><input id="mat" type="number" value="60"></div>
+   <div class="field"><label data-i18n="lbl_itc">Annual GST / ITC · ₹ Cr</label><input id="itc" type="number" value="12"></div>
+   <div class="field"><label data-i18n="lbl_fte">Finance / accounts team</label><input id="fte" type="number" value="8"></div>
+   <div class="field"><label data-i18n="lbl_ftecost">Loaded cost / finance FTE · ₹ L</label><input id="ftecost" type="number" value="8"></div>
+   <div class="field"><label data-i18n="lbl_inv">Purchase invoices / month</label><input id="inv" type="number" value="1800"></div>
+   <div class="field"><label data-i18n="lbl_audit">Audit effort / year · hours</label><input id="audit" type="number" value="1800"></div>
+   <div class="field"><label data-i18n="lbl_vendors">Active vendors</label><input id="vendors" type="number" value="650"></div>
   </div></div>
-  <div class="calcbox"><h3>2 · Scope &amp; assumptions</h3><div class="fields">
-   <div class="field"><label>Scope — command centre</label><select id="v_scope"><option>All (consolidated)</option><option>CFO</option><option>CPO</option><option>Pramaan (Audit)</option><option>Pragya (Advisory)</option></select></div>
-   <div class="field"><label>Direct-cost realization · %</label><input id="v_dreal" type="number" value="50"></div>
-   <div class="field"><label>Value-recovered realization · %</label><input id="v_vreal" type="number" value="30"></div>
-   </div></div>
+  <div class="calcbox"><h3 data-i18n="vl_box2">2 · What matters?</h3><div class="goalgrid" id="goals">
+   <button class="goal on" data-goal="procure" data-i18n="goal_procure">Reduce procurement cost</button><button class="goal on" data-goal="itc" data-i18n="goal_itc">Recover ITC / tax leakage</button>
+   <button class="goal" data-goal="close" data-i18n="goal_close">Accelerate close & reporting</button><button class="goal" data-goal="audit" data-i18n="goal_audit">Reduce audit effort / findings</button>
+   <button class="goal" data-goal="cash" data-i18n="goal_cash">Release working capital</button><button class="goal" data-goal="risk" data-i18n="goal_risk">Reduce leakage / duplicate payments</button>
+   <button class="goal" data-goal="advisory" data-i18n="goal_advisory">Create advisory / new revenue</button><button class="goal" data-goal="listing" data-i18n="goal_listing">Improve readiness / transactions</button>
+  </div><div style="margin-top:15px;color:var(--muted);font-size:11px" data-i18n="vl_helper">Select the priorities you want the model to test. The model uses conservative illustrative drivers and clearly separates modelled opportunity from potential upside; nothing is presented as realized or banked value.</div></div>
+  <div class="calcbox"><h3 data-i18n="vl_box3">3 · Investment assumptions</h3><div class="fields">
+   <div class="field"><label data-i18n="lbl_platform">Platform / year · ₹ Cr</label><input id="platformCost" type="number" value="0.36"></div>
+   <div class="field"><label data-i18n="lbl_setup">Integration / setup · ₹ L</label><input id="setup" type="number" value="8"></div>
+   <div class="field"><label data-i18n="lbl_months">Implementation period · months</label><input id="months" type="number" value="3"></div>
+   <div class="field"><label data-i18n="lbl_cx">Organisation complexity</label><select id="complexity"><option value="1" data-i18n="cx_1">Single entity / simple</option><option value="1.08" selected data-i18n="cx_2">Multi-entity / moderate</option><option value="1.16" data-i18n="cx_3">Complex / multi-country</option></select></div>
+  </div></div>
   <div class="calcresult locked" style="position:relative">
    <div class="gate-deco" aria-hidden="true">
     <svg class="gd gd-robot gd-l" viewBox="0 0 40 52" fill="none" stroke="#39d8c1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="20" y1="8" x2="20" y2="3"/><circle cx="20" cy="2" r="1.6" fill="#f0d18a" stroke="none"/><rect x="9" y="8" width="22" height="16" rx="5"/><circle cx="16" cy="16" r="2" fill="#39d8c1" stroke="none"/><circle cx="24" cy="16" r="2" fill="#39d8c1" stroke="none"/><rect x="11" y="26" width="18" height="16" rx="4"/><line x1="9" y1="30" x2="4" y2="34"/><line x1="31" y1="30" x2="36" y2="34"/><line x1="16" y1="42" x2="16" y2="49"/><line x1="24" y1="42" x2="24" y2="49"/></svg>
@@ -497,13 +508,12 @@ html[lang="hi"] .audience-kicker,html[lang="ja"] .audience-kicker,html[lang="ar"
     <button id="unlockValueBtn" class="btn gold" type="button" onclick="unlockValue()">Unlock Value →</button>
     <div id="gateError" style="color:#f2a7a7;font-size:10px;margin-top:9px;min-height:14px"></div>
    </div>
-   <div class="eyebrow">ILLUSTRATIVE — TENTATIVE PRICING &amp; PAYBACK</div><div class="bigvalue" id="v_year1">₹0.00 Cr</div><div style="color:var(--muted)">Year-1 total to client · DuaDesk fees + pass-through infrastructure</div>
-   <div class="resultgrid"><div class="rk"><small>DUADESK IMPLEMENTATION FEE (one-time)</small><b id="v_implfee">₹0.00 Cr</b></div><div class="rk"><small>DUADESK ANNUAL FEE</small><b id="v_annfee">₹0.00 Cr</b></div><div class="rk"><small>PASS-THROUGH INFRA (client-paid)</small><b id="v_pass">₹0.00 Cr</b></div><div class="rk"><small>PAYBACK · DIRECT ONLY</small><b id="v_pbd">—</b></div></div>
-   <div class="eyebrow" style="margin-top:6px">FINANCE COST · SAVINGS · FULL PAYBACK</div>
-   <div class="resultgrid"><div class="rk"><small>EST. FINANCE COST / YR</small><b id="v_fcost">₹0.00 Cr</b></div><div class="rk"><small>DIRECT COST REDUCTION (realized)</small><b id="v_direct">₹0.00 Cr</b></div><div class="rk"><small>ADDITIONAL RECURRING VALUE (realized)</small><b id="v_value">₹0.00 Cr</b></div><div class="rk"><small>PAYBACK · DIRECT + RECURRING VALUE</small><b id="v_pbdv">—</b></div></div>
-   <div class="explain"><h4>Every number, explainable.</h4><div class="flow"><div class="node"><small>01 · SCOPE</small><b id="v_x1">—</b><span>What was modelled.</span></div><div class="node"><small>02 · REDUCTION</small><b id="v_x2">—</b><span>Cost-to-operate; sign-off retained.</span></div><div class="node"><small>03 · PRICING</small><b id="v_x3">—</b><span>Pass-through vs DuaDesk fee.</span></div><div class="node"><small>04 · PAYBACK</small><b id="v_x4">—</b><span>On what the client pays.</span></div></div><div class="assumptions"><div><b>Pricing:</b> infrastructure (Supabase · Vercel · Anthropic) is a pass-through paid directly by the client, at cost; DuaDesk fees are the professional-services implementation and support fee.</div><div><b>Illustrative:</b> cost-to-operate reduction with human sign-off retained; not a quote or guarantee.</div></div></div>
-   <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:18px"><button class="btn gold" onclick="emailEstimate()">Send this estimate →</button><button class="btn ghost" onclick="window.print()">Print / Save PDF</button></div>
-   <div style="font-size:10px;color:#71869b;margin-top:14px">Illustrative, assumption-led pricing. Infrastructure is a client-paid pass-through, at cost; DuaDesk fees are the professional-services fee. Not a guarantee, audit, certification, tax/legal advice or engagement. Live DuaDesk work is computed from the client’s own data, reconciled and reviewed/sign-gated by a qualified professional.</div>
+   <div class="eyebrow" data-i18n="res_eyebrow">ILLUSTRATIVE VALUE OPPORTUNITY</div><div class="bigvalue" id="totalValue">₹0.00 Cr / year</div><div style="color:var(--muted)" data-i18n="res_sub">Selected priorities · recalculated live · every lever is explainable</div>
+   <div class="resultgrid"><div class="rk"><small data-i18n="res_hard">MODELLABLE OPPORTUNITY</small><b id="hard">₹0.00 Cr</b></div><div class="rk"><small data-i18n="res_up">MODELLED UPSIDE</small><b id="upside">₹0.00 Cr</b></div><div class="rk"><small data-i18n="res_net">YEAR-1 NET</small><b id="net">₹0.00 Cr</b></div><div class="rk"><small data-i18n="res_pay">PAYBACK</small><b id="payback">—</b></div></div>
+   <div class="eyebrow" style="margin-top:12px" data-i18n="res_bridge">VALUE BRIDGE</div><div class="bridge" id="bridge"></div>
+   <div class="explain"><h4 data-i18n="exp_h">Make every number explainable.</h4><div style="color:var(--muted);font-size:11px" data-i18n="exp_sub">DuaDesk should let a CFO move from the headline number to the exact input, assumption and formula behind it.</div><div class="flow"><div class="node"><small data-i18n="exp_n1">01 · INPUT</small><b id="xInput">Your business data</b><span data-i18n="exp_n1s">The exact business input used by this lever.</span></div><div class="node"><small data-i18n="exp_n2">02 · ASSUMPTION</small><b id="xAssumption">The explicit assumption applied.</b><span data-i18n="exp_n2s">Explicit, editable modelling assumption.</span></div><div class="node"><small data-i18n="exp_n3">03 · FORMULA</small><b id="xFormula">Input × assumption × complexity</b><span data-i18n="exp_n3s">Visible calculation — not a black-box score.</span></div><div class="node"><small data-i18n="exp_n4">04 · RESULT</small><b id="xResult">₹0.00 Cr</b><span data-i18n="exp_n4s">Illustrative value; not realized value.</span></div></div><div class="assumptions"><div data-i18n-html="exp_a1"><b>Evidence status:</b> illustrative model until validated against client data.</div><div data-i18n-html="exp_a2"><b>Attribution:</b> modelled opportunity is not the same as realized value.</div></div></div>
+   <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:18px"><button class="btn gold" onclick="emailEstimate()" data-i18n="btn_send">Send this estimate →</button><button class="btn ghost" onclick="window.print()" data-i18n="btn_print">Print / Save PDF</button></div>
+   <div style="font-size:10px;color:#71869b;margin-top:14px" data-i18n="vl_disc">Illustrative, assumption-led estimate. It is not a guarantee, audit, certification, tax/legal advice or engagement. Live DuaDesk work is computed from the client’s own data, reconciled and reviewed/sign-gated by a qualified professional.</div>
   </div>
  </div>
 </section>
@@ -667,48 +677,43 @@ function closeModal(){document.getElementById("modal").classList.remove("on")}
 document.querySelectorAll(".goal").forEach(b=>b.onclick=()=>{b.classList.toggle("on");calc()});
 document.querySelectorAll("#value input,#value select").forEach(e=>e.addEventListener("input",calc));
 function val(id){return Math.max(0,parseFloat(document.getElementById(id).value)||0)}
-const V_CC={CFO:{funcs:18,red:{"Automobile": 0.6497, "Chemical": 0.6497, "Textile": 0.6397, "Trading": 0.6797, "Infrastructure": 0.6197, "Electronics": 0.6697, "Logistics": 0.6697, "Petrochemical": 0.6397, "Hotel": 0.6497, "Real Estate": 0.6197}},CPO:{funcs:15,red:{"Automobile": 0.6484, "Chemical": 0.6484, "Textile": 0.6384, "Trading": 0.6784, "Infrastructure": 0.6184, "Electronics": 0.6684, "Logistics": 0.6684, "Petrochemical": 0.6384, "Hotel": 0.6484, "Real Estate": 0.6184}},Pramaan:{funcs:16,red:{"Automobile": 0.6514, "Chemical": 0.6514, "Textile": 0.6414, "Trading": 0.6814, "Infrastructure": 0.6214, "Electronics": 0.6714, "Logistics": 0.6714, "Petrochemical": 0.6414, "Hotel": 0.6514, "Real Estate": 0.6214}},Pragya:{funcs:13,red:{"Automobile": 0.5978, "Chemical": 0.5978, "Textile": 0.5878, "Trading": 0.6278, "Infrastructure": 0.5678, "Electronics": 0.6178, "Logistics": 0.6178, "Petrochemical": 0.5878, "Hotel": 0.5978, "Real Estate": 0.5678}}};
-const V_ERP={"SAP":1.4,"Oracle":1.4,"Microsoft Dynamics":1.2,"NetSuite":1.2,"Tally":1.0,"Zoho":1.0,"Other":1.3};
-const V_D={baseHead:6,perCr:0.03,perLoc:3,cfoOh:0.25,costMo:75000,cpoPct:0.0015,audPct:0.0010,advPct:0.0010,
- baseDays:20,perFunc:2,perLocDays:5,erpIntDays:15,sso:5,datamig:8,uat:6,training:4,pmg:6,quotedDayRate:30000,supportDays:20,
- supabase:25,vercel:20,anthropic:150,fx:86,matPct:0.60,itcPct:0.07,proc:0.015,leak:0.003,itcR:0.03,wc:0.0025,aud:0.0005,adv:0.0005};
-function sv(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
-function selv(id,d){var e=document.getElementById(id);return e?e.value:d;}
-function mo(x){return x?((x<1?"<1":x.toFixed(1))+" mo"):"—";}
+const LEVER_META={
+ procure:{label:"Procurement should-cost",input:"Materials spend",assumption:"1.5% of addressable materials spend",formula:"Materials spend × 1.5% × complexity",type:"opportunity"},
+ itc:{label:"ITC / tax leakage opportunity",input:"Annual GST / ITC pool",assumption:"3% of annual ITC pool",formula:"ITC pool × 3% × complexity",type:"opportunity"},
+ close:{label:"Finance productivity + AP processing",input:"Finance FTE + monthly purchase invoices",assumption:"30% of loaded finance capacity + ₹35 per invoice × 40%",formula:"(FTE × loaded cost × 30%) + (monthly invoices × 12 × ₹35 × 40%)",type:"opportunity"},
+ audit:{label:"Audit effort & rework",input:"Annual audit hours",assumption:"30% of hours at ₹1,500/hour",formula:"Audit hours × 30% × ₹1,500",type:"opportunity"},
+ cash:{label:"Working-capital opportunity",input:"Annual turnover",assumption:"0.25% cash-efficiency proxy",formula:"Turnover × 0.25% × complexity",type:"opportunity"},
+ risk:{label:"Duplicate / leakage controls",input:"Materials spend",assumption:"0.3% of addressable materials spend",formula:"Materials spend × 0.3% × complexity",type:"opportunity"},
+ advisory:{label:"New advisory revenue",input:"Active vendors",assumption:"₹0.003 Cr per active vendor, capped at ₹40 Cr",formula:"MIN(active vendors × ₹0.003 Cr, ₹40 Cr)",type:"upside"},
+ listing:{label:"Readiness / transaction upside",input:"Annual turnover",assumption:"0.05% of turnover",formula:"Turnover × 0.05%",type:"upside"}
+};
+let lastRows=[];
 function calc(){
- var ind=selv("v_ind","Automobile"), t=val("v_turn"), loc=val("v_loc")||1, erp=selv("v_erp","SAP"), scope=selv("v_scope","All (consolidated)");
- var dreal=val("v_dreal")/100, vreal=val("v_vreal")/100;
- function on(cc){ return scope==="All (consolidated)" ? true : (scope.split(" ")[0]===cc); }
- var head=Math.round(V_D.baseHead+V_D.perCr*t+V_D.perLoc*(loc-1));
- var pools={CFO:head*(V_D.costMo*12/1e7)*(1+V_D.cfoOh),CPO:t*V_D.cpoPct,Pramaan:t*V_D.audPct,Pragya:t*V_D.advPct};
- var totPool=0,directGross=0,funcs=0;
- ["CFO","CPO","Pramaan","Pragya"].forEach(function(cc){ if(on(cc)){ var p=pools[cc],r=V_CC[cc].red[ind]||0.62; totPool+=p; directGross+=p*r; funcs+=V_CC[cc].funcs; } });
- var blended=totPool>0?directGross/totPool:0, directReal=directGross*dreal;
- var materials=t*V_D.matPct, itc=t*V_D.itcPct, recur=0, onetime=0;
- if(on("CPO")) recur+=materials*V_D.proc+materials*V_D.leak;
- if(on("CFO")) recur+=itc*V_D.itcR;
- if(on("CFO")) onetime+=t*V_D.wc;
- if(on("Pramaan")) onetime+=t*V_D.aud;
- if(on("Pragya")) onetime+=t*V_D.adv;
- var recurReal=recur*vreal, oneReal=onetime*vreal;
- // effort (ERP complexity separated) & pricing
- var ef=V_ERP[erp]||1.3;
- var baseDays=V_D.baseDays+V_D.perFunc*funcs+V_D.perLocDays*loc;
- var erpDays=V_D.erpIntDays*ef;
- var entDays=V_D.sso+V_D.datamig+V_D.uat+V_D.training+V_D.pmg;
- var totalDays=baseDays+erpDays+entDays;
- var implFee=totalDays*V_D.quotedDayRate/1e7;
- var annFee=V_D.supportDays*V_D.quotedDayRate/1e7;
- var passthru=(V_D.supabase+V_D.vercel+V_D.anthropic)*12*V_D.fx/1e7;
- var year1=implFee+annFee+passthru, recurring=annFee+passthru;
- var netBase=directReal-recurring, netUp=directReal+recurReal-recurring;
- var pbBase=netBase>0?implFee/(netBase/12):0, pbUp=netUp>0?implFee/(netUp/12):0;
- sv("v_year1",money(year1)); sv("v_implfee",money(implFee)); sv("v_annfee",money(annFee)); sv("v_pass",money(passthru)); sv("v_pbd",mo(pbBase));
- sv("v_fcost",money(totPool)); sv("v_direct",money(directReal)); sv("v_value",money(recurReal)); sv("v_pbdv",mo(pbUp));
- sv("v_x1", ind+" · "+(scope==="All (consolidated)"?"all four command centres":scope)+" · ₹"+t.toFixed(0)+" Cr · "+loc+" location(s)");
- sv("v_x2", "Blended cost-to-operate reduction "+(blended*100).toFixed(0)+"% · direct "+(dreal*100).toFixed(0)+"% / value "+(vreal*100).toFixed(0)+"% realization");
- sv("v_x3", "DuaDesk implementation fee "+money(implFee)+" · annual "+money(annFee)+" · infra ₹"+passthru.toFixed(2)+" Cr/yr is a client pass-through, at cost");
- sv("v_x4", "Payback (direct) "+(pbBase?pbBase.toFixed(1):"—")+" mo · with recurring value "+(pbUp?pbUp.toFixed(1):"—")+" mo · plus one-time value "+money(oneReal)+" in Year 1");
+ const t=val("turnover"), mat=t*val("mat")/100, itc=val("itc"), fte=val("fte"), fc=val("ftecost")/100, inv=val("inv"), audit=val("audit"), vendors=val("vendors"), cx=parseFloat(document.getElementById("complexity").value)||1;
+ const on={};document.querySelectorAll(".goal.on").forEach(g=>on[g.dataset.goal]=1); const rows=[];
+ if(on.procure)rows.push(["procure",mat*.015*cx]);
+ if(on.itc)rows.push(["itc",itc*.03*cx]);
+ if(on.close)rows.push(["close",(fte*fc*.30 + inv*12*35*.40/1e7)*cx]);
+ if(on.audit)rows.push(["audit",audit*.30*1500/1e7*cx]);
+ if(on.cash)rows.push(["cash",t*.0025*cx]);
+ if(on.risk)rows.push(["risk",mat*.003*cx]);
+ if(on.advisory)rows.push(["advisory",Math.max(0,Math.min(40,vendors*.003))]);
+ if(on.listing)rows.push(["listing",Math.max(.05,t*.0005)]);
+ lastRows=rows;
+ const hard=rows.filter(x=>LEVER_META[x[0]].type==="opportunity").reduce((a,x)=>a+x[1],0), up=rows.filter(x=>LEVER_META[x[0]].type==="upside").reduce((a,x)=>a+x[1],0), total=hard+up;
+ const annual=val("platformCost"), setup=val("setup")/100, net=total-annual-setup, pay=hard>0?(annual+setup)/hard*12:0;
+ document.getElementById("totalValue").textContent=money(total)+" / year";
+ document.getElementById("hard").textContent=money(hard);document.getElementById("upside").textContent=money(up);document.getElementById("net").textContent=money(net);
+ document.getElementById("payback").textContent=pay?((pay<1?"<1":pay.toFixed(1))+" months"):"—";
+ document.getElementById("bridge").innerHTML=rows.length?rows.map((r,i)=>{const m=LEVER_META[r[0]];return `<div class="brow" onclick="explainLever(${i})"><div><b>${m.label}</b><div style="color:#7289a0;font-size:9px">${m.assumption}</div><div class="explainhint">Click to explain →</div></div><span class="kind ${m.type==="opportunity"?"hard":"up"}">${m.type}</span><b>${money(r[1])}</b></div>`}).join(""): `<div style="color:var(--muted)">Select at least one priority.</div>`;
+ explainLever(0);
+}
+function explainLever(i){
+ const r=lastRows[i]; if(!r){document.getElementById("xInput").textContent="Select a priority";document.getElementById("xAssumption").textContent="—";document.getElementById("xFormula").textContent="—";document.getElementById("xResult").textContent="₹0.00 Cr";return;}
+ const key=r[0], t=val("turnover"), mat=t*val("mat")/100, itc=val("itc"), fte=val("fte"), fc=val("ftecost")/100, inv=val("inv"), audit=val("audit"), vendors=val("vendors"), cx=parseFloat(document.getElementById("complexity").value)||1, m=LEVER_META[key];
+ const inputs={procure:`₹${mat.toFixed(2)} Cr materials spend`,itc:`₹${itc.toFixed(2)} Cr annual ITC pool`,close:`${fte} FTE + ${inv.toLocaleString()} purchase invoices/month`,audit:`${audit.toLocaleString()} audit hours/year`,cash:`₹${t.toFixed(2)} Cr turnover`,risk:`₹${mat.toFixed(2)} Cr materials spend`,advisory:`${vendors.toLocaleString()} active vendors`,listing:`₹${t.toFixed(2)} Cr turnover`};
+ document.getElementById("xInput").textContent=inputs[key];document.getElementById("xAssumption").textContent=m.assumption;document.getElementById("xFormula").textContent=m.formula+` · complexity ${cx.toFixed(2)}×`;
+ document.getElementById("xResult").textContent=money(r[1]);
 }
 function validLeadEmail(){
  const el=document.getElementById("leadEmail");
@@ -724,12 +729,18 @@ const WEB3FORMS_KEY = "d924d751-50fc-4a7c-97c5-1422af447027";   // Web3Forms →
 const LEAD_ENDPOINT = "https://api.web3forms.com/submit";
 let leadRecorded = false;
 function leadSnapshot(email){
- var g=function(id){return document.getElementById(id)||{};};
- return {email, page:"duadesk.com — Value Lab (pricing)", ts:new Date().toISOString(),
-  industry:g("v_ind").value||"", turnover_cr:val("v_turn"), locations:val("v_loc"), erp:g("v_erp").value||"", scope:g("v_scope").value||"",
-  est_finance_cost:g("v_fcost").textContent||"", direct_reduction:g("v_direct").textContent||"", value_recovered:g("v_value").textContent||"",
-  impl_fee:g("v_implfee").textContent||"", annual_fee:g("v_annfee").textContent||"", passthrough:g("v_pass").textContent||"", year1_total:g("v_year1").textContent||"",
-  payback_direct:g("v_pbd").textContent||"", payback_direct_value:g("v_pbdv").textContent||""};
+ const g=id=>document.getElementById(id);
+ const goals=[...document.querySelectorAll(".goal.on")].map(b=>b.dataset.goal).join(", ");
+ return {
+  email, page:"duadesk.com — Value Lab", ts:new Date().toISOString(),
+  turnover_cr:val("turnover"), materials_pct:val("mat"), itc_cr:val("itc"),
+  finance_fte:val("fte"), fte_cost_l:val("ftecost"), invoices_month:val("inv"),
+  audit_hours:val("audit"), vendors:val("vendors"),
+  complexity:g("complexity")?g("complexity").value:"", priorities:goals,
+  total:(g("totalValue")||{}).textContent||"", opportunity:(g("hard")||{}).textContent||"",
+  upside:(g("upside")||{}).textContent||"", year1_net:(g("net")||{}).textContent||"",
+  payback:(g("payback")||{}).textContent||""
+ };
 }
 function recordLead(email){
  if(leadRecorded) return;
@@ -754,14 +765,17 @@ function unlockValue(){
  return true;
 }
 function emailEstimate(){
- if(!validLeadEmail()){document.getElementById("valueGate").classList.remove("unlocked");document.getElementById("leadEmail").focus();return;}
- var lead=document.getElementById("leadEmail").value.trim();
- var g=function(id){return (document.getElementById(id)||{}).textContent||"";};
- var s=function(id){return (document.getElementById(id)||{}).value||"";};
- var subject=encodeURIComponent("DuaDesk — pricing & payback discussion");
- var body=encodeURIComponent("I ran the DuaDesk Value Lab and would like to discuss.\n\nProspect email: "+lead+"\nIndustry: "+s("v_ind")+" · Scope: "+s("v_scope")+"\nEst. finance cost/yr: "+g("v_fcost")+"\nDirect cost reduction (realized): "+g("v_direct")+"\nValue recovered (realized): "+g("v_value")+"\n\nDuaDesk implementation fee (one-time): "+g("v_implfee")+"\nDuaDesk annual fee: "+g("v_annfee")+"\nPass-through infra (client-paid): "+g("v_pass")+"\nYear-1 total to client: "+g("v_year1")+"\n\nPayback (direct only): "+g("v_pbd")+"\nPayback (direct + value): "+g("v_pbdv"));
- location.href="mailto:ashish@ashishduacorporation.com?subject="+subject+"&body="+body;
+ if(!validLeadEmail()){
+   document.getElementById("valueGate").classList.remove("unlocked");
+   document.getElementById("leadEmail").focus();
+   return;
+ }
+ const lead=document.getElementById("leadEmail").value.trim();
+ const subject=encodeURIComponent("DuaDesk Value Lab — discussion");
+ const body=encodeURIComponent("I ran the DuaDesk Value Lab and would like to discuss the estimate.\n\nProspect email: "+lead+"\n\nIllustrative annual value: "+document.getElementById("totalValue").textContent+"\nModelled opportunity: "+document.getElementById("hard").textContent+"\nModelled upside: "+document.getElementById("upside").textContent+"\nYear-1 net: "+document.getElementById("net").textContent+"\nPayback: "+document.getElementById("payback").textContent);
+ location.href=`mailto:ashish@ashishduacorporation.com?subject=${subject}&body=${body}`;
 }
+
 function openDemo(){
  const modal=document.getElementById("demoModal");
  if(!modal)return;
