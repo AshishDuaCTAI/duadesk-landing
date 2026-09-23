@@ -283,18 +283,6 @@ html[lang="hi"] .audience-kicker,html[lang="ja"] .audience-kicker,html[lang="ar"
 .footermeta{margin-top:12px;font-size:12px;color:#71869b}
 .footermeta a{color:#b9c9dc;text-decoration:none}.footermeta a:hover{color:#fff}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
-
-/* ---- detailed assessment form ---- */
-.assessbox{max-width:1000px;margin:0 auto;padding:26px;border:1px solid rgba(214,174,85,.35);border-radius:20px;background:radial-gradient(circle at 90% 8%,rgba(214,174,85,.10),transparent 45%),#0b1a2a}
-.afields{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.assessbox textarea{width:100%;background:#071321;color:#fff;border:1px solid var(--line);border-radius:9px;padding:11px;font-family:inherit;font-size:13px}
-.achecks{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:6px}
-.achk{display:flex;align-items:center;gap:8px;color:#c7d6e5;font-size:12px;text-transform:none;letter-spacing:0}
-.achk input{width:auto}
-@media(max-width:760px){.afields{grid-template-columns:1fr 1fr}.achecks{grid-template-columns:1fr}}
-@media(max-width:520px){.afields{grid-template-columns:1fr}}
-
-.freebadge{display:inline-block;vertical-align:middle;margin-left:10px;padding:4px 13px;border-radius:999px;background:linear-gradient(90deg,#d6ae55,#e9c46a);color:#0b1a2a;font:800 13px Arial,Helvetica,sans-serif;letter-spacing:.6px;text-transform:uppercase;box-shadow:0 2px 10px rgba(214,174,85,.35)}
 </style>
 </head>
 <body>
@@ -335,7 +323,7 @@ html[lang="hi"] .audience-kicker,html[lang="ja"] .audience-kicker,html[lang="ar"
     <option value="nl">NL</option><option value="ja">日本語</option><option value="ar">العربية</option><option value="fr">FR</option>
   </select>
 </div>
-<div class="navcta"><button id="assessTop" class="btn gold" onclick="document.getElementById('assessment').scrollIntoView({behavior:'smooth'})">Free Assessment →</button><button id="demoTop" class="btn ghost" onclick="openDemo()">Request a Demo →</button><button id="experienceTop" class="btn ghost" onclick="openExperience()">Experience</button><button id="calculateTop" class="btn ghost" onclick="document.getElementById('value').scrollIntoView()">Calculate Value →</button></div>
+<div class="navcta"><button id="demoTop" class="btn ghost" onclick="openDemo()">Request a Demo →</button><button id="experienceTop" class="btn ghost" onclick="openExperience()">Experience</button><button id="calculateTop" class="btn gold" onclick="document.getElementById('value').scrollIntoView()">Calculate Value →</button></div>
 </div></nav>
 
 <header class="hero">
@@ -354,7 +342,7 @@ html[lang="hi"] .audience-kicker,html[lang="ja"] .audience-kicker,html[lang="ar"
   <div class="eyebrow">Enterprise AI · Command Centres · Governed Execution</div>
   <h1>AI that <em>does the work.</em><br>Not just AI that talks.</h1>
   <p class="lead">DuaDesk turns finance, procurement, audit and advisory work into AI-powered operating teams — helping businesses lower the cost of work, reduce manual dependence, strengthen compliance and turn their data into intelligence for growth. Your systems stay. Your controls stay. AI does more of the work.</p>
-  <div class="heroactions"><button class="btn gold" onclick="document.getElementById('assessment').scrollIntoView({behavior:'smooth'})">Get your free assessment →</button><button class="btn ghost" onclick="openDemo()" data-i18n="hero_btn_demo">Request a Demo →</button><button class="btn ghost" onclick="openExperience()" data-i18n="hero_btn_exp">▶ Enter the Experience Centre</button><button class="btn ghost" onclick="document.getElementById('value').scrollIntoView()" data-i18n="hero_btn_calc">₹ Calculate your opportunity</button></div>
+  <div class="heroactions"><button class="btn gold" onclick="openDemo()" data-i18n="hero_btn_demo">Request a Demo →</button><button class="btn ghost" onclick="openExperience()" data-i18n="hero_btn_exp">▶ Enter the Experience Centre</button><button class="btn ghost" onclick="document.getElementById('value').scrollIntoView()" data-i18n="hero_btn_calc">₹ Calculate your opportunity</button></div>
   <div class="proofrow">
    <div class="proof" data-i18n-html="proof_1"><b>18</b> AI CFO desks</div><div class="proof" data-i18n-html="proof_2"><b>16</b> CPO desks + co-pilot</div><div class="proof" data-i18n-html="proof_3"><b>20</b> audit types</div><div class="proof" data-i18n-html="proof_4"><b>47</b> advisory agents</div><div class="proof" data-i18n-html="proof_5"><b>6</b> country layers</div>
   </div>
@@ -520,41 +508,6 @@ html[lang="hi"] .audience-kicker,html[lang="ja"] .audience-kicker,html[lang="ar"
  </div>
 </section>
 
-<section class="section" id="assessment">
- <div class="sectionhead"><div><div class="eyebrow">FREE DETAILED ASSESSMENT</div><h2>Want a deeper, tailored assessment? <span class="freebadge">100% Free</span></h2></div><p>The Value Lab above gives an instant estimate. For a <b>definitive, sector-specific cost-saving and pricing view built on your own numbers</b> — free, confidential and with no obligation — share a few details and we'll prepare it and get back to you.</p></div>
- <div class="assessbox">
-  <form id="assessForm" onsubmit="submitAssessment(event)">
-   <div class="afields">
-    <div class="field"><label>Name *</label><input id="a_name" required autocomplete="name" placeholder="Your name"></div>
-    <div class="field"><label>Work email *</label><input id="a_email" type="email" required autocomplete="email" placeholder="you@company.com"></div>
-    <div class="field"><label>Company *</label><input id="a_company" required autocomplete="organization" placeholder="Company / organisation"></div>
-    <div class="field"><label>Phone</label><input id="a_phone" type="tel" placeholder="+91 ..."></div>
-    <div class="field"><label>Industry / sector</label><select id="a_industry"><option>— select —</option><option>Automobile</option><option>Chemical</option><option>Textile</option><option>Trading</option><option>Infrastructure</option><option>Electronics</option><option>Logistics</option><option>Petrochemical</option><option>Hotel</option><option>Real Estate</option></select></div>
-    <div class="field"><label>ERP / finance system</label><select id="a_erp"><option>— select —</option><option>SAP</option><option>Oracle</option><option>Microsoft Dynamics</option><option>NetSuite</option><option>Tally</option><option>Zoho</option><option>Other</option></select></div>
-    <div class="field"><label>Annual turnover (₹ Cr)</label><input id="a_turnover" type="number"></div>
-    <div class="field"><label>Number of locations</label><input id="a_locations" type="number"></div>
-    <div class="field"><label>Finance &amp; accounts team size</label><input id="a_headcount" type="number"></div>
-    <div class="field"><label>Annual GST / ITC pool (₹ Cr)</label><input id="a_gstitc" type="number"></div>
-    <div class="field"><label>Procurement / materials (% of turnover)</label><input id="a_procurement" type="number"></div>
-    <div class="field"><label>Purchase invoices / month</label><input id="a_invoices" type="number"></div>
-   </div>
-   <div class="field" style="margin-top:14px"><label>Which command centres interest you?</label>
-    <div class="achecks">
-     <label class="achk"><input type="checkbox" id="a_cfo"> AI CFO — finance</label>
-     <label class="achk"><input type="checkbox" id="a_cpo"> AI CPO — procurement</label>
-     <label class="achk"><input type="checkbox" id="a_audit"> Dua Pramaan — audit</label>
-     <label class="achk"><input type="checkbox" id="a_advisory"> Dua Pragya — advisory</label>
-    </div>
-   </div>
-   <div class="field" style="margin-top:14px"><label>Your biggest finance / compliance pain points</label><textarea id="a_pain" rows="2" placeholder="e.g. close takes 12 days, ITC leakage, working capital, audit effort..."></textarea></div>
-   <div class="field" style="margin-top:14px"><label>Anything sector-specific or additional context</label><textarea id="a_context" rows="2" placeholder="audit fees, penalties/notices, working-capital cycle, litigation, export incentives, SPVs, RERA/Ind AS 115, etc."></textarea></div>
-   <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:18px">
-    <button id="assessSubmit" class="btn gold" type="submit" disabled>Request my free assessment →</button>
-    <span style="color:var(--muted);font-size:11px">A valid work email is required to submit. Your details go directly to Ashish Dua — confidential, illustrative, no obligation.</span>
-   </div>
-  </form>
- </div>
-</section>
 <section class="section" id="trust">
  <div class="sectionhead"><div><div class="eyebrow">TRUST IS PART OF THE PRODUCT</div><h2>Autonomy without surrendering control.</h2></div><p>The supplied product materials consistently describe AI doing repetitive analysis and drafting while consequential filing, posting, payment or professional judgement remains behind a human gate.</p></div>
  <div class="trust">
@@ -609,7 +562,7 @@ html[lang="hi"] .audience-kicker,html[lang="ja"] .audience-kicker,html[lang="ar"
  </div><div class="calcbox"><h3 data-i18n="glob_h">The strategic idea</h3><p style="color:var(--muted)" data-i18n="glob_p1">The global layer is not six separate products. It is a common operating model with local intelligence: regulation, tax, language, data residency, filing standards, ERP ecosystem and country-specific controls.</p><p style="color:#dce7f1" data-i18n="glob_p2">That is how DuaDesk can move from a collection of AI features toward a repeatable enterprise application architecture.</p></div></div>
 </section>
 
-<section class="final"><div class="eyebrow">THE NEXT STEP</div><h2>Ready to see DuaDesk running on your business?</h2><p data-i18n="fin_p">Request a live demonstration, run an AI workflow, or calculate an illustrative value opportunity for your organisation.</p><button class="btn gold" onclick="document.getElementById('assessment').scrollIntoView({behavior:'smooth'})">Get your free assessment →</button> <button class="btn ghost" onclick="openDemo()" data-i18n="fin_demo">Request a Demo →</button> <button class="btn ghost" onclick="openExperience()" data-i18n="fin_exp">Run an AI agent →</button> <button class="btn ghost" onclick="document.getElementById('value').scrollIntoView()" data-i18n="fin_calc">Calculate Value</button></section>
+<section class="final"><div class="eyebrow">THE NEXT STEP</div><h2>Ready to see DuaDesk running on your business?</h2><p data-i18n="fin_p">Request a live demonstration, run an AI workflow, or calculate an illustrative value opportunity for your organisation.</p><button class="btn gold" onclick="openDemo()" data-i18n="fin_demo">Request a Demo →</button> <button class="btn ghost" onclick="openExperience()" data-i18n="fin_exp">Run an AI agent →</button> <button class="btn ghost" onclick="document.getElementById('value').scrollIntoView()" data-i18n="fin_calc">Calculate Value</button></section>
 
 
 <footer class="sitefooter">
@@ -812,36 +765,6 @@ function emailEstimate(){
  var body=encodeURIComponent("I ran the DuaDesk Value Lab and would like to discuss.\n\nProspect email: "+lead+"\nIndustry: "+s("v_ind")+" · Scope: "+s("v_scope")+"\nEst. finance cost/yr: "+g("v_fcost")+"\nDirect cost reduction (realized): "+g("v_direct")+"\nValue recovered (realized): "+g("v_value")+"\n\nDuaDesk implementation fee (one-time): "+g("v_implfee")+"\nDuaDesk annual fee: "+g("v_annfee")+"\nPass-through infra (client-paid): "+g("v_pass")+"\nYear-1 total to client: "+g("v_year1")+"\n\nPayback (direct only): "+g("v_pbd")+"\nPayback (direct + value): "+g("v_pbdv"));
  location.href="mailto:ashish@ashishduacorporation.com?subject="+subject+"&body="+body;
 }
-async function submitAssessment(e){
- e.preventDefault();
- var f=document.getElementById("assessForm"); if(!f.checkValidity()){f.reportValidity();return;}
- var g=function(id){return (document.getElementById(id)||{}).value||"";};
- var ck=function(id,lbl){var el=document.getElementById(id);return el&&el.checked?lbl:"";};
- var centres=[ck("a_cfo","AI CFO"),ck("a_cpo","AI CPO"),ck("a_audit","Dua Pramaan (Audit)"),ck("a_advisory","Dua Pragya (Advisory)")].filter(Boolean).join(", ")||"Not specified";
- var vals={ name:g("a_name"), email:g("a_email"), company:g("a_company"), phone:g("a_phone")||"Not provided",
-   industry:g("a_industry"), erp:g("a_erp"), turnover_cr:g("a_turnover"), locations:g("a_locations"), finance_team_size:g("a_headcount"),
-   gst_itc_pool_cr:g("a_gstitc"), procurement_pct:g("a_procurement"), purchase_invoices_month:g("a_invoices"),
-   command_centres:centres, pain_points:g("a_pain")||"—", additional_context:g("a_context")||"—" };
- var showToast=function(m){var t=document.getElementById("toast");if(t){t.textContent=m;t.classList.add("on");setTimeout(function(){t.classList.remove("on")},4800);}};
- var mailtoFallback=function(){
-   var body=encodeURIComponent("DuaDesk — Detailed Assessment Request\n\n"+Object.keys(vals).map(function(k){return k.replace(/_/g," ")+": "+vals[k];}).join("\n"));
-   location.href="mailto:ashish@ashishduacorporation.com?subject="+encodeURIComponent("DuaDesk — Detailed Assessment — "+vals.company)+"&body="+body;
- };
- if(typeof WEB3FORMS_KEY!=="undefined" && WEB3FORMS_KEY.indexOf("PASTE")!==0){
-   try{
-     var res=await fetch("https://api.web3forms.com/submit",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(Object.assign({access_key:WEB3FORMS_KEY,subject:"DuaDesk — Detailed Assessment — "+(vals.company||"(company)"),from_name:"DuaDesk website · Detailed Assessment"},vals))});
-     var data=await res.json();
-     if(data&&data.success){ showToast("Thanks — your detailed assessment request has been received. Ashish will get back to you."); f.reset(); return false; }
-     throw new Error("send failed");
-   }catch(err){ mailtoFallback(); showToast("Opening your email app to send the request to DuaDesk."); return false; }
- }
- mailtoFallback(); showToast("Opening your email app to send the request to DuaDesk."); return false;
-}
-/* hard-gate the detailed assessment on a valid work email */
-(function(){
- var em=document.getElementById("a_email"), btn=document.getElementById("assessSubmit");
- if(em&&btn){ var upd=function(){ btn.disabled=!(em.value.trim() && em.checkValidity()); }; em.addEventListener("input",upd); em.addEventListener("blur",upd); upd(); }
-})();
 function openDemo(){
  const modal=document.getElementById("demoModal");
  if(!modal)return;
