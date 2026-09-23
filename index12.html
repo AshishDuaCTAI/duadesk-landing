@@ -675,9 +675,7 @@ const V_D={baseHead:6,perCr:0.03,perLoc:3,cfoOh:0.25,costMo:75000,cpoPct:0.0015,
 function sv(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
 function selv(id,d){var e=document.getElementById(id);return e?e.value:d;}
 function mo(x){return x?((x<1?"<1":x.toFixed(1))+" mo"):"—";}
-var valueUnlocked=false;
 function calc(){
- if(!valueUnlocked) return;
  var ind=selv("v_ind","Automobile"), t=val("v_turn"), loc=val("v_loc")||1, erp=selv("v_erp","SAP"), scope=selv("v_scope","All (consolidated)");
  var dreal=val("v_dreal")/100, vreal=val("v_vreal")/100;
  function on(cc){ return scope==="All (consolidated)" ? true : (scope.split(" ")[0]===cc); }
@@ -751,7 +749,6 @@ function unlockValue(){
  document.getElementById("valueGate").classList.add("unlocked");
  document.querySelector(".calcresult")?.classList.remove("locked");
  if(err) err.textContent="";
- valueUnlocked=true;
  calc();
  recordLead(el.value.trim());
  return true;
