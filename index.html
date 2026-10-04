@@ -33,7 +33,7 @@ a{color:inherit}
 .nav{position:sticky;top:0;z-index:50;background:rgba(5,13,23,.78);backdrop-filter:blur(16px);border-bottom:1px solid color-mix(in srgb,var(--gold) 20%,transparent)}
 .navin{max-width:1240px;margin:auto;padding:14px 22px;display:flex;align-items:center;gap:24px}
 .brand{font:700 23px Georgia,serif;letter-spacing:1px}.brand span{color:var(--gold2)}
-.navlinks{display:flex;gap:18px;margin-left:auto}.navlinks a{text-decoration:none;color:#b9c9dc;font-size:13px}.navlinks a:hover{color:white}
+.navlinks{display:flex;gap:18px;margin-left:auto;align-items:center}.navlinks a{text-decoration:none;color:#b9c9dc;font-size:13px}.navlinks a:hover{color:white}
 .navcta{display:flex;gap:8px}.btn{border:0;border-radius:999px;padding:11px 17px;font-weight:800}.btn.gold{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#151006}.btn.ghost{background:transparent;border:1px solid var(--line);color:#dce8f4}
 .hero{max-width:1240px;margin:auto;padding:48px 22px 50px;display:grid;grid-template-columns:1.25fr .75fr;gap:44px;align-items:center}
 .launch20{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:0 0 22px;padding:8px 11px;border:1px solid color-mix(in srgb,var(--gold) 34%,transparent);background:linear-gradient(90deg,color-mix(in srgb,var(--gold) 12%,transparent),rgba(15,32,51,.62));border-radius:999px;width:max-content;max-width:100%;box-shadow:0 10px 35px rgba(0,0,0,.14)}
@@ -151,7 +151,7 @@ html[dir="rtl"] .langbox{margin-left:0;margin-right:6px}
 
 
 /* FINAL MOBILE PASS — optimized for 320–480px phones */
-html,body{max-width:100%;overflow-x:hidden}
+html,body{max-width:100%;overflow-x:clip}
 img,svg,video{max-width:100%;height:auto}
 .navin{min-width:0}
 .brand{white-space:nowrap}
@@ -309,7 +309,9 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif}
 
 /* nav */
 .navlinks a{white-space:nowrap}
-.menubtn{display:none;margin-left:8px;background:transparent;border:1px solid var(--line);color:#dce8f4;border-radius:999px;padding:8px 13px;font-size:12px;font-weight:700}
+.navcta .btn{white-space:nowrap;padding:10px 15px}
+@media(max-width:1400px){body[data-choice="ent"] .navbot{display:none}}
+.menubtn{display:none;margin-left:auto;background:transparent;border:1px solid var(--line);color:#dce8f4;border-radius:999px;padding:8px 13px;font-size:12px;font-weight:700}
 @media(max-width:1180px){.navbot{display:none}}
 @media(max-width:1060px){.navlinks{gap:13px}.navlinks a{font-size:12px}}
 @media(max-width:900px){
@@ -563,9 +565,9 @@ body[data-mode="ent"] .shoes i:not(.b),body[data-mode="com"] .shoes i:not(.g),bo
 body[data-mode="ent"] .shoes .b,body[data-mode="com"] .shoes .g,body[data-mode="fam"] .shoes .p{transform:scale(1.3)}
 .navlinks a.cur{color:var(--gold2)}
 .ent-only{display:none!important}
-body.ent-open .ent-only{display:inline-flex!important}
-body.ent-open .navlinks a.ent-only{display:inline!important}
-@media(max-width:900px){body.ent-open .nav.open .navlinks a.ent-only{display:block!important}}
+body[data-choice="ent"] .ent-only{display:inline-flex!important}
+body[data-choice="ent"] .navlinks a.ent-only{display:inline!important}
+@media(max-width:900px){body[data-choice="ent"] .nav.open .navlinks a.ent-only{display:block!important}}
 
 /* world-coloured entry points (always shown together, like the shoes) */
 .door.w-ent,.door.w-com,.door.w-fam{border-color:color-mix(in srgb,var(--w) 55%,transparent);background:linear-gradient(150deg,color-mix(in srgb,var(--w) 14%,transparent),rgba(10,22,37,.55))}
@@ -676,7 +678,89 @@ body[data-mood="stretched"] .atmo{filter:saturate(.7)}
 @keyframes petal{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--r));opacity:0}}
 @media(prefers-reduced-motion:reduce){.flame,.spin,.bob,.doodle-in,.thinking .ci-av i{animation:none!important}.petal{display:none}}
 @media(max-width:600px){.today .motif{width:44px;height:44px}.today .occ{font-size:14px}}
+
+/* ===================== Gateways: choose a world ===================== */
+.gates{max-width:1240px;margin:auto;padding:30px 22px 70px}
+.gates-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:22px}
+.gates-head h2{font:700 clamp(34px,4.4vw,56px)/1.04 Georgia,serif;margin:4px 0 0}
+.gates-head>p{max-width:520px;color:var(--muted);margin:0}
+.gate-grid{display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:16px;align-items:start}
+.gate{border:1px solid color-mix(in srgb,var(--w) 45%,transparent);border-radius:22px;overflow:hidden;background:linear-gradient(180deg,color-mix(in srgb,var(--w) 10%,#081323),#071120);transition:opacity .5s,filter .5s,border-color .4s,box-shadow .4s}
+.gate:hover{border-color:var(--w);box-shadow:0 22px 60px color-mix(in srgb,var(--w) 22%,transparent)}
+.gate-door{display:block;width:100%;padding:0;border:0;background:none;color:inherit;text-align:left;cursor:pointer;font:inherit}
+.gate-art{position:relative;display:block;aspect-ratio:400/260;overflow:hidden}
+.gate-art svg{position:absolute;inset:0;width:100%;height:100%;transform-origin:var(--ox) var(--oy);transition:transform .9s cubic-bezier(.55,0,.2,1)}
+.gate-art:after{content:"";position:absolute;inset:0;background:var(--w);opacity:0;transition:opacity .7s ease .25s;pointer-events:none}
+.walker{transform-box:fill-box;transform-origin:50% 100%;transition:transform .7s cubic-bezier(.3,.7,.2,1)}
+.door-light,.door-spill{transition:opacity .5s}
+.gate-door:hover .walker,.gate-door:focus-visible .walker{transform:translateY(-6px) scale(.86)}
+.gate-door:hover .door-spill{opacity:.9}
+.gate.entering .gate-art svg{transform:scale(3.2)}
+.gate.entering .gate-art:after{opacity:.55}
+.gate.entering .walker{transform:translateY(-14px) scale(.55)}
+.gate-cap{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center;padding:16px 18px 14px;border-bottom:1px solid color-mix(in srgb,var(--w) 25%,transparent)}
+.gate-cap b{font:700 24px/1.15 Georgia,serif;color:#fff}
+.gate-cap span{grid-column:1;font-size:13px;color:#c6d3e0}
+.gate-cap .go{grid-column:2;grid-row:1/3;font-style:normal;font-weight:800;font-size:13px;border-radius:999px;padding:10px 16px;background:var(--w);color:#08101c;white-space:nowrap;transition:transform .3s}
+.gate-door:hover .go{transform:translateX(3px)}
+.w-ent .gate-cap .go{color:#fff}
+/* the diagram under each door */
+.tree{list-style:none;margin:0;padding:14px 16px 18px;display:grid;gap:8px}
+.tree button{display:block;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer;border:1px solid color-mix(in srgb,var(--w) 28%,#1b2f45);background:rgba(8,18,32,.75);border-radius:12px;padding:10px 12px;transition:border-color .2s,background .2s}
+.tree button:hover,.tree button:focus-visible{border-color:var(--w);background:color-mix(in srgb,var(--w) 12%,#08121f)}
+.tree b{display:block;font-size:14px;color:#fff}
+.tree small{display:block;font-size:12px;color:#a9bccd;line-height:1.4;margin-top:2px}
+.tree-ent .t-root{border-color:color-mix(in srgb,var(--w) 70%,transparent);background:color-mix(in srgb,var(--w) 16%,#08121f);text-align:center;max-width:300px;margin:0 auto;position:relative}
+.tree-ent .t-root b{font:700 17px Georgia,serif}
+.t-branches{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:18px}
+.t-branches:before{content:"";position:absolute;top:0;left:50%;height:10px;border-left:1px solid color-mix(in srgb,var(--w) 60%,transparent)}
+.t-branches:after{content:"";position:absolute;top:10px;left:25%;right:25%;border-top:1px solid color-mix(in srgb,var(--w) 60%,transparent)}
+.t-for{margin:4px 2px 0;font-size:12px;color:#8fb3a3;line-height:1.5}
+.tree-fam{counter-reset:st;position:relative}
+.tree-fam:before{content:"";position:absolute;left:29px;top:26px;bottom:34px;border-left:2px dashed color-mix(in srgb,var(--w) 55%,transparent)}
+.tree-fam li{counter-increment:st;position:relative}
+.tree-fam button{padding-left:42px}
+.tree-fam li:before{content:counter(st);position:absolute;left:4px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font:700 11px Inter,sans-serif;background:var(--w);color:#22061a;z-index:1;margin-left:2px}
+.tree-fam:after{content:"and back to the beginning: a grandparent's letter, opened at a wedding";display:block;font-size:11px;color:#dba7c3;padding:2px 4px 0 42px;font-style:italic}
+.choose-hint{margin-top:22px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:16px 20px;border:1px dashed color-mix(in srgb,var(--gold) 55%,transparent);border-radius:16px;background:color-mix(in srgb,var(--gold) 6%,transparent)}
+.choose-hint p{margin:0;color:#c9d6e3}
+.choose-hint b{color:#fff}
+
+/* only the chosen world is shown */
+.js .zone{display:none}
+.js .after-choice{display:none}
+body[data-choice="ent"] #ent-chapter,body[data-choice="com"] #community,body[data-choice="fam"] #life{display:block}
+body[data-choice] .after-choice{display:block}
+body[data-choice] .choose-hint{display:none}
+body[data-choice] .gate{opacity:.5;filter:saturate(.5)}
+body[data-choice] .gate:hover,body[data-choice] .gate:focus-within{opacity:1;filter:none}
+body[data-choice="ent"] .gate.w-ent,body[data-choice="com"] .gate.w-com,body[data-choice="fam"] .gate.w-fam{opacity:1;filter:none;border-color:var(--w);box-shadow:0 0 0 2px color-mix(in srgb,var(--w) 40%,transparent)}
+body[data-choice="ent"] .gate.w-ent .go,body[data-choice="com"] .gate.w-com .go,body[data-choice="fam"] .gate.w-fam .go{font-size:0}
+body[data-choice="ent"] .gate.w-ent .go:after,body[data-choice="com"] .gate.w-com .go:after,body[data-choice="fam"] .gate.w-fam .go:after{content:"You're here";font-size:13px}
+body[data-choice="ent"] #entOpener{display:none}
+.room.flash,.sarthi.flash{animation:flash 1.6s ease}
+@keyframes flash{0%,100%{box-shadow:none}30%{box-shadow:0 0 0 3px var(--gold2),0 0 40px color-mix(in srgb,var(--gold) 50%,transparent)}}
+.zone-enter{animation:unfold .8s cubic-bezier(.2,.7,.2,1) both}
+
+/* world switcher in the nav */
+.navlinks .wpill{border:1px solid color-mix(in srgb,var(--w) 50%,transparent);border-radius:999px;padding:6px 12px 6px 22px;position:relative;color:#d8e3ee}
+.navlinks .wpill:before{content:"";position:absolute;left:9px;top:50%;width:7px;height:7px;margin-top:-3.5px;border-radius:50%;background:var(--w)}
+body[data-choice="ent"] .navlinks .wpill.w-ent,body[data-choice="com"] .navlinks .wpill.w-com,body[data-choice="fam"] .navlinks .wpill.w-fam{background:var(--w);color:#08101c;border-color:var(--w)}
+body[data-choice="ent"] .navlinks .wpill.w-ent:before,body[data-choice="com"] .navlinks .wpill.w-com:before,body[data-choice="fam"] .navlinks .wpill.w-fam:before{background:#08101c}
+body[data-choice="ent"] .navlinks .wpill.w-ent{color:#fff}
+body[data-choice="ent"] .navlinks .wpill.w-ent:before{background:#fff}
+
+/* the closing invitation shows only the other worlds */
+body[data-choice="ent"] .closing .door.w-ent,body[data-choice="com"] .closing .door.w-com,body[data-choice="fam"] .closing .door.w-fam{display:none}
+body[data-choice] .closing .doors{grid-template-columns:repeat(2,1fr)}
+body[data-choice="ent"] .bq.w-ent,body[data-choice="com"] .bq.w-com,body[data-choice="fam"] .bq.w-fam{order:-1}
+.bquotes{display:grid}
+
+@media(max-width:1100px){.gate-grid{grid-template-columns:1fr 1fr}.gate.w-ent{grid-column:1/-1}.gate.w-ent .gate-door{display:grid;grid-template-columns:1.2fr 1fr}.gate.w-ent .gate-cap{border-bottom:0;align-content:center;grid-template-columns:1fr}.gate.w-ent .gate-cap .go{grid-column:1;grid-row:auto;justify-self:start;margin-top:10px}}
+@media(max-width:700px){.gates{padding:20px 15px 50px}.gates-head{flex-direction:column;align-items:start}.gate-grid{grid-template-columns:1fr}.gate.w-ent .gate-door{display:block}.gate.w-ent .gate-cap{border-bottom:1px solid color-mix(in srgb,var(--w) 25%,transparent);grid-template-columns:1fr auto}.gate.w-ent .gate-cap .go{grid-column:2;grid-row:1/3;margin:0}.t-branches{grid-template-columns:1fr}.t-branches:after{display:none}.gate-cap b{font-size:21px}body[data-choice] .closing .doors{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.gate-art svg,.walker,.gate-art:after{transition:none!important}}
 </style>
+<script>document.documentElement.className+=" js"</script>
 </head>
 <body data-mode="hub">
 <div class="atmo hub"></div><div class="atmo ent"></div><div class="atmo com"></div><div class="atmo fam"></div>
@@ -709,14 +793,8 @@ body[data-mood="stretched"] .atmo{filter:saturate(.7)}
    <g><ellipse cx="140" cy="26.6" rx="12.5" ry="3.4" fill="#16273f" stroke="#f0d18a" stroke-width="1"/><circle cx="140" cy="17.5" r="8.5" fill="#f0d18a" stroke="#d6ae55" stroke-width="1.2"/><text x="140" y="21.2" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="700" fill="#3a2c07">₹</text><animateTransform attributeName="transform" type="translate" values="0 0;0 -1.6;0 0" dur="1.9s" repeatCount="indefinite"/></g>
    <text x="158" y="16" text-anchor="middle" font-family="Georgia,serif" font-size="8" font-weight="700" fill="#50d69a">+₹<animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.7;1" dur="2.6s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" values="0 5;0 -6" dur="2.6s" repeatCount="indefinite"/></text>
   </svg></div>
-  <div class="navlinks" id="navLinks"><a href="#ecosystem">Products</a><a href="#belief">Our belief</a><a href="#enterprise" data-w="ent">Enterprise</a><a href="#community" data-w="com">Community</a><a href="#life" data-w="fam">Life journey</a><a href="#value" class="ent-only" data-w="ent">Value Lab</a></div>
-  <div class="langbox">
-  <label for="langSelect" class="sr-only">Language</label>
-  <select id="langSelect" aria-label="Language">
-    <option value="en">EN</option><option value="hi">हिन्दी</option><option value="de">DE</option>
-    <option value="nl">NL</option><option value="ja">日本語</option><option value="ar">العربية</option><option value="fr">FR</option>
-  </select>
-</div>
+  <div class="navlinks" id="navLinks"><a href="#ecosystem">All of DuaDesk</a><a href="#enterprise" class="wpill w-ent" data-w="ent">Business</a><a href="#community" class="wpill w-com" data-w="com">Community</a><a href="#life" class="wpill w-fam" data-w="fam">Family</a><a href="#value" class="ent-only" data-w="ent">Value Lab</a></div>
+  <!-- Language selector hidden for now: translations for the new sections are not ready. The selector and all translation code (DD_T, DD_I18N, ddTranslate) are kept; to restore, put the langbox markup back here and set DD_LANG_ENABLED to true. -->
 <div class="navcta"><button id="assessTop" class="btn gold ent-only" onclick="goTo('assessment')">Free Assessment</button><button id="demoTop" class="btn ghost" onclick="openDemo()">Request a Demo →</button></div>
 <button class="menubtn" id="menuBtn" type="button" aria-expanded="false" aria-controls="navLinks">Menu</button>
 </div></nav>
@@ -728,12 +806,7 @@ body[data-mood="stretched"] .atmo{filter:saturate(.7)}
   <div class="today" id="today"><p class="kick" style="margin:0">DuaDesk: AI for the enterprise, the community and the family</p></div>
   <h1>AI that <em>does the work.</em><br>Not just AI that talks.</h1>
   <p class="eco-lead">DuaDesk began at the CFO's desk. Today it is one family of AI teams: running finance, procurement and audit for companies, cases for housing societies and wards, and the everyday work of a home. And it walks beside families from the day two people meet to the letters a grandparent leaves behind. In every one of them, AI prepares and a person decides.</p>
-  <div class="doors">
-   <a class="door w-ent" href="#enterprise" data-interest="ent"><b>For your business</b><span>Dua Sarthi for the CEO and six command centres</span></a>
-   <a class="door w-com" href="#community" data-interest="com"><b>For your society and home</b><span>Philia for RWAs and wards, and Dua Home</span></a>
-   <a class="door w-fam" href="#life" data-interest="fam"><b>For your family</b><span>From marriage to parenting, care and legacy</span></a>
-  </div>
-  <div class="eco-cta"><button class="btn gold" onclick="openDemo()">Request a demo</button><a class="btn ghost" href="#ecosystem" style="text-decoration:none">See every product</a></div>
+  <div class="eco-cta"><a class="btn gold" href="#ecosystem" style="text-decoration:none">Choose your world</a><button class="btn ghost" onclick="openDemo()">Request a demo</button></div>
  </div>
 <div class="eco-side">
  <div class="checkin" id="checkin">
@@ -744,68 +817,215 @@ body[data-mood="stretched"] .atmo{filter:saturate(.7)}
   <p class="ci-note">Nothing you type here is saved. <button type="button" id="whyBtn">Why does this page change?</button></p>
   <div class="why" id="whyPanel" hidden></div>
  </div>
- <aside class="day" aria-labelledby="dayTitle">
-  <h2 id="dayTitle">A day with DuaDesk</h2>
-  <p class="sub">An illustrative day, drawn from how each product works.</p>
-  <ol>
-   <li class="w-ent"><time>06:30</time><div><span class="who">Fixed Assets</span><p>Kavya, an AI agent, prepares the month's depreciation and lease journals.</p><span class="gate">A second person signs off before Tally</span></div></li>
-   <li class="w-com"><time>07:00</time><div><span class="who">Dua Home</span><p>The morning briefing notices the bedroom AC drawing 38% more than expected.</p><span class="gate">The service visit waits for your approval</span></div></li>
-   <li class="w-ent"><time>08:30</time><div><span class="who">Dua Vyapar</span><p>A shopkeeper's AI Munim suggests reordering Diwali sweets before they run out.</p><span class="gate">Nothing is ordered without his yes</span></div></li>
-   <li class="w-ent"><time>09:00</time><div><span class="who">Dua Sarthi</span><p>The CEO's cockpit ranks the three things that need her today.</p><span class="gate">Every figure opens to its source</span></div></li>
-   <li class="w-com"><time>11:40</time><div><span class="who">Philia</span><p>A resident reports a broken water pump on WhatsApp. It becomes a case with an owner and a clock.</p><span class="gate">Closed only with proof the resident confirms</span></div></li>
-   <li class="w-fam"><time>21:00</time><div><span class="who">Dua Parivaar</span><p>"Mumma, why is the moon following our car?" is kept in ten seconds.</p><span class="gate">Kabir gets his whole story at 18</span></div></li>
-   <li class="w-fam"><time>02:10</time><div><span class="who">Dua Saathi</span><p>Maa presses SOS. No AI sits in this path.</p><span class="gate">A person answers within two minutes</span></div></li>
-  </ol>
- </aside>
 </div>
 </header>
+<section class="gates" id="ecosystem" data-world="hub">
+ <div class="gates-head">
+  <div><p class="kick">Thirteen products, five country editions, three worlds</p><h2>Where shall we begin?</h2></div>
+  <p>Choose a door. The page below will show only what belongs to that world, and you can step into another one any time from the top bar.</p>
+ </div>
+ <div class="gate-grid">
 
-<section class="section" id="ecosystem" data-world="hub">
- <div class="sectionhead"><div><p class="kick">The DuaDesk family</p><h2>One family of products, two pillars.</h2></div><p>Each product has its own home. Start with the one that fits you; they are built to work together.</p></div>
- <div class="map">
-  <div class="pillar w-ent" data-interest="ent">
-   <h3>Enterprise solutions</h3>
-   <p>For companies, from the CEO's view down to every function.</p>
-   <button class="pnode root" type="button" onclick="openDemoFor('Dua Sarthi (CEO)')"><span><b>Dua Sarthi<span class="new">New</span></b><small>The AI operating system for the CEO: what needs you, am I protected, where the company is heading.</small></span><span class="url">Request a demo</span></button>
-   <div class="branch grid2">
-    <div>
-     <a class="pnode" href="https://cfo.duadesk.com" target="_blank" rel="noopener"><span><b>AI CFO, India</b><small>Finance as specialist AI desks</small></span><span class="url">cfo ↗</span></a>
-     <div class="twig" aria-label="International CFO editions"><a href="https://de.duadesk.com" target="_blank" rel="noopener">Germany</a><a href="https://nl.duadesk.com" target="_blank" rel="noopener">Netherlands</a><a href="https://uae.duadesk.com" target="_blank" rel="noopener">UAE, e-invoicing</a><a href="https://sa.duadesk.com" target="_blank" rel="noopener">Saudi, ZATCA e-invoicing <span class="new">New</span></a><a href="https://jp.duadesk.com" target="_blank" rel="noopener">Japan</a></div>
+  <article class="gate w-ent" data-gate="ent" data-interest="ent">
+   <button class="gate-door" type="button" data-choose="ent" aria-describedby="gtEnt">
+    <span class="gate-art" style="--ox:50%;--oy:84%">
+     <svg viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+       <linearGradient id="gEntSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#050f26"/><stop offset="1" stop-color="#1b4a8c"/></linearGradient>
+       <radialGradient id="gEntGlow"><stop offset="0" stop-color="#3d8bff" stop-opacity=".55"/><stop offset="1" stop-color="#3d8bff" stop-opacity="0"/></radialGradient>
+       <radialGradient id="gEntDoor"><stop offset="0" stop-color="#fff3d2"/><stop offset=".6" stop-color="#ffd98a"/><stop offset="1" stop-color="#e7a94c"/></radialGradient>
+       <linearGradient id="gEntSpill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd98a" stop-opacity=".45"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></linearGradient>
+      </defs>
+      <rect width="400" height="260" fill="url(#gEntSky)"/>
+      <circle cx="330" cy="46" r="110" fill="url(#gEntGlow)"/>
+      <circle cx="330" cy="46" r="9" fill="#dfeaff" opacity=".85"/>
+      <g fill="#0f2a52"><rect x="0" y="122" width="58" height="140"/><rect x="44" y="92" width="46" height="170"/><rect x="306" y="102" width="52" height="160"/><rect x="350" y="132" width="50" height="130"/></g>
+      <g fill="#ffd98a" opacity=".45"><rect x="10" y="132" width="6" height="5"/><rect x="26" y="146" width="6" height="5"/><rect x="54" y="104" width="6" height="5"/><rect x="70" y="128" width="6" height="5"/><rect x="316" y="114" width="6" height="5"/><rect x="334" y="140" width="6" height="5"/><rect x="362" y="146" width="6" height="5"/><rect x="380" y="170" width="6" height="5"/></g>
+      <rect x="150" y="14" width="100" height="20" fill="#0a2146"/><rect x="198" y="0" width="4" height="16" fill="#0a2146"/>
+      <rect x="118" y="30" width="164" height="202" fill="#0a2146"/>
+      <g fill="#14325f">
+       <rect x="126" y="40" width="14" height="10"/><rect x="146" y="40" width="14" height="10"/><rect x="166" y="40" width="14" height="10"/><rect x="186" y="40" width="14" height="10"/><rect x="206" y="40" width="14" height="10"/><rect x="226" y="40" width="14" height="10"/><rect x="246" y="40" width="14" height="10"/><rect x="266" y="40" width="10" height="10"/>
+       <rect x="126" y="58" width="14" height="10"/><rect x="166" y="58" width="14" height="10"/><rect x="206" y="58" width="14" height="10"/><rect x="246" y="58" width="14" height="10"/>
+       <rect x="146" y="76" width="14" height="10"/><rect x="186" y="76" width="14" height="10"/><rect x="226" y="76" width="14" height="10"/><rect x="266" y="76" width="10" height="10"/>
+       <rect x="126" y="94" width="14" height="10"/><rect x="166" y="94" width="14" height="10"/><rect x="206" y="94" width="14" height="10"/><rect x="246" y="94" width="14" height="10"/>
+       <rect x="146" y="112" width="14" height="10"/><rect x="186" y="112" width="14" height="10"/><rect x="226" y="112" width="14" height="10"/>
+       <rect x="126" y="130" width="14" height="10"/><rect x="166" y="130" width="14" height="10"/><rect x="246" y="130" width="14" height="10"/><rect x="266" y="130" width="10" height="10"/>
+       <rect x="146" y="148" width="14" height="10"/><rect x="206" y="148" width="14" height="10"/><rect x="226" y="148" width="14" height="10"/>
+      </g>
+      <g fill="#ffd98a">
+       <rect x="146" y="58" width="14" height="10" opacity=".9"/><rect x="186" y="58" width="14" height="10" opacity=".75"/><rect x="226" y="58" width="14" height="10" opacity=".9"/>
+       <rect x="126" y="76" width="14" height="10" opacity=".7"/><rect x="166" y="76" width="14" height="10" opacity=".9"/><rect x="206" y="76" width="14" height="10" opacity=".8"/><rect x="246" y="76" width="14" height="10" opacity=".9"/>
+       <rect x="146" y="94" width="14" height="10" opacity=".85"/><rect x="186" y="94" width="14" height="10" opacity=".9"/><rect x="226" y="94" width="14" height="10" opacity=".7"/><rect x="266" y="94" width="10" height="10" opacity=".8"/>
+       <rect x="126" y="112" width="14" height="10" opacity=".9"/><rect x="166" y="112" width="14" height="10" opacity=".75"/><rect x="206" y="112" width="14" height="10" opacity=".9"/><rect x="246" y="112" width="14" height="10" opacity=".85"/><rect x="266" y="112" width="10" height="10" opacity=".7"/>
+       <rect x="146" y="130" width="14" height="10" opacity=".8"/><rect x="186" y="130" width="14" height="10" opacity=".9"/><rect x="206" y="130" width="14" height="10" opacity=".9"/><rect x="226" y="130" width="14" height="10" opacity=".75"/>
+       <rect x="126" y="148" width="14" height="10" opacity=".85"/><rect x="166" y="148" width="14" height="10" opacity=".9"/><rect x="186" y="148" width="14" height="10" opacity=".7"/><rect x="246" y="148" width="14" height="10" opacity=".9"/><rect x="266" y="148" width="10" height="10" opacity=".85"/>
+      </g>
+      <rect x="160" y="168" width="80" height="13" rx="3" fill="#061733"/>
+      <circle cx="190" cy="174.5" r="2.6" fill="#3d8bff"/><circle cx="200" cy="174.5" r="2.6" fill="#1fc47d"/><circle cx="210" cy="174.5" r="2.6" fill="#ff4f9a"/>
+      <rect x="146" y="186" width="108" height="6" rx="2" fill="#9cc8ff" opacity=".55"/>
+      <rect class="door-light" x="166" y="192" width="68" height="40" fill="url(#gEntDoor)"/>
+      <path d="M200 192v40M183 192v40M217 192v40" stroke="#c99a52" stroke-width="1.4" opacity=".7"/>
+      <rect x="0" y="232" width="400" height="28" fill="#040d20"/>
+      <path class="door-spill" d="M166 232h68l70 28H96z" fill="url(#gEntSpill)"/>
+      <path d="M150 238h100M138 246h124" stroke="#0e2346" stroke-width="1.5"/>
+      <g fill="#0a2a1f"><rect x="126" y="220" width="16" height="12" rx="2"/><rect x="258" y="220" width="16" height="12" rx="2"/></g>
+      <g fill="#123d2c"><circle cx="134" cy="212" r="10"/><circle cx="266" cy="212" r="10"/></g>
+      <g class="walker" fill="#020816">
+       <circle cx="200" cy="211" r="5.2"/>
+       <path d="M192.5 218.5c0-2 2-3 3-3h9c1 0 3 1 3 3l1.5 17h-18z"/>
+       <path d="M196 235l-2.2 15h4l1.8-15zM204 235l2.4 14.5h-4l-1.6-14.5z"/>
+       <rect x="208.5" y="228" width="7" height="6" rx="1"/>
+      </g>
+     </svg>
+    </span>
+    <span class="gate-cap"><b>Enter the enterprise</b><span id="gtEnt">For companies, from the CEO's desk to every function</span><i class="go">Walk in</i></span>
+   </button>
+   <div class="tree tree-ent" aria-label="Enterprise products">
+    <button type="button" class="t-root" data-go="sarthi"><b>Dua Sarthi</b><small>The CEO's view over everything below</small></button>
+    <div class="t-branches">
+     <button type="button" data-go="cfo"><b>Finance</b><small>AI CFO, with editions for India, Germany, the Netherlands, UAE, Saudi Arabia and Japan</small></button>
+     <button type="button" data-go="cpo"><b>Procurement</b><small>AI CPO, with customs and trade, and RFQ and e-sourcing</small></button>
+     <button type="button" data-go="fassets"><b>Fixed assets</b><small>Every machine, building and laptop, accounted for</small></button>
+     <button type="button" data-go="pramaan"><b>Audit</b><small>Dua Pramaan, across 20 audit types</small></button>
+     <button type="button" data-go="pragya"><b>Advisory</b><small>Dua Pragya, an AI consulting workforce</small></button>
+     <button type="button" data-go="vyapar"><b>Retail</b><small>Dua Vyapar, the AI partner for a shop</small></button>
     </div>
-    <div>
-     <a class="pnode" href="https://cpo.duadesk.com" target="_blank" rel="noopener"><span><b>AI CPO</b><small>Procurement, spend to payment</small></span><span class="url">cpo ↗</span></a>
-     <div class="twig" aria-label="Inside AI CPO"><span>Global Trade &amp; Customs <span class="new">New</span></span><span>AI RFQ &amp; e-Sourcing <span class="new">New</span></span></div>
-    </div>
-    <a class="pnode" href="https://fassets.duadesk.com" target="_blank" rel="noopener"><span><b>Fixed Assets<span class="new">New</span></b><small>Every asset, accounted for</small></span><span class="url">fassets ↗</span></a>
-    <a class="pnode" href="https://audit.duadesk.com" target="_blank" rel="noopener"><span><b>Dua Pramaan</b><small>AI-assisted audit</small></span><span class="url">audit ↗</span></a>
-    <a class="pnode" href="https://consulting.duadesk.com" target="_blank" rel="noopener"><span><b>Dua Pragya</b><small>AI advisory and consulting</small></span><span class="url">consulting ↗</span></a>
-    <a class="pnode" href="https://retail.duadesk.com" target="_blank" rel="noopener"><span><b>Dua Vyapar<span class="new">New</span></b><small>The AI partner for your shop</small></span><span class="url">retail ↗</span></a>
    </div>
-  </div>
-  <div class="pillar w-com" data-interest="com">
-   <h3>Community and society</h3>
-   <p>For the places we live and the people we love.</p>
-   <div class="branch" style="margin-left:0;padding-left:0;border:0">
-    <a class="pnode" href="https://philia.duadesk.com" target="_blank" rel="noopener"><span><b>Philia<span class="new">New</span></b><small>The AI office for your RWA, ward or society</small></span><span class="url">philia ↗</span></a>
-    <a class="pnode" href="https://home.duadesk.com" target="_blank" rel="noopener"><span><b>Dua Home<span class="new">New</span></b><small>Your home, looked after by AI that asks first</small></span><span class="url">home ↗</span></a>
-    <div class="lifegroup w-fam" data-interest="fam"><b>The complete human life cycle <span class="new">New</span></b>
-     <div class="branch">
-      <a class="pnode" href="https://marriage.duadesk.com" target="_blank" rel="noopener"><span><b>Marriage Companion</b><small>From getting to know each other to parenthood</small></span><span class="url">marriage ↗</span></a>
-      <a class="pnode" href="https://parenting.duadesk.com" target="_blank" rel="noopener"><span><b>Dua Parivaar</b><small>A child's story, age 5 to 18</small></span><span class="url">parenting ↗</span></a>
-      <a class="pnode" href="https://saathi.duadesk.com" target="_blank" rel="noopener"><span><b>Dua Saathi</b><small>Care for Maa and Papa at home</small></span><span class="url">saathi ↗</span></a>
-      <a class="pnode" href="https://legacy.duadesk.com" target="_blank" rel="noopener"><span><b>Dua Legacy</b><small>A life that continues to speak</small></span><span class="url">legacy ↗</span></a>
-     </div>
-    </div>
+  </article>
+
+  <article class="gate w-com" data-gate="com" data-interest="com">
+   <button class="gate-door" type="button" data-choose="com" aria-describedby="gtCom">
+    <span class="gate-art" style="--ox:50%;--oy:76%">
+     <svg viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+       <linearGradient id="gComSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#03171a"/><stop offset="1" stop-color="#0f4a37"/></linearGradient>
+       <radialGradient id="gComGlow"><stop offset="0" stop-color="#1fc47d" stop-opacity=".5"/><stop offset="1" stop-color="#1fc47d" stop-opacity="0"/></radialGradient>
+       <radialGradient id="gLamp"><stop offset="0" stop-color="#ffe39a" stop-opacity=".9"/><stop offset="1" stop-color="#ffe39a" stop-opacity="0"/></radialGradient>
+      </defs>
+      <rect width="400" height="260" fill="url(#gComSky)"/>
+      <circle cx="72" cy="40" r="100" fill="url(#gComGlow)"/>
+      <circle cx="72" cy="40" r="10" fill="#effff6" opacity=".9"/>
+      <g fill="#0b3125">
+       <rect x="24" y="72" width="94" height="150"/><rect x="140" y="50" width="116" height="172"/><rect x="278" y="86" width="98" height="136"/>
+      </g>
+      <g fill="#1a5641"><rect x="52" y="60" width="22" height="12" rx="3"/><rect x="178" y="36" width="26" height="14" rx="3"/><rect x="212" y="38" width="20" height="12" rx="3"/><rect x="310" y="74" width="22" height="12" rx="3"/></g>
+      <g stroke="#1a5641" stroke-width="1.5"><path d="M56 72v-4M70 72v-4M182 50v-4M200 50v-4M216 50v-4M228 50v-4M314 86v-4M328 86v-4"/></g>
+      <g fill="#123f30">
+       <rect x="34" y="84" width="12" height="9"/><rect x="54" y="84" width="12" height="9"/><rect x="94" y="84" width="12" height="9"/><rect x="74" y="104" width="12" height="9"/><rect x="34" y="124" width="12" height="9"/><rect x="94" y="124" width="12" height="9"/><rect x="54" y="144" width="12" height="9"/><rect x="74" y="164" width="12" height="9"/>
+       <rect x="152" y="64" width="12" height="9"/><rect x="192" y="64" width="12" height="9"/><rect x="232" y="64" width="12" height="9"/><rect x="172" y="84" width="12" height="9"/><rect x="212" y="84" width="12" height="9"/><rect x="152" y="104" width="12" height="9"/><rect x="232" y="104" width="12" height="9"/><rect x="192" y="124" width="12" height="9"/><rect x="172" y="144" width="12" height="9"/><rect x="232" y="144" width="12" height="9"/>
+       <rect x="290" y="98" width="12" height="9"/><rect x="350" y="98" width="12" height="9"/><rect x="310" y="118" width="12" height="9"/><rect x="290" y="138" width="12" height="9"/><rect x="330" y="158" width="12" height="9"/>
+      </g>
+      <g fill="#ffe39a">
+       <rect x="74" y="84" width="12" height="9" opacity=".9"/><rect x="34" y="104" width="12" height="9" opacity=".8"/><rect x="54" y="104" width="12" height="9" opacity=".9"/><rect x="94" y="104" width="12" height="9" opacity=".7"/><rect x="54" y="124" width="12" height="9" opacity=".85"/><rect x="74" y="124" width="12" height="9" opacity=".9"/><rect x="34" y="144" width="12" height="9" opacity=".9"/><rect x="94" y="144" width="12" height="9" opacity=".8"/>
+       <rect x="172" y="64" width="12" height="9" opacity=".9"/><rect x="212" y="64" width="12" height="9" opacity=".8"/><rect x="152" y="84" width="12" height="9" opacity=".9"/><rect x="192" y="84" width="12" height="9" opacity=".75"/><rect x="232" y="84" width="12" height="9" opacity=".9"/><rect x="172" y="104" width="12" height="9" opacity=".85"/><rect x="192" y="104" width="12" height="9" opacity=".9"/><rect x="212" y="104" width="12" height="9" opacity=".7"/><rect x="152" y="124" width="12" height="9" opacity=".9"/><rect x="212" y="124" width="12" height="9" opacity=".85"/><rect x="232" y="124" width="12" height="9" opacity=".9"/><rect x="152" y="144" width="12" height="9" opacity=".8"/><rect x="192" y="144" width="12" height="9" opacity=".9"/><rect x="212" y="144" width="12" height="9" opacity=".9"/>
+       <rect x="310" y="98" width="12" height="9" opacity=".9"/><rect x="330" y="98" width="12" height="9" opacity=".75"/><rect x="290" y="118" width="12" height="9" opacity=".9"/><rect x="350" y="118" width="12" height="9" opacity=".85"/><rect x="310" y="138" width="12" height="9" opacity=".9"/><rect x="350" y="138" width="12" height="9" opacity=".8"/><rect x="290" y="158" width="12" height="9" opacity=".9"/>
+      </g>
+      <g fill="#0d3a2b"><rect x="12" y="176" width="5" height="30"/><rect x="128" y="172" width="5" height="34"/><rect x="266" y="174" width="5" height="32"/><rect x="386" y="178" width="5" height="28"/></g>
+      <g fill="#14563f"><circle cx="14" cy="166" r="16"/><circle cx="130" cy="160" r="18"/><circle cx="268" cy="164" r="16"/><circle cx="388" cy="170" r="14"/></g>
+      <g fill="#1d6b4f"><circle cx="8" cy="160" r="8"/><circle cx="124" cy="152" r="9"/><circle cx="262" cy="157" r="8"/></g>
+      <rect x="0" y="196" width="400" height="22" fill="#0a2a1f"/><rect x="0" y="194" width="400" height="4" fill="#1a5641"/>
+      <circle cx="157" cy="138" r="18" fill="url(#gLamp)"/><circle cx="243" cy="138" r="18" fill="url(#gLamp)"/>
+      <rect x="148" y="146" width="16" height="72" fill="#1d6b4f"/><rect x="236" y="146" width="16" height="72" fill="#1d6b4f"/>
+      <circle cx="156" cy="139" r="4" fill="#ffe39a"/><circle cx="244" cy="139" r="4" fill="#ffe39a"/>
+      <rect x="140" y="124" width="120" height="18" rx="4" fill="#062118" stroke="#7eecb6" stroke-width="1.2"/>
+      <text x="200" y="137" text-anchor="middle" font-family="Georgia,serif" font-size="10" fill="#bdf5da">Welcome home</text>
+      <rect x="280" y="180" width="30" height="38" fill="#14563f"/><rect x="286" y="188" width="18" height="10" fill="#ffe39a" opacity=".85"/><rect x="276" y="176" width="38" height="5" fill="#1d6b4f"/>
+      <path d="M256 200l38-30" stroke="#f2f2f2" stroke-width="3" stroke-dasharray="6 5" stroke-linecap="round"/>
+      <rect x="0" y="218" width="400" height="42" fill="#06231a"/>
+      <path d="M164 218h72l84 42H80z" fill="#0f3c2d"/>
+      <path class="door-spill" d="M164 218h72l84 42H80z" fill="#ffe39a" opacity=".06"/>
+      <path d="M200 222v6M200 234v8M200 248v10" stroke="#3e7a62" stroke-width="2"/>
+      <circle cx="110" cy="132" r="16" fill="url(#gLamp)"/><rect x="108" y="134" width="3" height="84" fill="#123f30"/><circle cx="110" cy="132" r="3.5" fill="#ffe39a"/>
+      <circle cx="356" cy="132" r="16" fill="url(#gLamp)"/><rect x="354" y="134" width="3" height="84" fill="#123f30"/><circle cx="356" cy="132" r="3.5" fill="#ffe39a"/>
+      <g class="walker" fill="#01110b">
+       <circle cx="194" cy="210" r="5"/>
+       <path d="M187 217c0-2 2-3 3-3h8c1 0 3 1 3 3l1.4 16h-17z"/>
+       <path d="M190.5 233l-2 14h4l1.7-14zM198 233l2.2 13.5h-4l-1.5-13.5z"/>
+       <rect x="181" y="225" width="6" height="8" rx="1.5"/>
+       <circle cx="211" cy="221" r="3.6"/>
+       <path d="M206 226c0-1.5 1.5-2.2 2.2-2.2h5.6c.7 0 2.2.7 2.2 2.2l1 10h-12z"/>
+       <path d="M208 236l-1.4 9h3l1.2-9zM213 236l1.6 8.6h-3l-1-8.6z"/>
+       <path d="M201.5 222l5 5" stroke="#01110b" stroke-width="2.4" stroke-linecap="round"/>
+      </g>
+     </svg>
+    </span>
+    <span class="gate-cap"><b>Enter your community</b><span id="gtCom">For housing societies, wards and homes</span><i class="go">Walk in</i></span>
+   </button>
+   <div class="tree tree-com" aria-label="Community products">
+    <button type="button" data-go="philia"><b>Housing societies and wards</b><small>Philia, the AI office for an RWA, ward or society</small></button>
+    <button type="button" data-go="home"><b>Your home</b><small>Dua Home, twelve AI helpers that ask before they act</small></button>
+    <p class="t-for">For RWA presidents, municipal councillors, apartment societies, gated villa communities and every household.</p>
    </div>
-  </div>
+  </article>
+
+  <article class="gate w-fam" data-gate="fam" data-interest="fam">
+   <button class="gate-door" type="button" data-choose="fam" aria-describedby="gtFam">
+    <span class="gate-art" style="--ox:50%;--oy:72%">
+     <svg viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+       <linearGradient id="gFamSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a0624"/><stop offset=".62" stop-color="#6e1f55"/><stop offset="1" stop-color="#ff9a6b"/></linearGradient>
+       <radialGradient id="gSun"><stop offset="0" stop-color="#ffe0a3"/><stop offset=".45" stop-color="#ffb36b" stop-opacity=".8"/><stop offset="1" stop-color="#ff7a59" stop-opacity="0"/></radialGradient>
+       <radialGradient id="gDiya"><stop offset="0" stop-color="#ffd27a" stop-opacity=".95"/><stop offset="1" stop-color="#ffb627" stop-opacity="0"/></radialGradient>
+      </defs>
+      <rect width="400" height="260" fill="url(#gFamSky)"/>
+      <circle cx="200" cy="164" r="96" fill="url(#gSun)"/>
+      <circle cx="200" cy="166" r="20" fill="#ffe7b0"/>
+      <path d="M0 178c60-18 110-6 160-14s110-16 240 6v90H0z" fill="#4a1640"/>
+      <path d="M0 196c80-10 140 2 200-4s130-6 200 0v68H0z" fill="#3a1033"/>
+      <path class="door-spill" d="M188 182c4 18-34 26-40 46s-6 22-16 32h136c-14-14-30-20-44-34s-16-26-24-44z" fill="#ffcf9a" opacity=".22"/>
+      <path d="M194 182c2 18-30 28-36 46s-8 22-14 32h112c-12-12-26-18-38-32s-14-28-18-46z" fill="#5a1d4e"/>
+      <g fill="#2a0a2c" transform="translate(42 4)">
+       <path d="M78 196h4v-18h26v18h4v-22l-17-10-17 10z"/>
+       <circle cx="85" cy="188" r="2.2" fill="#ffb627"/><circle cx="95" cy="186" r="2.2" fill="#ff7a1a"/><circle cx="105" cy="188" r="2.2" fill="#ffb627"/>
+      </g>
+      <g fill="#2a0a2c" transform="translate(150 2)"><rect x="128" y="182" width="26" height="3" rx="1"/><rect x="130" y="185" width="2" height="5"/><rect x="150" y="185" width="2" height="5"/><circle cx="135" cy="176" r="3"/><circle cx="146" cy="176" r="3"/><rect x="132" y="179" width="6" height="4" rx="2"/><rect x="143" y="179" width="6" height="4" rx="2"/></g>
+      <g fill="#2a0a2c" transform="translate(-128 -2)"><circle cx="292" cy="184" r="2.6"/><path d="M290 187h4l1 7h-6z"/><path d="M292 186l14-30" stroke="#2a0a2c" stroke-width=".8" fill="none"/></g>
+      <g transform="translate(-128 -2)"><path d="M306 146l7 8-7 8-7-8z" fill="#ff4f9a"/><path d="M306 162c-2 4 3 5 0 9" stroke="#ff4f9a" stroke-width="1" fill="none"/></g>
+      <g fill="#24081f"><rect x="248" y="166" width="5" height="22"/><circle cx="240" cy="160" r="12"/><circle cx="252" cy="152" r="14"/><circle cx="266" cy="160" r="12"/><circle cx="252" cy="166" r="10"/>
+       <path d="M234 166v18M242 168v16M262 168v16M270 164v20" stroke="#24081f" stroke-width="1.2"/></g>
+      <circle cx="244" cy="188" r="6" fill="url(#gDiya)"/><circle cx="260" cy="188" r="6" fill="url(#gDiya)"/>
+      <path d="M86 260V118h20v142zM294 260V118h20v142z" fill="#3b0f37"/>
+      <path d="M86 118h20M294 118h20" stroke="#ffcf7a" stroke-width="2"/>
+      <path d="M80 122C110 52 290 52 320 122" fill="none" stroke="#3b0f37" stroke-width="18" stroke-linecap="round"/>
+      <path d="M80 122C110 52 290 52 320 122" fill="none" stroke="#ffcf7a" stroke-width="1.6"/>
+      <path d="M96 116C124 64 276 64 304 116" fill="none" stroke="#ffcf7a" stroke-width=".8" opacity=".6"/>
+      <g fill="#2fd68e" transform="translate(0 2)">
+       <path d="M116 92l-4 12 8-4z"/><path d="M132 82l-3 13 8-5z"/><path d="M150 76l-2 13 7-6z"/><path d="M168 72l-1 13 7-7z"/><path d="M186 70l0 13 6-7z"/><path d="M204 70l1 13 5-8z"/><path d="M222 71l2 13 5-8z"/><path d="M240 74l3 13 4-9z"/><path d="M258 79l4 12 4-9z"/><path d="M274 87l5 11 3-10z"/>
+      </g>
+      <g>
+       <circle cx="110" cy="100" r="3.4" fill="#ffb627"/><circle cx="124" cy="88" r="3.4" fill="#ff7a1a"/><circle cx="141" cy="79" r="3.4" fill="#ffb627"/><circle cx="159" cy="74" r="3.4" fill="#ff7a1a"/><circle cx="177" cy="71" r="3.4" fill="#ffb627"/><circle cx="195" cy="70" r="3.4" fill="#ff7a1a"/><circle cx="213" cy="70" r="3.4" fill="#ffb627"/><circle cx="231" cy="72" r="3.4" fill="#ff7a1a"/><circle cx="249" cy="76" r="3.4" fill="#ffb627"/><circle cx="266" cy="83" r="3.4" fill="#ff7a1a"/><circle cx="282" cy="93" r="3.4" fill="#ffb627"/>
+      </g>
+      <g stroke="#ffb627" stroke-width="2" stroke-dasharray="2.5 2"><path d="M96 124v40"/><path d="M304 124v40"/></g>
+      <circle cx="96" cy="252" r="14" fill="url(#gDiya)"/><circle cx="304" cy="252" r="14" fill="url(#gDiya)"/>
+      <path d="M90 252h12l-2 4h-8z" fill="#c8501e"/><path d="M298 252h12l-2 4h-8z" fill="#c8501e"/>
+      <path class="flame" d="M96 244c2 3 2.5 5 0 8c-2.5-3-2-5 0-8z" fill="#ffe7a8"/><path class="flame" d="M304 244c2 3 2.5 5 0 8c-2.5-3-2-5 0-8z" fill="#ffe7a8"/>
+      <g class="walker" fill="#16041a">
+       <circle cx="190" cy="212" r="5"/>
+       <path d="M183 219c0-2 2-3 3-3h8c1 0 3 1 3 3l1.4 16h-17z"/>
+       <path d="M186.5 235l-2 14h4l1.7-14zM194 235l2.2 13.5h-4l-1.5-13.5z"/>
+       <circle cx="210" cy="213" r="4.8"/><path d="M206 210c2-4 7-4 9 0l1 6c-3-2-8-2-10 0z"/>
+       <path d="M203 220c0-2 2-3 3-3h8c1 0 3 1 3 3l3 20h-20z"/>
+       <path d="M206 240l-1 9h4l1-9zM213 240l1.5 8.6h-4l-.8-8.6z"/>
+       <path d="M197 224h7" stroke="#16041a" stroke-width="2.6" stroke-linecap="round"/>
+      </g>
+     </svg>
+    </span>
+    <span class="gate-cap"><b>Enter the journey of life</b><span id="gtFam">For families, from the day two people meet</span><i class="go">Walk in</i></span>
+   </button>
+   <ol class="tree tree-fam" aria-label="Life-stage products, in order">
+    <li><button type="button" data-go="marriage"><b>Two people meet</b><small>Marriage Companion</small></button></li>
+    <li><button type="button" data-go="parivaar"><b>A child grows, 5 to 18</b><small>Dua Parivaar</small></button></li>
+    <li><button type="button" data-go="saathi"><b>Caring for Maa and Papa</b><small>Dua Saathi</small></button></li>
+    <li><button type="button" data-go="legacy"><b>A life that continues to speak</b><small>Dua Legacy</small></button></li>
+   </ol>
+  </article>
+ </div>
+ <div class="choose-hint" id="chooseHint">
+  <p><b>Choose a door above to continue.</b> Not sure which? Tell Dua how your day is going, and Dua will point the way.</p>
+  <button type="button" class="btn ghost" onclick="document.getElementById('checkin').scrollIntoView({behavior:'smooth',block:'center'});setTimeout(function(){document.getElementById('ciInput').focus()},500)">Ask Dua</button>
  </div>
 </section>
 
-<section class="section" id="belief" data-world="hub">
- <div class="sectionhead"><div><p class="kick">What every product shares</p><h2>AI prepares. People decide.</h2></div><p>Each DuaDesk product was built for very different people: a CFO, a shopkeeper, a resident, a grandmother. They all follow the same five rules. Choose one to see it at work.</p></div>
- <div class="belief-tabs" role="tablist" aria-label="Shared principles" id="beliefTabs"></div>
- <div class="bpanel" role="tabpanel" id="beliefPanel" aria-live="polite"></div>
-</section>
 
 
 
@@ -828,7 +1048,8 @@ body[data-mood="stretched"] .atmo{filter:saturate(.7)}
 
 
 
-<div class="chapter" id="ent-chapter" data-world="ent">
+
+<div class="chapter zone" id="ent-chapter" data-zone="ent" data-world="ent">
 <div class="pillarhead"><p class="kick">Enterprise solutions</p></div>
 <section class="hero" id="enterprise" data-interest="ent">
  <div>
@@ -1119,7 +1340,7 @@ body[data-mood="stretched"] .atmo{filter:saturate(.7)}
 </div>
 </div>
 
-<section class="section" id="community" data-world="com" data-interest="com">
+<section class="section zone" id="community" data-zone="com" data-world="com" data-interest="com">
  <div class="sectionhead"><div><p class="kick">Community and society</p><h2>For the places we live.</h2></div><p>The same discipline that runs a finance function, a case for every issue, a clock on every promise and a person behind every decision, brought to housing societies, wards and homes.</p></div>
  <div class="commune">
   <article class="cpanel">
@@ -1152,7 +1373,7 @@ body[data-mood="stretched"] .atmo{filter:saturate(.7)}
  </div>
 </section>
 
-<section class="life" id="life" aria-labelledby="lifeTitle" data-world="fam">
+<section class="life zone" id="life" data-zone="fam" aria-labelledby="lifeTitle" data-world="fam">
  <div class="wrap">
   <div id="lifeTeaser" data-interest="fam"><p class="kick">The complete human life cycle</p>
   <h2 id="lifeTitle">A companion for a whole life.</h2>
@@ -1195,8 +1416,13 @@ body[data-mood="stretched"] .atmo{filter:saturate(.7)}
  </div>
 </section>
 
-<section class="section closing" id="start" data-world="hub">
- <div class="sectionhead"><div><p class="kick">Start where you are</p><h2>Three worlds. One way of working.</h2></div><p>Blue for the enterprise, green for the community, pink for the family. Different colours, the same rule underneath: AI prepares, people decide.</p></div>
+<section class="section after-choice" id="belief" data-world="hub">
+ <div class="sectionhead"><div><p class="kick">What every product shares</p><h2>AI prepares. People decide.</h2></div><p>Each DuaDesk product was built for very different people: a CFO, a shopkeeper, a resident, a grandmother. They all follow the same five rules. Choose one to see it at work.</p></div>
+ <div class="belief-tabs" role="tablist" aria-label="Shared principles" id="beliefTabs"></div>
+ <div class="bpanel" role="tabpanel" id="beliefPanel" aria-live="polite"></div>
+</section>
+<section class="section closing after-choice" id="start" data-world="hub">
+ <div class="sectionhead"><div><p class="kick">Step into another world</p><h2>There is more to DuaDesk.</h2></div><p>Blue for the enterprise, green for the community, pink for the family. Different colours, the same rule underneath: AI prepares, people decide.</p></div>
  <div class="doors"><a class="door w-ent" href="#enterprise" data-interest="ent"><b>For your business</b><span>Dua Sarthi and six command centres</span></a><a class="door w-com" href="#community" data-interest="com"><b>For your society and home</b><span>Philia and Dua Home</span></a><a class="door w-fam" href="#life" data-interest="fam"><b>For your family</b><span>Marriage, parenting, care and legacy</span></a></div>
 </section>
 
@@ -1482,7 +1708,7 @@ async function submitDemo(e){
   phone:document.getElementById("demoPhone").value.trim(),
   country:document.getElementById("demoCountry").value,
   product:document.getElementById("demoProduct").value,
-  erp:document.getElementById("demoERP").value,
+  erp:(document.getElementById("demoERP").closest(".field").hidden?"Not applicable":document.getElementById("demoERP").value),
   need:document.getElementById("demoNeed").value.trim()
  };
  const showToast=(m)=>{const t=document.getElementById("toast");if(t){t.textContent=m;t.classList.add("on");setTimeout(()=>t.classList.remove("on"),4500);}};
@@ -1621,9 +1847,11 @@ function ddTranslate(lang){
   // Store preference
   try{localStorage.setItem("duadesk-language",lang)}catch(e){}
 }
+var DD_LANG_ENABLED=false;
 function ddInitLanguage(){
   const s=document.getElementById("langSelect");
   let lang="en"; try{lang=localStorage.getItem("duadesk-language")||"en"}catch(e){}
+  if(!DD_LANG_ENABLED){lang="en";try{localStorage.removeItem("duadesk-language")}catch(e){}}
   if(s){s.value=lang;s.addEventListener("change",()=>ddTranslate(s.value));}
   ddTranslate(lang);
 }
@@ -1636,6 +1864,7 @@ function ddInitLanguage(){
 /* ===== DuaDesk ecosystem update: interactions ===== */
 function openDemoFor(product){
  if(typeof openDemo==="function")openDemo();
+ if(typeof ddSyncErp==="function")setTimeout(ddSyncErp,0);
  var s=document.getElementById("demoProduct");
  if(s){for(var i=0;i<s.options.length;i++){if(s.options[i].text===product){s.selectedIndex=i;break;}}}
 }
@@ -1826,7 +2055,7 @@ function openDemoFor(product){
   var w=el.getAttribute("data-interest"),dwell=null;
   function enter(){clearTimeout(previewTimer);preview=w;setMode();
    var target=w==="ent"?"ent1":w==="fam"?"life1":null;
-   if(target&&!document.getElementById(target).classList.contains("shown"))dwell=setTimeout(function(){revealUpTo(target);if(w==="ent"&&!el.closest("#ent-chapter")&&typeof toast==="function")toast("Enterprise solutions have opened further down the page.");},900);}
+   if(target&&!document.getElementById(target).classList.contains("shown"))dwell=setTimeout(function(){revealUpTo(target);},900);}
   function leave(){clearTimeout(dwell);previewTimer=setTimeout(function(){preview=null;setMode();},180);}
   if(canHover){el.addEventListener("mouseenter",enter);el.addEventListener("mouseleave",leave);}
   el.addEventListener("focusin",enter);el.addEventListener("focusout",leave);
@@ -1858,6 +2087,58 @@ function openDemoFor(product){
  setMode();
 })();
 </script>
+<script>
+/* ===== Gateways: the visitor chooses a world; only that world is shown ===== */
+/* the demo form asks about ERP only when an enterprise product is chosen */
+function ddSyncErp(){var s=document.getElementById("demoProduct"),f=document.getElementById("demoERP");if(!s||!f)return;
+ var o=s.options[s.selectedIndex],ent=!o||!o.parentNode||o.parentNode.label!=="Community and family";f.closest(".field").hidden=!ent;}
+(function(){
+ var body=document.body,reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+ var Z={ent:document.getElementById("ent-chapter"),com:document.getElementById("community"),fam:document.getElementById("life")};
+ var FIRST={ent:"ent1",fam:"life1"};
+ var WORLD_OF={sarthi:"ent",cfo:"ent",cpo:"ent",fassets:"ent",pramaan:"ent",pragya:"ent",vyapar:"ent",philia:"com",home:"com",marriage:"fam",parivaar:"fam",saathi:"fam",legacy:"fam"};
+ var rawReveal=window.ddReveal||function(){},rawGoTo=window.goTo||function(id){var t=document.getElementById(id);t&&t.scrollIntoView({behavior:"smooth"});};
+
+ function choose(w,o){
+  o=o||{};var zone=Z[w];if(!zone)return;
+  var prev=body.dataset.choice;body.dataset.choice=w;
+  try{sessionStorage.setItem("dd-choice",w)}catch(e){}
+  if(FIRST[w])rawReveal(FIRST[w],!!o.instant);
+  if(!o.instant&&prev!==w){zone.classList.add("zone-enter");setTimeout(function(){zone.classList.remove("zone-enter")},900);}
+  if(o.scroll===false)return;
+  var gate=document.querySelector('.gate[data-gate="'+w+'"]');
+  var go=function(){if(o.then)o.then();else zone.scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"});};
+  if(gate&&!reduce&&o.walk!==false){gate.classList.add("entering");setTimeout(function(){go();setTimeout(function(){gate.classList.remove("entering")},900);},820);}
+  else go();
+ }
+ window.ddChoose=choose;
+ var dp=document.getElementById("demoProduct");if(dp)dp.addEventListener("change",ddSyncErp);
+ /* opening the demo form from a world preselects that world's products */
+ if(typeof window.openDemo==="function"){var od=window.openDemo;window.openDemo=function(){od.apply(this,arguments);var s=document.getElementById("demoProduct"),w=body.dataset.choice;
+  if(s&&w&&w!=="ent"){var cur=s.options[s.selectedIndex];if(!cur||cur.parentNode.label!=="Community and family"){for(var i=0;i<s.options.length;i++){var t=s.options[i].text;if((w==="com"&&/Philia/.test(t))||(w==="fam"&&/Marriage/.test(t))){s.selectedIndex=i;break;}}}}
+  ddSyncErp();};}
+
+ /* anything that points into a hidden world opens that world first */
+ function zoneOf(id){var el=document.getElementById(id);var z=el&&el.closest(".zone");return z?z.getAttribute("data-zone"):null;}
+ window.goTo=function(id){var w=zoneOf(id);if(w&&body.dataset.choice!==w)choose(w,{scroll:false});rawGoTo(id);};
+ window.ddReveal=function(id,silent){var w=zoneOf(id);if(w&&!silent&&body.dataset.choice!==w)choose(w,{scroll:false});return rawReveal(id,silent);};
+
+ document.querySelectorAll("[data-choose]").forEach(function(b){b.addEventListener("click",function(){choose(b.getAttribute("data-choose"));});});
+ document.querySelectorAll(".tree [data-go]").forEach(function(b){b.addEventListener("click",function(){
+  var id=b.getAttribute("data-go"),w=WORLD_OF[id];
+  var TAG={cfo:"AI CFO",cpo:"AI CPO",fassets:"DUA DESK FIXED ASSETS",pramaan:"DUA PRAMAAN",pragya:"DUA PRAGYA",vyapar:"DUA VYAPAR"};
+  choose(w,{then:function(){
+   var card=id==="sarthi"?document.querySelector("#command .sarthi"):[].slice.call(document.querySelectorAll("#command .room")).filter(function(r){var t=r.querySelector(".tag");return t&&t.textContent.trim()===TAG[id];})[0];
+   if(card){card.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});card.classList.remove("flash");void card.offsetWidth;card.classList.add("flash");}
+   else if(window.ddShowProduct)window.ddShowProduct(id);
+  }});
+ });});
+
+ var saved=null;try{saved=sessionStorage.getItem("dd-choice")}catch(e){}
+ if(saved&&Z[saved])choose(saved,{scroll:false,instant:true});
+})();
+</script>
+
 <script>
 /* =====================================================================
    TODAY AT DUADESK — the homepage reads the visitor's local date, time
@@ -1996,6 +2277,7 @@ function openDemoFor(product){
  };
  var STAGEP=["marriage","parivaar","saathi","legacy"];
  function showStage(n){if(window.ddReveal)ddReveal("life1");var s=document.getElementById("stage"+n);if(s)s.click();setTimeout(function(){var r=document.getElementById("ring");if(r)r.scrollIntoView({behavior:"smooth",block:"center"});},80);}
+ window.ddShowProduct=function(id){showProduct(id)};
  function showProduct(id){var p=P[id];if(!p)return;if(p.stage!=null)return showStage(p.stage);if(window.ddReveal&&p.w==="ent")ddReveal("ent1");if(window.goTo)goTo(p.go);}
 
  /* ---------- the greeting ribbon ---------- */
@@ -2048,7 +2330,7 @@ function openDemoFor(product){
  if(wbtn&&why){wbtn.addEventListener("click",function(){
   if(!why.hidden){why.hidden=true;return;}
   why.hidden=false;
-  why.innerHTML='<b>What this page notices:</b> your local date and time, and the time zone your browser reports'+(Q.get("region")?' (this is a preview set to '+REGION_NAME[region]+')':TZ[tz]?' ('+esc(tz)+', so we greet you as someone in '+REGION_NAME[region]+')':tz?' ('+esc(tz)+')':'')+'. That chooses today\'s greeting'+(occ?' ('+esc(occ.name)+')':'')+', the colours, and the "now" in the day timeline. It is worked out in your browser and not sent anywhere.<br><br><b>What it remembers:</b> only which part of DuaDesk you looked at last, on this device. <button type="button" id="whyForget">Forget it</button><br><br><b>What you type to Dua</b> is used to answer you and is not saved by DuaDesk.';
+  why.innerHTML='<b>What this page notices:</b> your local date and time, and the time zone your browser reports'+(Q.get("region")?' (this is a preview set to '+REGION_NAME[region]+')':TZ[tz]?' ('+esc(tz)+', so we greet you as someone in '+REGION_NAME[region]+')':tz?' ('+esc(tz)+')':'')+'. That chooses today\'s greeting'+(occ?' ('+esc(occ.name)+')':'')+' and the colours. It is worked out in your browser and not sent anywhere.<br><br><b>What it remembers:</b> only which part of DuaDesk you looked at last, on this device. <button type="button" id="whyForget">Forget it</button><br><br><b>What you type to Dua</b> is used to answer you and is not saved by DuaDesk.';
   document.getElementById("whyForget").addEventListener("click",function(){store.del("dd-last");store.set("dd-forget","1");this.outerHTML="<em>Forgotten. We won't remember your visits on this device.</em>";});
  });}
 
