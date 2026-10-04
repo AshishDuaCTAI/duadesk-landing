@@ -803,6 +803,88 @@ body[data-choice="ent"] .bq.w-ent,body[data-choice="com"] .bq.w-com,body[data-ch
 .bot-name span:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gold2);margin-right:5px;vertical-align:1px;animation:bulb 1.6s ease-in-out infinite}
 @media(max-width:1000px){.bot-wrap{flex-direction:row;gap:14px;justify-content:center}.ddbot{width:150px}.bot-say{position:static;max-width:200px;opacity:1;transform:none;display:none}.bot-say.on{display:block}.bot-name{display:none}}
 @media(prefers-reduced-motion:reduce){.bot-float,.bot-shadow,.bot-thrust,.bulb,.heart,.bot-name span:before{animation:none!important}.ddbot.wave .arm-left,.ddbot.jump .bot-float,.ddbot.nod .bot-float{animation:none}}
+
+/* ===================== Full product sections ===================== */
+.lifefull,.comfull{display:grid;gap:22px;margin-top:40px}
+.comfull{margin-top:6px}
+.pfull{--acc:var(--thread,#ff5fa2);--acc2:#ffd1e4;border:1px solid color-mix(in srgb,var(--acc) 35%,transparent);border-radius:22px;padding:28px;background:rgba(255,255,255,.035);scroll-margin-top:90px}
+.pfull.com{--acc:#1fc47d;--acc2:#bdf5da;background:linear-gradient(165deg,#0f2a24,#08161a);border-color:rgba(31,196,125,.35)}
+.pfull.flash{animation:flash 1.6s ease}
+.pf-head{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px}
+.pf-n{margin:0 0 4px;font-size:13px;font-weight:700;color:var(--acc)}
+.pf-head h3{font:600 clamp(30px,3.6vw,44px)/1.05 Newsreader,Georgia,serif;margin:0;color:#fff}
+.pfull.com .pf-head h3{font-family:Georgia,serif;font-weight:700}
+.pf-line{font:500 20px/1.3 Newsreader,Georgia,serif;color:var(--acc2);margin:8px 0 0;max-width:640px}
+.pfull.com .pf-line{font-family:Georgia,serif}
+.pf-hi{margin:6px 0 0;color:#f3e2c2;font-size:15px}
+.pf-hi-inline{font-size:.5em;color:#f3e2c2;vertical-align:middle;margin-left:8px}
+.pf-meta{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.pf-meta .status{font-size:12px;color:#fff;border:1px solid var(--acc);border-radius:999px;padding:3px 11px}
+.pf-go{display:inline-block;text-decoration:none;font-weight:800;font-size:14px;border-radius:999px;padding:11px 18px;background:var(--acc);color:#14060f}
+.pfull.com .pf-go{color:#04140d}
+.pf-url{font-size:12px;color:#b9c6d6}
+.pf-desc{font-size:16px;line-height:1.65;color:#e4dcef;max-width:820px;margin:0 0 18px}
+.pfull.com .pf-desc{color:#d6e6df}
+.pfull .steps{margin:0 0 22px}
+.pfull .steps li{color:#f3eaf8}
+.pfull .moment{margin:0 0 16px}
+.pf-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-bottom:18px}
+.pf-cols h4,.pf-h,.pf-box h4,.pf-trust h4{font:700 15px Inter,sans-serif;color:#fff;margin:0 0 10px}
+.pf-h{margin-top:20px}
+.pf-cols dl,.pf-who{margin:0}
+.pf-cols dt,.pf-who dt{font-weight:700;font-size:14px;color:var(--acc2);margin-top:10px}
+.pf-cols dt:first-child,.pf-who dt:first-child{margin-top:0}
+.pf-cols dd,.pf-who dd{margin:2px 0 0;font-size:14px;line-height:1.5;color:#d9d1e6}
+.pfull.com .pf-cols dd,.pfull.com .pf-who dd{color:#cfe2da}
+.pf-grid{display:grid;gap:10px}
+.pf-grid.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.pf-grid.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.pf-grid>div{padding:14px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);font-size:14px;line-height:1.5;color:#ddd5e8}
+.pfull.com .pf-grid>div{color:#d3e4dc}
+.pf-grid>div>b{display:block;color:#fff;font-size:14.5px;margin-bottom:3px}
+.pf-grid.small>div{font-size:13px;padding:12px}
+.pf-grid.mods>div{font-size:13.5px}
+.pf-grid.mods .mt{display:block;font-size:12px;color:var(--acc);font-weight:700;margin:-1px 0 6px}
+.pf-grid.mods ul{margin:0;padding-left:16px}
+.pf-grid.mods li{margin:3px 0}
+.pf-two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.pf-box{padding:16px 18px;border-radius:16px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.1)}
+.pf-box ul{margin:0;padding-left:18px;font-size:14px;line-height:1.55;color:#ddd5e8}
+.pfull.com .pf-box ul{color:#d3e4dc}
+.pf-box li{margin:3px 0}
+.pf-trust{margin-top:4px;padding:16px 18px;border-radius:16px;border:1px dashed color-mix(in srgb,var(--acc) 50%,transparent)}
+.pf-trust ul,.pf-tags{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.pf-trust li,.pf-tags li{font-size:13px;padding:6px 11px;border-radius:999px;background:color-mix(in srgb,var(--acc) 14%,transparent);border:1px solid color-mix(in srgb,var(--acc) 35%,transparent);color:#fff}
+.pf-tags{margin:0 0 6px}
+.pf-tags.agents li{font-weight:700}
+.pf-small{font-size:13px;color:#b8aec9;margin:14px 0 0;line-height:1.5}
+.pfull.com .pf-small{color:#a9c4b8}
+ol.timed{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+ol.timed li{display:grid;grid-template-columns:62px 1fr auto;gap:10px;align-items:center;font-size:14px;color:#ece4f4;padding:7px 0;border-bottom:1px dashed rgba(255,255,255,.12)}
+ol.timed span{font-size:11px;font-weight:700;text-align:center;border-radius:6px;padding:2px 0;background:rgba(255,255,255,.1);color:#fff}
+ol.timed em{font-style:normal;font-size:12px;color:var(--acc2);white-space:nowrap}
+ol.pf-start,ol.pf-phases{margin:0;padding:0;list-style:none;counter-reset:ps;display:grid;gap:10px}
+ol.pf-phases{grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:6px}
+ol.pf-start li,ol.pf-phases li{counter-increment:ps;position:relative;padding-left:38px;font-size:14px;line-height:1.5;color:#ddd5e8}
+.pfull.com ol.pf-start li{color:#d3e4dc}
+ol.pf-start li:before,ol.pf-phases li:before{content:counter(ps);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;background:var(--acc);color:#14060f;font:700 13px Inter,sans-serif;display:grid;place-items:center}
+ol.pf-start li b,ol.pf-phases li b{display:block;color:#fff}
+.pf-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.pf-stats div{font-size:12px;line-height:1.35;color:#d9d1e6}
+.pf-stats b{display:block;font:600 28px Newsreader,Georgia,serif;color:var(--acc2)}
+.pfull .chat{margin:0}
+.pf-readall{background:none;border:0;padding:0;color:var(--thread);font-weight:700;text-decoration:underline;text-underline-offset:3px;margin-left:10px;cursor:pointer}
+@media(max-width:1000px){.pf-cols,.pf-grid.g4{grid-template-columns:1fr 1fr}.pf-grid.g3{grid-template-columns:1fr 1fr}.pf-two{grid-template-columns:1fr}ol.pf-phases{grid-template-columns:1fr}.pf-stats{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.pfull{padding:18px}.pf-cols,.pf-grid.g4,.pf-grid.g3{grid-template-columns:1fr}.pf-meta{align-items:flex-start}.pf-head h3{font-size:30px}ol.timed li{grid-template-columns:54px 1fr;}ol.timed em{grid-column:2}}
+
+/* the product lists under the doors are a map, not a menu */
+.tree .ti{display:block;width:100%;box-sizing:border-box;text-align:left;border:1px solid color-mix(in srgb,var(--w) 28%,#1b2f45);background:rgba(8,18,32,.75);border-radius:12px;padding:10px 12px;cursor:default}
+.tree-ent .t-root.ti{border-color:color-mix(in srgb,var(--w) 70%,transparent);background:color-mix(in srgb,var(--w) 16%,#08121f);text-align:center;max-width:300px;margin:0 auto}
+.tree-fam .ti{padding-left:42px}
+/* agent lab: scenario tabs */
+.labtabs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.labtabs button{border:1px solid var(--line);background:#091625;color:#c7d6e5;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700}
+.labtabs button[aria-pressed="true"]{background:var(--gold2);border-color:var(--gold2);color:#151006}
 </style>
 <script>document.documentElement.className+=" js"</script>
 </head>
@@ -972,14 +1054,14 @@ body[data-choice="ent"] .bq.w-ent,body[data-choice="com"] .bq.w-com,body[data-ch
     <span class="gate-cap"><b>Enter the enterprise</b><span id="gtEnt">For companies, from the CEO's desk to every function</span><i class="go">Walk in</i></span>
    </button>
    <div class="tree tree-ent" aria-label="Enterprise products">
-    <button type="button" class="t-root" data-go="sarthi"><b>Dua Sarthi</b><small>The CEO's view over everything below</small></button>
+    <div class="t-root ti"><b>Dua Sarthi</b><small>The CEO's view over everything below</small></div>
     <div class="t-branches">
-     <button type="button" data-go="cfo"><b>Finance</b><small>AI CFO, with editions for India, Germany, the Netherlands, UAE, Saudi Arabia and Japan</small></button>
-     <button type="button" data-go="cpo"><b>Procurement</b><small>AI CPO, with customs and trade, and RFQ and e-sourcing</small></button>
-     <button type="button" data-go="fassets"><b>Fixed assets</b><small>Every machine, building and laptop, accounted for</small></button>
-     <button type="button" data-go="pramaan"><b>Audit</b><small>Dua Pramaan, across 20 audit types</small></button>
-     <button type="button" data-go="pragya"><b>Advisory</b><small>Dua Pragya, an AI consulting workforce</small></button>
-     <button type="button" data-go="vyapar"><b>Retail</b><small>Dua Vyapar, the AI partner for a shop</small></button>
+     <div class="ti"><b>Finance</b><small>AI CFO, with editions for India, Germany, the Netherlands, UAE, Saudi Arabia and Japan</small></div>
+     <div class="ti"><b>Procurement</b><small>AI CPO, with customs and trade, and RFQ and e-sourcing</small></div>
+     <div class="ti"><b>Fixed assets</b><small>Every machine, building and laptop, accounted for</small></div>
+     <div class="ti"><b>Audit</b><small>Dua Pramaan, across 20 audit types</small></div>
+     <div class="ti"><b>Advisory</b><small>Dua Pragya, an AI consulting workforce</small></div>
+     <div class="ti"><b>Retail</b><small>Dua Vyapar, the AI partner for a shop</small></div>
     </div>
    </div>
   </article>
@@ -1043,8 +1125,8 @@ body[data-choice="ent"] .bq.w-ent,body[data-choice="com"] .bq.w-com,body[data-ch
     <span class="gate-cap"><b>Enter your community</b><span id="gtCom">For housing societies, wards and homes</span><i class="go">Walk in</i></span>
    </button>
    <div class="tree tree-com" aria-label="Community products">
-    <button type="button" data-go="philia"><b>Housing societies and wards</b><small>Philia, the AI office for an RWA, ward or society</small></button>
-    <button type="button" data-go="home"><b>Your home</b><small>Dua Home, twelve AI helpers that ask before they act</small></button>
+    <div class="ti"><b>Housing societies and wards</b><small>Philia, the AI office for an RWA, ward or society</small></div>
+    <div class="ti"><b>Your home</b><small>Dua Home, twelve AI helpers that ask before they act</small></div>
     <p class="t-for">For RWA presidents, municipal councillors, apartment societies, gated villa communities and every household.</p>
    </div>
   </article>
@@ -1104,10 +1186,10 @@ body[data-choice="ent"] .bq.w-ent,body[data-choice="com"] .bq.w-com,body[data-ch
     <span class="gate-cap"><b>Enter the journey of life</b><span id="gtFam">For families, from the day two people meet</span><i class="go">Walk in</i></span>
    </button>
    <ol class="tree tree-fam" aria-label="Life-stage products, in order">
-    <li><button type="button" data-go="marriage"><b>Two people meet</b><small>Marriage Companion</small></button></li>
-    <li><button type="button" data-go="parivaar"><b>A child grows, 5 to 18</b><small>Dua Parivaar</small></button></li>
-    <li><button type="button" data-go="saathi"><b>Caring for Maa and Papa</b><small>Dua Saathi</small></button></li>
-    <li><button type="button" data-go="legacy"><b>A life that continues to speak</b><small>Dua Legacy</small></button></li>
+    <li><div class="ti"><b>Two people meet</b><small>Marriage Companion</small></div></li>
+    <li><div class="ti"><b>A child grows, 5 to 18</b><small>Dua Parivaar</small></div></li>
+    <li><div class="ti"><b>Caring for Maa and Papa</b><small>Dua Saathi</small></div></li>
+    <li><div class="ti"><b>A life that continues to speak</b><small>Dua Legacy</small></div></li>
    </ol>
   </article>
  </div>
@@ -1303,10 +1385,10 @@ body[data-choice="ent"] .bq.w-ent,body[data-choice="com"] .bq.w-com,body[data-ch
 <section class="section" id="agents">
  <div class="sectionhead"><div><div class="eyebrow">AGENTS AT WORK</div><h2>Don't watch another chatbot demo.</h2></div><p>Run a workflow. Watch the agent read a source, compute or reason, surface an exception and emit a governed work product.</p></div>
  <div class="lab">
-  <div class="labtop"><div><b id="scenarioTitle">AI CPO · Spend intelligence</b><div style="color:var(--muted);font-size:11px" data-i18n="agents_sub">Interactive simulated workflow using the current product concepts</div></div><div class="live" data-i18n-html="agents_live"><i></i>AGENTS AT WORK</div></div>
+  <div class="labtop"><div><b id="scenarioTitle">AI CPO Command Centre</b><div style="color:var(--muted);font-size:11px" data-i18n="agents_sub">Interactive simulated workflow using the current product concepts</div><div class="labtabs" role="group" aria-label="Choose a scenario"><button type="button" data-key="cfo" aria-pressed="false" onclick="labPick('cfo')">Finance</button><button type="button" data-key="cpo" aria-pressed="true" onclick="labPick('cpo')">Procurement</button><button type="button" data-key="audit" aria-pressed="false" onclick="labPick('audit')">Audit</button><button type="button" data-key="pragya" aria-pressed="false" onclick="labPick('pragya')">Advisory</button></div></div><div class="live" data-i18n-html="agents_live"><i></i>AGENTS AT WORK</div></div>
   <div class="labbody">
    <div class="agentrail" id="agentRail"></div>
-   <div class="work"><div class="phase" id="phase">CONNECT → COMPUTE → REASON → PROVE</div><h3 id="workTitle">Select a scenario</h3><div class="reads" id="reads">Choose a command centre above or start a live scenario.</div><div class="result" id="result">—</div><div class="bar"><i id="bar"></i></div><div class="exactions"><button class="btn gold" onclick="runScenario()" data-i18n="agents_run">Run next agent step ▶</button><button class="btn ghost autoplay" onclick="autoplayScenario()" data-i18n-html="agents_watch"><span class="livepulse"></span>Watch full run</button><button class="btn ghost" onclick="resetScenario()" data-i18n="agents_reset">Reset</button></div></div>
+   <div class="work"><div class="phase" id="phase">CONNECT → COMPUTE → REASON → PROVE</div><h3 id="workTitle">Select a scenario</h3><div class="reads" id="reads">Pick a scenario above, then run it one step at a time or watch the full run.</div><div class="result" id="result">—</div><div class="bar"><i id="bar"></i></div><div class="exactions"><button class="btn gold" onclick="runScenario()" data-i18n="agents_run">Run next agent step ▶</button><button class="btn ghost autoplay" onclick="autoplayScenario()" data-i18n-html="agents_watch"><span class="livepulse"></span>Watch full run</button><button class="btn ghost" onclick="resetScenario()" data-i18n="agents_reset">Reset</button></div></div>
    <div class="evidence"><div class="evtitle" data-i18n="agents_evtitle">TRUST LEDGER · LIVE</div><div class="ev"><b data-i18n="ev_source">Source</b><span id="ev1">Waiting for workflow</span></div><div class="ev"><b data-i18n="ev_comp">Computation</b><span id="ev2">Deterministic checks where applicable</span></div><div class="ev"><b data-i18n="ev_conf">Confidence</b><span id="ev3">—</span></div><div class="ev"><b data-i18n="ev_gate">Gate</b><span id="ev4">Human review before consequential action</span></div><div class="ev"><b data-i18n="ev_out">Output</b><span id="ev5">—</span></div></div>
   </div>
  </div>
@@ -1433,34 +1515,70 @@ body[data-choice="ent"] .bq.w-ent,body[data-choice="com"] .bq.w-com,body[data-ch
 
 <section class="section zone" id="community" data-zone="com" data-world="com" data-interest="com">
  <div class="sectionhead"><div><p class="kick">Community and society</p><h2>For the places we live.</h2></div><p>The same discipline that runs a finance function, a case for every issue, a clock on every promise and a person behind every decision, brought to housing societies, wards and homes.</p></div>
- <div class="commune">
-  <article class="cpanel">
-   <h3>Philia</h3>
-   <p class="line">The AI office for your RWA, ward or society.</p>
-   <p>Residents report problems on WhatsApp. Philia turns each one into a tracked case, chases it to a confirmed fix, and prepares every decision for your leaders to approve. Residents pay nothing.</p>
-   <ol class="flow" aria-label="How one complaint works">
-    <li>A resident reports it on WhatsApp, by voice, photo or video</li>
-    <li>AI drafts the case; the resident confirms it</li>
-    <li>It gets a case ID, an owner and a clock</li>
-    <li>It is chased and escalated on time</li>
-    <li>It is fixed with proof, and the resident confirms</li>
-   </ol>
-   <div class="chips"><span>RWA presidents</span><span>Municipal councillors</span><span>Apartment societies</span><span>Gated villa communities</span><span>Hindi, Hinglish, English</span><span>9 AI agents, each with one job</span><span>No voter profiling</span><span>No face recognition, ever</span></div>
-   <div class="go"><a class="golink" href="https://philia.duadesk.com" target="_blank" rel="noopener">See it with your community's name</a><button class="golink ghost" onclick="openDemoFor('Philia (RWA / ward)')">Book a free walkthrough</button></div>
-  </article>
-  <article class="cpanel">
-   <h3>Dua Home</h3>
-   <p class="line">Your home, looked after by AI that asks before it acts.</p>
-   <p class="hi" lang="hi">घर की देखभाल, हर पल।</p>
-   <p>Twelve AI helpers notice and prepare the everyday work of an Indian household: safety, water and power, staff, money, care for parents, repairs, papers, guests and travel. Your family decides.</p>
-   <div class="chat" aria-label="Example conversation from a sample home">
-    <div class="q">Why was the electricity bill so high?</div>
-    <div class="a"><b>Dua · Urja</b>₹1,240 more than last month, mostly the bedroom AC, drawing 38% more than expected for this weather. Its warranty runs to March.<span class="src">From your home: BSES bill, AC energy vs. weather, warranty card</span><span class="ask">Draft a service visit? It'll wait for your approval.</span></div>
-    <small>Example from a sample home.</small>
+ <div class="comfull">
+
+  <article class="pfull com" id="pf-philia">
+   <header class="pf-head">
+    <div><p class="pf-n">Housing societies, wards and colonies</p><h3>Philia</h3><p class="pf-line">The AI office for your RWA, ward or society.</p></div>
+    <div class="pf-meta"><span class="status">Free walkthrough</span><a class="pf-go" href="https://philia.duadesk.com" target="_blank" rel="noopener">See it with your community's name</a><span class="pf-url">philia.duadesk.com</span></div>
+   </header>
+   <p class="pf-desc">Residents report problems on WhatsApp. Philia turns each one into a tracked case, chases it to a confirmed fix, and prepares every decision for your leaders to approve.</p>
+   <ul class="pf-tags"><li>WhatsApp-first</li><li>Hindi, Hinglish and English</li><li>Residents pay nothing</li><li>People decide, AI prepares</li><li>Your data stays yours</li></ul>
+   <div class="pf-two">
+    <div class="pf-box"><h4>Who it's for</h4><dl class="pf-who"><dt>RWA presidents</dt><dd>Issues, notices, bye-laws</dd><dt>Municipal councillors</dt><dd>The whole ward, one system</dd><dt>Apartment societies</dt><dd>Lifts, pumps, AMC vendors</dd><dt>Gated villa communities</dt><dd>Estate team, security, club</dd></dl></div>
+    <div class="pf-box"><h4>How one complaint works</h4><ol class="pf-start"><li><b>A resident reports it on WhatsApp</b>By voice, photo or video.</li><li><b>AI drafts the case</b>The resident confirms it.</li><li><b>Case ID, owner and clock</b>Routed by rules, with an SLA.</li><li><b>Chased and escalated on time</b>L1 to L3, automatically.</li><li><b>Fixed with proof</b>The resident confirms the fix.</li></ol></div>
    </div>
-   <div class="chips"><span>No AI in the safety path</span><span>Doors open only for people</span><span>Video stays at home</span><span>Consent first, under DPDP</span><span>Hindi or English</span></div>
-   <div class="go"><a class="golink" href="https://home.duadesk.com" target="_blank" rel="noopener">Explore Dua Home</a></div>
+   <h4 class="pf-h">Eight modules, switched on as you need them</h4>
+   <div class="pf-grid g4 mods">
+    <div><b>Philia Connect</b><span class="mt">For residents</span><ul><li>Report on WhatsApp or app by voice, photo or video</li><li>Complaints captured from WhatsApp groups</li><li>Mobile tracker: stage, owner, time left</li><li>Bilingual notices, a 24x7 assistant, meeting booking</li></ul></div>
+    <div><b>Philia Case</b><span class="mt">Cases and SLA</span><ul><li>One case ID from resident to RWA, ward and agency</li><li>Rules-based routing, SLA clocks, escalation L1 to L3</li><li>No-login update links for officers and vendors</li><li>Closure only with evidence; an emergency fast lane</li></ul></div>
+    <div><b>Philia AI</b><span class="mt">Virtual leader</span><ul><li>Decision packets with options, reasons and the rule</li><li>Tier A acts, Tier B the leader approves, Tier C people only</li><li>Leader's morning brief; community memory with citations</li><li>A weekly summary of what the AI did</li></ul></div>
+    <div><b>Philia Intelligence</b><span class="mt">Insight</span><ul><li>Leader dashboard, exceptions first</li><li>Hotspot map and month-by-month heat map</li><li>Authority and vendor scorecards</li><li>Root-cause reviews with fishbone and 5 Whys</li></ul></div>
+    <div><b>Philia Govern</b><span class="mt">Governance</span><ul><li>Bye-laws turned into deadlines with evidence</li><li>AGM and GB notices, quorum, resolutions, minutes</li><li>Spending approvals; a compliance check on any action</li><li>A commitment ledger and polls</li></ul></div>
+    <div><b>Philia Operate</b><span class="mt">Operations</span><ul><li>Facility booking with rules and UPI</li><li>Garbage rounds with photo check-in</li><li>Tree risk checks; dogs and monkeys register</li><li>Vendors, AMC penalties, lifts and DG sets</li></ul></div>
+    <div><b>Philia Secure</b><span class="mt">Safety</span><ul><li>Guard incident reports with video</li><li>An opt-in community camera network, with owner consent</li><li>Vehicle watch for event-day parking (optional)</li><li>No face recognition, ever</li></ul></div>
+    <div><b>Set up your way</b><span class="mt">Editions</span><ul><li>RWA plus councillor, RWA only, or councillor only</li><li>Apartment society or gated villas</li><li>Modules on or off; lean or standard AI</li><li>Admins manage everything; every change logged</li></ul></div>
+   </div>
+   <div class="pf-two">
+    <div class="pf-box"><h4>Meet the AI team: nine agents, each with one job and a clear limit</h4><ul class="pf-tags agents"><li>Sahayak</li><li>Nigrani</li><li>Pradhan AI</li><li>Khoji</li><li>Niyam</li><li>Suchna</li><li>Smriti</li><li>Saathi</li><li>Subah</li></ul></div>
+    <div class="pf-box"><h4>What Philia promises</h4><dl class="pf-who"><dt>People decide</dt><dd>Named humans approve anything official</dd><dt>Evidence</dt><dd>Every step logged; nothing closes without proof</dd><dt>Privacy</dt><dd>Designed with India's DPDP Act in mind</dd><dt>Your data</dt><dd>Owned by the community, export any time</dd><dt>No politics</dt><dd>No voter profiling or campaign use</dd><dt>Consent</dt><dd>Cameras opt-in; no face recognition</dd></dl></div>
+   </div>
   </article>
+
+  <article class="pfull com" id="pf-home">
+   <header class="pf-head">
+    <div><p class="pf-n">Your home</p><h3>Dua Home</h3><p class="pf-line">Your home, looked after by AI that asks before it acts.</p><p class="pf-hi" lang="hi">घर की देखभाल, हर पल।</p></div>
+    <div class="pf-meta"><a class="pf-go" href="https://home.duadesk.com" target="_blank" rel="noopener">Explore Dua Home</a><span class="pf-url">home.duadesk.com</span></div>
+   </header>
+   <p class="pf-desc">Dua Home runs the everyday work of an Indian household: safety, water and power, staff, money, care for parents, repairs, papers, guests and travel. Twelve AI helpers notice and prepare. Your family decides.</p>
+   <h4 class="pf-h">Why families choose Dua</h4>
+   <div class="pf-grid g4">
+    <div><b>Sleep without worrying</b>Leaks, gas, smoke and open doors watched all night, with safety rules that act in seconds.</div>
+    <div><b>Decisions, not chores</b>Carts, repairs and dinner plans arrive prepared; you just approve, with the reason shown.</div>
+    <div><b>No more surprises</b>Bills, renewals, warranties, filters and staff pay remembered before they become problems.</div>
+    <div><b>Care from anywhere</b>Parents' medicines and readings, shared only with their consent, from another city or country.</div>
+   </div>
+   <div class="pf-two">
+    <div class="pf-box"><h4>How the AI helps</h4><dl class="pf-who"><dt>Understands how you ask</dt><dd>Plain English or Hindi. No menus to learn.</dd><dt>Answers from your home</dt><dd>Built from your devices and records, with sources shown. Never guesses "safe".</dd><dt>Notices before you ask</dt><dd>A 7 AM briefing, and plain explanations when bills jump or an AC struggles.</dd><dt>Asks before it acts</dt><dd>Spending or changing a device waits for you. AI never opens doors. A monthly AI budget caps cost.</dd></dl></div>
+    <div class="chat" aria-label="Example conversation from a sample home">
+     <div class="q">Why was the electricity bill so high?</div>
+     <div class="a"><b>Dua · Urja</b>₹1,240 more than last month, mostly the bedroom AC, drawing 38% more than expected for this weather. Its warranty runs to March.<span class="src">From your home: BSES bill, AC energy vs. weather, warranty card</span><span class="ask">Draft a service visit? It'll wait for your approval.</span></div>
+     <small>Example from a sample home.</small>
+    </div>
+   </div>
+   <h4 class="pf-h">Everything the house needs, in one place</h4>
+   <ul class="pf-tags"><li>Safety and emergencies</li><li>Security and visitors</li><li>Water tanks and leaks</li><li>Energy and power cuts</li><li>Climate and air</li><li>Kitchen and groceries</li><li>Money, bills and UPI</li><li>Staff and payroll</li><li>Care and health</li><li>Family, guests and pets</li><li>Repairs and warranties</li><li>Documents and renewals</li><li>Travel and second homes</li><li>Ask Dua, in Hindi or English</li></ul>
+   <h4 class="pf-h">Built to be trusted</h4>
+   <div class="pf-grid g3">
+    <div><b>No AI in the safety path</b>Leak and alarm responses are fixed rules, on the home hub, even without internet.</div>
+    <div><b>Doors open only for people</b>Unlocking always needs a person and Face ID.</div>
+    <div><b>Approved people only</b>No open sign-up; each person sees only what their role allows.</div>
+    <div><b>Consent first, under DPDP</b>Health and camera data used only with consent.</div>
+    <div><b>Video stays at home</b>Cameras are analysed in the house; private ones never.</div>
+    <div><b>A record of everything</b>Who did what and why, person or AI, always readable.</div>
+   </div>
+  </article>
+
  </div>
 </section>
 
@@ -1486,6 +1604,134 @@ body[data-choice="ent"] .bq.w-ent,body[data-choice="com"] .bq.w-com,body[data-ch
     <div class="ringmid" aria-hidden="true"><div class="n" id="ringN"></div><div class="hi" id="ringHi"></div><div class="nx" id="ringNx"></div></div>
    </div>
    <div class="lpanel" id="lifePanel" role="tabpanel" aria-live="polite"></div>
+  </div>
+  <div class="lifefull">
+
+   <article class="pfull" id="pf-marriage">
+    <header class="pf-head">
+     <div><p class="pf-n">1 · Two people meet</p><h3>Marriage Companion</h3><p class="pf-line">Your wedding is one day. Your story is a lifetime.</p><p class="pf-hi" lang="hi">विवाह से पहले भी, विवाह के साथ भी, विवाह के बाद भी</p></div>
+     <div class="pf-meta"><span class="status">Private beta</span><a class="pf-go" href="https://marriage.duadesk.com" target="_blank" rel="noopener">Begin your journey</a><span class="pf-url">marriage.duadesk.com</span></div>
+    </header>
+    <p class="pf-desc">One private app for the two of you: understand each other, plan a wedding rooted in your sanskaar, and keep growing together for years after, wherever in the world you both are. You move at your own pace, and both of you confirm every step.</p>
+    <ol class="steps"><li>Getting to know</li><li>In love and committed</li><li class="opt">Living together<small>optional</small></li><li>Engaged</li><li>Married: the first year</li><li>Growing together</li><li class="opt">Parenthood<small>optional</small></li></ol>
+    <div class="pf-cols">
+     <div><h4>Inside the app</h4><dl>
+      <dt>Reflect, like stories</dt><dd>Nine areas of life, one question at a time. Private until you choose to share.</dd>
+      <dt>Where we stand</dt><dd>18 areas of married life: aligned, talk more, not yet. No scores, ever.</dd>
+      <dt>Talk it through</dt><dd>12 guided conversations on money, in-laws and where to live, with a calm, neutral summary for both.</dd>
+      <dt>Ask Dua, five guides</dt><dd>Saathi, Pandit Ji, Arth, Legal Guide and Parivaar, answering in English or Hinglish.</dd>
+      <dt>Your vault</dt><dd>Your story, agreements, ceremony and memories, kept together for the years ahead.</dd></dl></div>
+     <div><h4>Your journey</h4><dl>
+      <dt>Journey map</dt><dd>Seven stages, steps you agree on, target dates only if you both want them.</dd>
+      <dt>Hard times, with care</dt><dd>Pause privately, safety first with helplines, one counsellor conversation before any decision.</dd>
+      <dt>Moment cards</dt><dd>Milestone cards for your Instagram story or family group, only when you both approve.</dd>
+      <dt>After the wedding</dt><dd>Gentle check-ins through the first 100 days, year one and every anniversary.</dd>
+      <dt>Guided sessions</dt><dd>Book a live session with a Dua guide, with reviewed recaps afterwards.</dd></dl></div>
+     <div><h4>Plan it right</h4><dl>
+      <dt>Marrying across borders</dt><dd>Checklists for 9 countries, flags to watch, and a Word brief for your lawyer.</dd>
+      <dt>Money, honestly</dt><dd>Private disclosure and Dua Arth draft packs, reviewed before you see them.</dd>
+      <dt>Engagement timeline</dt><dd>From twelve months out to the wedding week, step by step.</dd>
+      <dt>Two families, one ceremony</dt><dd>Honour both families' traditions; rehearse all 39 rites in customary order.</dd>
+      <dt>Sacred Wedding Book</dt><dd>Your rites, customs and blessings in one keepsake. Mantras only as recorded by a Pandit.</dd></dl></div>
+    </div>
+    <div class="pf-trust"><h4>Private by design</h4><ul><li>Private until you share; every share recorded</li><li>Email-code sign-in, each person on their own</li><li>Both of you agree on every change</li><li>No scores or comparisons, ever</li><li>People check the AI's drafts</li><li>Safety first: 112, 181, 14416</li><li>English and Hinglish</li><li>Installs on your phone like an app</li></ul></div>
+    <p class="pf-small">Not matchmaking, not therapy, not legal or financial advice. The AI-guided ceremony is not a legal marriage; register separately.</p>
+   </article>
+
+   <article class="pfull" id="pf-parivaar">
+    <header class="pf-head">
+     <div><p class="pf-n">2 · A child grows, 5 to 18</p><h3>Dua Parivaar</h3><p class="pf-line">Your child's story, kept safe from 5 to 18.</p></div>
+     <div class="pf-meta"><span class="status">By invitation</span><a class="pf-go" href="https://parenting.duadesk.com" target="_blank" rel="noopener">Request an invitation</a><span class="pf-url">parenting.duadesk.com</span></div>
+    </header>
+    <blockquote class="moment"><q>Mumma, why is the moon following our car?</q><span>Kabir, age 5. Kept by his mother on the drive home from Nani's.</span></blockquote>
+    <p class="pf-desc">A private family app for Indian parents. Keep the moments, words, school years and milestones in one safe place, share them only with the family you choose, and hand the whole story to your child when they turn 18.</p>
+    <ol class="steps"><li>5<small>First day of school</small></li><li>8<small>Their own space</small></li><li>11<small>Growing up</small></li><li>13<small>A private diary</small></li><li>15<small>Board exams</small></li><li>18<small>The story is theirs</small></li></ol>
+    <h4 class="pf-h">Why it matters</h4>
+    <div class="pf-grid g4">
+     <div><b>Both parents work</b>The best moments happen at 7 am or 9 pm, and are forgotten by Sunday.</div>
+     <div><b>Family far away</b>Grandparents see photos late, if at all, through forwarded chats.</div>
+     <div><b>Photos, no story</b>Childhood is scattered across phones, drawers and WhatsApp groups.</div>
+     <div><b>Privacy matters</b>A child's life is not content for public feeds.</div>
+    </div>
+    <h4 class="pf-h">What it does</h4>
+    <div class="pf-grid g4">
+     <div><b>Catch moments</b>Exact words, photos, voice and video in ten seconds, even offline.</div>
+     <div><b>Whole childhood</b>School and marks (never ranked), health, activities, milestones.</div>
+     <div><b>Family Circle</b>Nani, Dadu and teachers see only what parents choose to share.</div>
+     <div><b>Letters and yearbook</b>Sealed letters for 18, and a printable page for every year.</div>
+     <div><b>Their own space</b>From 8, children write their own story; from 13 it is private.</div>
+     <div><b>Safety net</b>Worrying words bring free helplines at once; a trained person decides.</div>
+     <div><b>Guides and check-ins</b>Help for exams, a new sibling, moving or loss; a private weekly check-in.</div>
+     <div><b>Theirs at 18</b>Their own account: keep, share or erase their story.</div>
+    </div>
+    <div class="pf-two">
+     <div class="pf-box"><h4>Divorced or separated? Your child still gets one childhood.</h4><ul><li>Two households: each parent keeps their own space and family circle</li><li>Step-parents can help without signing for the child; court orders are enforced</li><li>Nobody erases the other's memories: erasure needs every parent</li></ul></div>
+     <div class="pf-box"><h4>Safe by design</h4><ul><li>Data stays in India (Mumbai), built for India's DPDP Act</li><li>No ads, no selling, no scoring</li><li>Every family checked by a person; letters and private notes encrypted</li><li>No passwords: a code each time</li><li>Helplines: 112 Emergency, 1098 Childline, 14416 Tele-MANAS, 1930 Cyber</li></ul></div>
+    </div>
+    <p class="pf-small"><b>Coming after review:</b> Saathi, an AI parenting companion; Kathakar, an AI yearbook storyteller; a portal for your child's doctor or psychologist; Hindi screens.</p>
+   </article>
+
+   <article class="pfull" id="pf-saathi">
+    <header class="pf-head">
+     <div><p class="pf-n">3 · Caring for Maa and Papa</p><h3>Dua Saathi</h3><p class="pf-line">Care for Maa and Papa at home: one connected system, watching over them day and night.</p><p class="pf-hi" lang="hi">आपके अपनों का साथी</p></div>
+     <div class="pf-meta"><span class="status">Gurugram and Delhi NCR</span><a class="pf-go" href="https://saathi.duadesk.com" target="_blank" rel="noopener">Ask for a first home visit</a><span class="pf-url">saathi.duadesk.com</span></div>
+    </header>
+    <p class="pf-desc">Their phone, TV, voice, home sensors and health devices feed one platform. Rules act in seconds, AI reads, listens and summarises, and a coordinator who knows them decides. Every step is labelled: a device collects, rules act in seconds, AI reads and summarises, a person decides and cares.</p>
+    <div class="pf-grid g3">
+     <div><b>Help in two minutes</b>SOS from the phone, TV, voice or a panic button. A person answers within 2 minutes, day or night; the family hears within 5.</div>
+     <div><b>Someone who knows them</b>One coordinator owns their care: visits, medicines, doctors, hospital stays and paperwork.</div>
+     <div><b>News the way you want</b>Choose from 14 topics, as it happens to monthly, on WhatsApp, in the app or by email.</div>
+    </div>
+    <div class="pf-two">
+     <div class="pf-box"><h4>Emergency SOS: no AI in this path, by design</h4><ol class="timed"><li><span>Device</span>Maa presses SOS<em>0 s</em></li><li><span>Rules</span>One incident, never five<em>under 1 s</em></li><li><span>Rules</span>Team, partner and family alerted<em>seconds</em></li><li><span>Person</span>A person answers<em>under 2 min</em></li><li><span>Rules</span>Hospital gets her profile<em>on arrival</em></li><li><span>Person</span>Family told what happened<em>under 5 min</em></li></ol></div>
+     <div class="pf-box"><h4>A home visit, matched to the family's choices</h4><ol class="timed"><li><span>Person</span>Booked, priced upfront<em>0 min</em></li><li><span>Rules</span>Best-matched professional<em>minutes</em></li><li><span>Rules</span>Confirmed, photo and checks shown<em>under 4 h</em></li><li><span>Device</span>Route followed live<em>live</em></li><li><span>Person</span>Visit code at the door<em>arrival</em></li><li><span>AI</span>Report summarised for family<em>under 2 h</em></li></ol></div>
+    </div>
+    <h4 class="pf-h">Everything Dua Saathi does</h4>
+    <div class="pf-grid g3 small">
+     <div><b>Emergency SOS</b>Phone, TV, voice or panic button; one incident per senior; a time-limited hospital link.</div>
+     <div><b>Home monitoring</b>Falls and inactivity spotted on the home hub; video never leaves the house. Door, leak and smoke sensors.</div>
+     <div><b>Saathi, the AI companion</b>A Hindi friend and, if wished, a spiritual companion. Always says it is AI; hands loneliness to a person.</div>
+     <div><b>Medicines</b>AI reads prescription photos, a nurse verifies every line, reminders on TV, phone and voice.</div>
+     <div><b>Readings and devices</b>Bluetooth BP monitors and glucometers; limits per condition; a nurse calls within 30 minutes.</div>
+     <div><b>Medical history</b>Versioned and clinician-confirmed, with an emergency profile and FHIR export.</div>
+     <div><b>Conditions and care scope</b>11 conditions staged by stage; a written scope signed off by the Clinical Lead.</div>
+     <div><b>Home visits</b>Verified nurses, doctors and therapists; the family's preferred people first; a report in 2 hours.</div>
+     <div><b>Doctors</b>Home visits and video consultations within 24 hours, with signed records.</div>
+     <div><b>Family updates</b>14 topics at the rhythm you choose, a weekly letter, photos, voice notes and video calls on the TV.</div>
+     <div><b>Couples and families</b>A plan for who looks after whom, and support after the loss of a partner.</div>
+     <div><b>Community</b>RWA outings, festivals and senior volunteering, with safeguarding built in.</div>
+     <div><b>Billing</b>A monthly membership, services priced before booking, UPI AutoPay with notice, a couple discount.</div>
+     <div><b>Insurance</b>Policies and renewals tracked, claimable services spotted, claims assembled and chased.</div>
+     <div><b>Service charter</b>30 promises with timers, measured every day; late tasks escalate automatically.</div>
+     <div><b>Quality and feedback</b>Families rate every visit and choose who returns; a call-back for every low score.</div>
+     <div><b>Command Center</b>A live wall of visits, alerts and routes, and a care console with every task and deadline.</div>
+     <div><b>Privacy and compliance</b>Consent checked on every read, every access audited, a DPDP register of all data.</div>
+    </div>
+    <div class="pf-two">
+     <div class="pf-box"><h4>How it starts</h4><ol class="pf-start"><li><b>You call or write</b>We call back within 2 hours (8 am to 8 pm).</li><li><b>A first home visit</b>Within 48 hours. The first conversation is free.</li><li><b>A careful start</b>Assessment, history, consent and a care plan within 7 days.</li><li><b>Care that adjusts</b>Reviewed every 3 months, and whenever things change.</li></ol></div>
+     <div class="pf-box"><h4>Built and tested like it matters</h4><div class="pf-stats"><div><b>352</b>API endpoints, tested as 11 roles</div><div><b>169</b>automated tests</div><div><b>79</b>data tables in a DPDP register</div><div><b>0</b>leaks in the final test run</div></div>
+      <p class="pf-small" style="margin-top:10px">Apps: senior's app in Hindi, family app, TV app, Android phone app, professionals' app, doctor portal, care console, business console and Command Center.</p></div>
+    </div>
+   </article>
+
+   <article class="pfull" id="pf-legacy">
+    <header class="pf-head">
+     <div><p class="pf-n">4 · A life that continues to speak</p><h3>Dua Legacy <span lang="hi" class="pf-hi-inline">विरासत</span></h3><p class="pf-line">What we leave behind is more than what we own.</p></div>
+     <div class="pf-meta"><span class="status">By invitation</span><a class="pf-go" href="https://legacy.duadesk.com" target="_blank" rel="noopener">Request a demo</a><span class="pf-url">legacy.duadesk.com</span></div>
+    </header>
+    <p class="pf-desc">Gather your stories, values and wishes while you are here. Dua Legacy helps your family carry them forward: gently, truthfully, and only as you intended.</p>
+    <ol class="pf-phases"><li><b>While we are here</b>Speak or write a little at a time. Approve what is true. Choose who sees what.</li><li><b>When the time comes</b>Family confirms, our team checks the certificate, and letters wait seven days for grief.</li><li><b>For the years after</b>Answers in their own words. Letters arrive on the days they chose.</li></ol>
+    <h4 class="pf-h">Why families choose Dua Legacy</h4>
+    <div class="pf-grid g3">
+     <div><b>Their own words, never invented</b>Nothing is used until the person confirms it is true. Every answer shows its source, or says "not enough to answer".</div>
+     <div><b>Letters for the days that matter</b>A birthday, a wedding, the years after they are gone. Delivered once, only to the person they were written for.</div>
+     <div><b>The family as pillars</b>A passing is confirmed by several trusted family members and a checked certificate. One voice of doubt pauses everything.</div>
+     <div><b>Shared only by choice</b>Each person sees only what they were given permission to see. Preview it exactly as they would.</div>
+     <div><b>Values, memories and inheritance</b><span lang="hi">संस्कार, स्मृति, विरासत</span>: values and stories, plus a separate private vault for assets, wishes and the Will.</div>
+     <div><b>Private, by invitation</b>Every person is approved individually. Data hosted in Mumbai, India. Emails never reveal what a letter says.</div>
+    </div>
+   </article>
+
   </div>
   <div class="next" data-next="life2"><div><b>Next: three generations, one thread</b><span>How the circle closes, from a grandfather's letter to a granddaughter's wedding.</span></div><button class="btn ghost" type="button">Show me</button></div>
   </div>
@@ -1612,9 +1858,11 @@ function money(x){return "₹"+x.toFixed(2)+" Cr";}
 function toast(s){let t=document.getElementById("toast");t.textContent=s;t.classList.add("on");clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove("on"),2600)}
 function renderAgents(){
  const rail=document.getElementById("agentRail");
- rail.innerHTML=active.agents.map((a,i)=>`<div class="agent ${i===step?'on':''}"><div class="bot">${a[0]}</div><div><b>${a}</b><small>${active.steps[i]?active.steps[i][1]:"AI specialist"}</small></div></div>`).join("");
+ const cur=step===0?0:step-1;
+ rail.innerHTML=active.steps.map((s,i)=>`<div class="agent ${i===cur?'on':''}"><div class="bot">${s[0][0]}</div><div><b>${s[0]}</b><small>${s[1]}</small></div></div>`).join("");
+ document.querySelectorAll(".labtabs button").forEach(b=>b.setAttribute("aria-pressed",DATA[b.dataset.key]===active?"true":"false"));
 }
-function resetScenario(){step=0;document.getElementById("bar").style.width="0";document.getElementById("workTitle").textContent="Ready to run";document.getElementById("reads").textContent="The agent will read the next source and execute the next governed step.";document.getElementById("result").textContent="—";document.getElementById("ev1").textContent="Waiting for workflow";document.getElementById("ev3").textContent="—";renderAgents()}
+function resetScenario(){step=0;clearInterval(autoTimer);document.getElementById("scenarioTitle").textContent=active.title;document.getElementById("phase").textContent="CONNECT → COMPUTE → REASON → PROVE";document.getElementById("bar").style.width="0";document.getElementById("workTitle").textContent="Ready to run";document.getElementById("reads").textContent="The agent will read the next source and execute the next governed step.";document.getElementById("result").textContent="—";document.getElementById("ev1").textContent="Waiting for workflow";document.getElementById("ev3").textContent="—";renderAgents()}
 function runScenario(){
  if(step>=active.steps.length){step=0}
  const s=active.steps[step];
@@ -1641,6 +1889,7 @@ function autoplayScenario(){
 function openRoom(key){active=DATA[key];step=0;renderAgents();resetScenario();document.getElementById("mEyebrow").textContent=active.ey;document.getElementById("mTitle").textContent=active.title;document.getElementById("mSub").textContent=active.sub;
  document.getElementById("mBody").innerHTML=`<div class="simgrid"><div class="simcard"><div class="simstep">WHAT THIS EXPERIENCE SHOWS</div><h3>AI specialist workflow</h3><p style="color:var(--muted)">This is a product demonstration model, not a live connection to your systems. It shows the operating pattern: source → computation/reasoning → exception or result → governed output.</p><button class="btn gold" onclick="closeModal();goTo('agents');runScenario()">Run in Agent Lab →</button></div><div class="simcard"><div class="simstep">CURRENT PRODUCT POSITIONING</div><h3>${active.title}</h3><div class="check done">Specialist agents organised by enterprise function</div><div class="check done">Source-grounded computation / reasoning</div><div class="check done">Review and sign-gates where required</div><div class="check done">Audit trail / evidence orientation</div><div class="check">Consequential actions remain governed</div></div></div>`;
  document.getElementById("modal").classList.add("on")}
+function labPick(k){active=DATA[k];resetScenario();renderAgents();}
 function openExperience(){document.getElementById("agents").scrollIntoView({behavior:"smooth"});toast("Welcome to the DuaDesk Experience Centre")}
 function closeModal(){document.getElementById("modal").classList.remove("on")}
 
@@ -2084,8 +2333,9 @@ function openDemoFor(product){
    "<div class=\"lfeat\">"+s.f.map(function(f){return "<div><b>"+esc(f[0])+"</b>"+esc(f[1])+"</div>";}).join("")+"</div>"+
    "<p class=\"promise\">"+esc(s.pr)+"</p>"+
    "<div class=\"lgo\"><a href=\""+s.url+"\" target=\"_blank\" rel=\"noopener\">"+esc(s.cta)+"</a><span class=\"note\">"+esc(s.note)+" "+esc(s.url.replace("https://",""))+"</span></div>"+
-   "<p class=\"handover\">"+esc(s.next)+" <button type=\"button\" data-go=\""+((i+1)%4)+"\">Continue to "+esc(L[(i+1)%4].nm)+"</button></p>";
+   "<p class=\"handover\">"+esc(s.next)+" <button type=\"button\" data-go=\""+((i+1)%4)+"\">Continue to "+esc(L[(i+1)%4].nm)+"</button><button type=\"button\" class=\"pf-readall\" data-read=\"pf-"+["marriage","parivaar","saathi","legacy"][i]+"\">Read everything about "+esc(s.nm)+"</button></p>";
   panel.querySelector("[data-go]").addEventListener("click",function(){showL(+this.getAttribute("data-go"),true);});
+  panel.querySelector("[data-read]").addEventListener("click",function(){var t=document.getElementById(this.getAttribute("data-read"));if(t){t.scrollIntoView({behavior:"smooth",block:"start"});t.classList.remove("flash");void t.offsetWidth;t.classList.add("flash");}});
  }
  showL(0);
  var drawn=false;function draw(){if(drawn)return;drawn=true;th.style.strokeDashoffset=0;}
@@ -2359,15 +2609,15 @@ function ddSyncErp(){var s=document.getElementById("demoProduct"),f=document.get
   pramaan:{n:"Dua Pramaan",w:"ent",url:"https://audit.duadesk.com",go:"command",demo:"Dua Pramaan"},
   pragya:{n:"Dua Pragya",w:"ent",url:"https://consulting.duadesk.com",go:"command",demo:"Dua Pragya"},
   vyapar:{n:"Dua Vyapar",w:"ent",url:"https://retail.duadesk.com",go:"command",demo:"Dua Vyapar (retail)"},
-  philia:{n:"Philia",w:"com",url:"https://philia.duadesk.com",go:"community",demo:"Philia (RWA / ward)"},
-  home:{n:"Dua Home",w:"com",url:"https://home.duadesk.com",go:"community",demo:"Dua Home"},
+  philia:{n:"Philia",w:"com",url:"https://philia.duadesk.com",go:"pf-philia",demo:"Philia (RWA / ward)"},
+  home:{n:"Dua Home",w:"com",url:"https://home.duadesk.com",go:"pf-home",demo:"Dua Home"},
   marriage:{n:"Marriage Companion",w:"fam",url:"https://marriage.duadesk.com",stage:0},
   parivaar:{n:"Dua Parivaar",w:"fam",url:"https://parenting.duadesk.com",stage:1},
   saathi:{n:"Dua Saathi",w:"fam",url:"https://saathi.duadesk.com",stage:2},
   legacy:{n:"Dua Legacy",w:"fam",url:"https://legacy.duadesk.com",stage:3}
  };
  var STAGEP=["marriage","parivaar","saathi","legacy"];
- function showStage(n){if(window.ddReveal)ddReveal("life1");var s=document.getElementById("stage"+n);if(s)s.click();setTimeout(function(){var r=document.getElementById("ring");if(r)r.scrollIntoView({behavior:"smooth",block:"center"});},80);}
+ function showStage(n){if(window.ddReveal)ddReveal("life1");var s=document.getElementById("stage"+n);if(s)s.click();setTimeout(function(){var r=document.getElementById("pf-"+["marriage","parivaar","saathi","legacy"][n]);if(r){r.scrollIntoView({behavior:"smooth",block:"start"});r.classList.remove("flash");void r.offsetWidth;r.classList.add("flash");}},80);}
  window.ddShowProduct=function(id){showProduct(id)};
  function showProduct(id){var p=P[id];if(!p)return;if(p.stage!=null)return showStage(p.stage);if(window.ddReveal&&p.w==="ent")ddReveal("ent1");if(window.goTo)goTo(p.go);}
 
