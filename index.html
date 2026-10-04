@@ -759,6 +759,50 @@ body[data-choice="ent"] .bq.w-ent,body[data-choice="com"] .bq.w-com,body[data-ch
 @media(max-width:1100px){.gate-grid{grid-template-columns:1fr 1fr}.gate.w-ent{grid-column:1/-1}.gate.w-ent .gate-door{display:grid;grid-template-columns:1.2fr 1fr}.gate.w-ent .gate-cap{border-bottom:0;align-content:center;grid-template-columns:1fr}.gate.w-ent .gate-cap .go{grid-column:1;grid-row:auto;justify-self:start;margin-top:10px}}
 @media(max-width:700px){.gates{padding:20px 15px 50px}.gates-head{flex-direction:column;align-items:start}.gate-grid{grid-template-columns:1fr}.gate.w-ent .gate-door{display:block}.gate.w-ent .gate-cap{border-bottom:1px solid color-mix(in srgb,var(--w) 25%,transparent);grid-template-columns:1fr auto}.gate.w-ent .gate-cap .go{grid-column:2;grid-row:1/3;margin:0}.t-branches{grid-template-columns:1fr}.t-branches:after{display:none}.gate-cap b{font-size:21px}body[data-choice] .closing .doors{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.gate-art svg,.walker,.gate-art:after{transition:none!important}}
+
+/* ===================== Dua Desk, the robot ===================== */
+.bot-wrap{position:relative;display:flex;flex-direction:column;align-items:center;margin-top:6px}
+.ddbot{display:block;width:min(100%,330px);padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ddbot svg{display:block;width:100%;height:auto;aspect-ratio:300/360;overflow:visible}
+.bot-float{animation:botFloat 4.2s ease-in-out infinite}
+@keyframes botFloat{50%{transform:translateY(-9px)}}
+.bot-shadow{transform-box:fill-box;transform-origin:center;animation:botShadow 4.2s ease-in-out infinite}
+@keyframes botShadow{50%{transform:scaleX(.82);opacity:.25}}
+.bot-thrust{animation:thrust 1.8s ease-in-out infinite}
+@keyframes thrust{50%{opacity:.85}}
+.bulb{animation:bulb 2.4s ease-in-out infinite}
+@keyframes bulb{50%{opacity:.45}}
+.bulb-halo{opacity:.6}
+.heart{animation:heart 2.1s ease-in-out infinite}
+.heart.h2{animation-delay:.25s}.heart.h3{animation-delay:.5s}
+@keyframes heart{0%,60%,100%{opacity:1}30%{opacity:.25}}
+.gaze{transition:transform .25s ease-out}
+.eye{transform-box:fill-box;transform-origin:center;transition:transform .09s}
+.ddbot.blink .eye{transform:scaleY(.1)}
+.eyes-happy,.eyes-soft,.mouth-o,.bot-diya{opacity:0;transition:opacity .2s}
+.ddbot.happy .eyes-open,.ddbot.soft .eyes-open{opacity:0}
+.ddbot.happy .eyes-happy{opacity:1}
+.ddbot.soft .eyes-soft{opacity:1}
+.ddbot.thinking .mouth{opacity:0}.ddbot.thinking .mouth-o{opacity:1}
+.ddbot.thinking .bulb{animation-duration:.5s}
+.ddbot.thinking .gaze{transform:translate(7px,-6px)!important}
+.ddbot.diya .bot-diya{opacity:1}
+.arm-left{transform-box:view-box;transform-origin:94px 196px}
+.ddbot.wave .arm-left{animation:wave 1.9s ease-in-out}
+@keyframes wave{0%{transform:rotate(0)}18%{transform:rotate(128deg)}30%{transform:rotate(104deg)}42%{transform:rotate(128deg)}54%{transform:rotate(104deg)}66%{transform:rotate(124deg)}100%{transform:rotate(0)}}
+.ddbot.jump .bot-float{animation:botJump .7s cubic-bezier(.3,1.6,.5,1) 2}
+@keyframes botJump{50%{transform:translateY(-34px)}}
+.ddbot.nod .bot-float{animation:botNod .45s ease-in-out 2}
+@keyframes botNod{50%{transform:translateY(6px)}}
+.ddbot:focus-visible{outline:none}
+.ddbot:focus-visible svg{filter:drop-shadow(0 0 10px var(--gold2))}
+.bot-say{position:absolute;top:4%;left:0;z-index:2;max-width:230px;padding:11px 14px;border-radius:16px 16px 16px 4px;background:#f8f3e8;color:#14203a;font-size:14px;line-height:1.4;font-weight:600;box-shadow:0 14px 34px rgba(0,0,0,.35);opacity:0;transform:translateY(8px) scale(.96);transition:opacity .3s,transform .3s;pointer-events:none}
+.bot-say.on{opacity:1;transform:none}
+.bot-name{margin:4px 0 0;font:700 18px Georgia,serif;color:#fff}
+.bot-name span{font:500 12px Inter,sans-serif;color:var(--gold2);margin-left:6px}
+.bot-name span:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gold2);margin-right:5px;vertical-align:1px;animation:bulb 1.6s ease-in-out infinite}
+@media(max-width:1000px){.bot-wrap{flex-direction:row;gap:14px;justify-content:center}.ddbot{width:150px}.bot-say{position:static;max-width:200px;opacity:1;transform:none;display:none}.bot-say.on{display:block}.bot-name{display:none}}
+@media(prefers-reduced-motion:reduce){.bot-float,.bot-shadow,.bot-thrust,.bulb,.heart,.bot-name span:before{animation:none!important}.ddbot.wave .arm-left,.ddbot.jump .bot-float,.ddbot.nod .bot-float{animation:none}}
 </style>
 <script>document.documentElement.className+=" js"</script>
 </head>
@@ -816,6 +860,53 @@ body[data-choice="ent"] .bq.w-ent,body[data-choice="com"] .bq.w-com,body[data-ch
   <div class="ci-reply" id="ciReply" aria-live="polite"></div>
   <p class="ci-note">Nothing you type here is saved. <button type="button" id="whyBtn">Why does this page change?</button></p>
   <div class="why" id="whyPanel" hidden></div>
+ </div>
+ <div class="bot-wrap" id="botWrap">
+  <div class="bot-say" id="botSay" aria-live="polite"></div>
+  <button class="ddbot" id="bot" type="button" aria-label="Talk to Dua Desk">
+   <svg viewBox="0 0 300 360" width="300" height="360" aria-hidden="true">
+    <defs>
+     <linearGradient id="botHead" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#21446f"/><stop offset="1" stop-color="#0e223e"/></linearGradient>
+     <linearGradient id="botBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b3a63"/><stop offset="1" stop-color="#0b1b33"/></linearGradient>
+     <radialGradient id="botGlow"><stop offset="0" stop-color="var(--gold2)" stop-opacity=".9"/><stop offset="1" stop-color="var(--gold2)" stop-opacity="0"/></radialGradient>
+     <radialGradient id="botDiya"><stop offset="0" stop-color="#ffd27a" stop-opacity=".95"/><stop offset="1" stop-color="#ffb627" stop-opacity="0"/></radialGradient>
+    </defs>
+    <ellipse class="bot-shadow" cx="150" cy="346" rx="70" ry="9" fill="#000" opacity=".4"/>
+    <g class="bot-float">
+     <ellipse cx="150" cy="300" rx="44" ry="14" fill="url(#botGlow)" opacity=".55" class="bot-thrust"/>
+     <!-- left arm: waves hello -->
+     <g class="arm-left"><path d="M94 196L72 258" stroke="#16304f" stroke-width="22" stroke-linecap="round"/><circle cx="70" cy="262" r="13" fill="#1b3a63" stroke="var(--gold)" stroke-width="2"/></g>
+     <!-- antenna and head -->
+     <path d="M150 42V20" stroke="#2a4560" stroke-width="3"/>
+     <circle class="bulb" cx="150" cy="15" r="7" fill="var(--gold2)"/>
+     <circle class="bulb-halo" cx="150" cy="15" r="16" fill="url(#botGlow)"/>
+     <rect x="60" y="80" width="14" height="40" rx="6" fill="#16304f"/><rect x="226" y="80" width="14" height="40" rx="6" fill="#16304f"/>
+     <rect x="72" y="40" width="156" height="118" rx="34" fill="url(#botHead)" stroke="var(--gold)" stroke-width="2"/>
+     <rect x="88" y="58" width="124" height="80" rx="22" fill="#040b17"/>
+     <g class="gaze">
+      <g class="eyes-open"><rect class="eye" x="110" y="80" width="22" height="30" rx="11" fill="var(--gold2)"/><rect class="eye" x="168" y="80" width="22" height="30" rx="11" fill="var(--gold2)"/>
+       <circle cx="125" cy="88" r="3.5" fill="#fff" opacity=".75"/><circle cx="183" cy="88" r="3.5" fill="#fff" opacity=".75"/></g>
+      <g class="eyes-happy" fill="none" stroke="var(--gold2)" stroke-width="5" stroke-linecap="round"><path d="M110 98q11-14 22 0"/><path d="M168 98q11-14 22 0"/></g>
+      <g class="eyes-soft" fill="none" stroke="var(--gold2)" stroke-width="5" stroke-linecap="round"><path d="M110 94q11 8 22 0"/><path d="M168 94q11 8 22 0"/></g>
+      <path class="mouth" d="M134 121q16 11 32 0" fill="none" stroke="var(--gold2)" stroke-width="3.5" stroke-linecap="round"/>
+      <ellipse class="mouth-o" cx="150" cy="124" rx="6" ry="5" fill="none" stroke="var(--gold2)" stroke-width="3"/>
+     </g>
+     <circle cx="102" cy="118" r="7" fill="#ff4f9a" opacity=".22"/><circle cx="198" cy="118" r="7" fill="#ff4f9a" opacity=".22"/>
+     <!-- body -->
+     <rect x="134" y="156" width="32" height="14" fill="#16304f"/>
+     <rect x="88" y="166" width="124" height="122" rx="32" fill="url(#botBody)" stroke="var(--gold)" stroke-width="2"/>
+     <rect x="104" y="190" width="92" height="50" rx="11" fill="#040b17" stroke="#23405b"/>
+     <text x="150" y="212" text-anchor="middle" font-family="Georgia,serif" font-size="14" font-weight="700" fill="#f8f3e8">Dua Desk</text>
+     <circle class="heart h1" cx="137" cy="227" r="4" fill="#3d8bff"/><circle class="heart h2" cx="150" cy="227" r="4" fill="#1fc47d"/><circle class="heart h3" cx="163" cy="227" r="4" fill="#ff4f9a"/>
+     <path d="M118 262h64" stroke="#23405b" stroke-width="2" stroke-linecap="round"/>
+     <!-- right arm: holds a diya on diya days -->
+     <g class="arm-right"><path d="M206 196L228 258" stroke="#16304f" stroke-width="22" stroke-linecap="round"/><circle cx="230" cy="262" r="13" fill="#1b3a63" stroke="var(--gold)" stroke-width="2"/>
+      <g class="bot-diya"><circle cx="230" cy="240" r="20" fill="url(#botDiya)"/><path d="M218 243h24c-2 8-6 10-12 10s-10-2-12-10z" fill="#c8501e"/><path d="M218 243h24" stroke="#ffb627" stroke-width="2" stroke-linecap="round"/><path class="flame" d="M230 226c3.5 4.5 4.5 8 0 14c-4.5-6-3.5-9.5 0-14z" fill="#ffe7a8" style="transform-origin:230px 236px"/></g>
+     </g>
+    </g>
+   </svg>
+  </button>
+  <p class="bot-name">Dua Desk <span>is listening</span></p>
  </div>
 </div>
 </header>
@@ -2283,6 +2374,7 @@ function ddSyncErp(){var s=document.getElementById("demoProduct"),f=document.get
  /* ---------- the greeting ribbon ---------- */
  var box=document.getElementById("today");
  var part=H<5?"night":H<12?"morning":H<17?"afternoon":H<22?"evening":"night";
+ window.ddOcc=occ;window.ddHello=HELLO[region];
  var hello=HELLO[region]+". "+(part==="night"?(H<5?"Up early, or up late? Our agents are too.":"Working late? So are our agents."):"Good "+part+".");
  var pal=(occ&&occ.pal)||GOLD;
  document.body.style.setProperty("--f1",pal[0]);document.body.style.setProperty("--f2",pal[1]);document.body.style.setProperty("--f3",pal[2]);
@@ -2439,5 +2531,58 @@ function ddSyncErp(){var s=document.getElementById("demoProduct"),f=document.get
  form.addEventListener("submit",function(e){e.preventDefault();var t=input.value.trim().slice(0,300);if(!t){input.focus();return;}ask(t);input.value="";});
 })();
 </script>
+<script>
+/* ===== Dua Desk, alive ===== */
+(function(){
+ var bot=document.getElementById("bot"),say=document.getElementById("botSay"),wrap=document.getElementById("botWrap");
+ if(!bot)return;
+ var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+ var gaze=bot.querySelector(".gaze"),status=document.querySelector(".bot-name span"),sayT=null,moodT=null;
+ function speak(t,ms){clearTimeout(sayT);say.textContent=t;say.classList.add("on");sayT=setTimeout(function(){say.classList.remove("on")},ms||4200);}
+ function pose(cls,ms){bot.classList.remove("happy","soft","jump","nod","wave");void bot.offsetWidth;bot.classList.add(cls);clearTimeout(moodT);if(ms)moodT=setTimeout(function(){bot.classList.remove(cls)},ms);}
+ function setStatus(t){if(status)status.textContent=t;}
+
+ /* blinking, at a human rhythm */
+ (function blink(){setTimeout(function(){if(!reduce&&!bot.classList.contains("happy")){bot.classList.add("blink");setTimeout(function(){bot.classList.remove("blink")},140);}blink();},2600+Math.random()*3400);})();
+
+ /* eyes follow the visitor's pointer */
+ if(!reduce&&window.matchMedia&&matchMedia("(pointer:fine)").matches){
+  var raf=null;document.addEventListener("pointermove",function(e){if(raf)return;raf=requestAnimationFrame(function(){raf=null;
+   if(bot.classList.contains("thinking"))return;var r=bot.getBoundingClientRect();if(r.bottom<0||r.top>innerHeight)return;
+   var cx=r.left+r.width/2,cy=r.top+r.height*.27,dx=(e.clientX-cx)/innerWidth,dy=(e.clientY-cy)/innerHeight;
+   gaze.style.transform="translate("+Math.max(-9,Math.min(9,dx*28)).toFixed(1)+"px,"+Math.max(-6,Math.min(6,dy*22)).toFixed(1)+"px)";});});
+ }
+
+ /* what day it is shapes how it greets you */
+ var occ=window.ddOcc||null,hello=window.ddHello||"Hello",quiet=occ&&occ.tone==="quiet";
+ if(occ&&(occ.m==="diya"||occ.m==="diyas"))bot.classList.add("diya");
+ var H=new Date().getHours();
+ var first=quiet?hello+". I'm Dua Desk.":hello+"! I'm Dua Desk.";
+ var second=quiet?"These are quiet days. I'm here whenever you need me.":
+  (occ&&!occ.biz)?occ.name+" greetings! Tell me how your day is going.":
+  (H>=22||H<5)?"Up late? I never sleep, but I always ask before I act.":"Tell me how your day is going, or just ask me anything.";
+ setTimeout(function(){if(!quiet)pose("wave",2000);speak(first,2600);setTimeout(function(){speak(second,5200)},2900);},900);
+
+ /* talk to it */
+ var LINES=["I'm Dua Desk. I do the work, and you make the decisions.","Ask me about GST, your housing society, or your parents' care.","Blue for business, green for community, pink for family. Pick a door below.","I never sleep. But I always ask before I act.","Everything I suggest shows where it came from."],li=0;
+ bot.addEventListener("click",function(){pose("happy",1400);speak(LINES[li++%LINES.length],4200);var i=document.getElementById("ciInput");if(i)setTimeout(function(){i.focus({preventScroll:true})},300);});
+
+ /* it reacts to the conversation with Dua */
+ var card=document.getElementById("checkin"),reply=document.getElementById("ciReply"),wasThinking=false;
+ if(card){new MutationObserver(function(){var t=card.classList.contains("thinking");bot.classList.toggle("thinking",t);setStatus(t?"is thinking":"is listening");
+  if(!t&&wasThinking&&!bot.classList.contains("soft"))pose("happy",1800);wasThinking=t;}).observe(card,{attributes:true,attributeFilter:["class"]});}
+ document.querySelectorAll(".ci-moods button").forEach(function(b){b.addEventListener("click",function(){var m=b.getAttribute("data-mood");
+  if(m==="celebrating"){if(quiet){pose("happy",1800);speak("That's lovely to hear.");}else{pose("jump",1500);setTimeout(function(){pose("happy",1800)},700);speak("Yay! Let's celebrate.");}}
+  else if(m==="stretched"){pose("soft",6000);speak("Take a breath. I'll take some of the load.",5000);}
+  else if(m==="busy"){pose("nod",900);speak("On it. I'll keep this short.");}
+  else if(m==="calm"){pose("soft",2600);speak("Lovely. Take your time.");}
+  else{pose("happy",1600);speak("Start with a door below. I'll walk with you.");}
+ });});
+ /* its eyes take the colour of the world you are in, through --gold2; a word when you step in */
+ var WORLD={ent:"Welcome to the business world.",com:"Welcome to your community.",fam:"Welcome to the journey of life."};
+ new MutationObserver(function(){var c=document.body.dataset.choice;if(c&&WORLD[c]){pose("happy",1400);speak(WORLD[c],3000);}}).observe(document.body,{attributes:true,attributeFilter:["data-choice"]});
+})();
+</script>
+
 </body>
 </html>
