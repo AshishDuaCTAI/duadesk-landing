@@ -157,6 +157,77 @@ footer{border-top:1px solid var(--line);margin-top:64px;padding:34px 0 46px;colo
  <a class="brand-p3" href="index.html#top" aria-label="P³ on the DuaDesk home page"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="28" height="28" role="img" aria-label="P³: Present, Purpose, Possibility. A DuaDesk method." class="stamp"><defs><path id="s-top" d="M13,60 A47,47 0 0,1 107,60"/><path id="s-bot" d="M7.5,60 A52.5,52.5 0 0,0 112.5,60"/></defs><circle cx="60" cy="60" r="57" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="60" cy="60" r="38" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="12.5" cy="60" r="1.6" fill="currentColor"/><circle cx="107.5" cy="60" r="1.6" fill="currentColor"/><text font-family="'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif" font-size="8.6" font-weight="700" letter-spacing="1.6" fill="currentColor" text-anchor="middle"><textPath href="#s-top" startOffset="50%">PRESENT · PURPOSE</textPath></text><text font-family="'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif" font-size="8.6" font-weight="700" letter-spacing="1.6" fill="currentColor" text-anchor="middle"><textPath href="#s-bot" startOffset="50%">POSSIBILITY</textPath></text><text x="57" y="70" text-anchor="middle" font-family="'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif" font-size="34" font-weight="800" fill="currentColor">P</text><text x="73" y="54" text-anchor="middle" font-family="'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif" font-size="17" font-weight="800" fill="currentColor">3</text><text x="60" y="85" text-anchor="middle" font-family="'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif" font-size="6.6" font-weight="700" letter-spacing="1.4" fill="currentColor">DUADESK</text></svg>P³</a>
  <div class="navlinks"><a class="hn hn-ent" href="organisation.html" aria-current="page">Organisation</a><a class="hn hn-com" href="social-leadership.html">Social Leadership</a><a class="hn hn-fam" href="life-journey.html">Life Journey</a><a href="index.html#ecosystem">Choose your world</a></div>
 </div></nav>
+
+<div class="p3m" id="p3Modal" hidden role="dialog" aria-modal="true" aria-labelledby="p3mTitle" style="--p3m-acc:#9cc8ff">
+ <div class="p3m-back" data-p3m-close></div>
+ <div class="p3m-box">
+  <div class="p3m-top">
+   <div><p class="p3m-kick">For review · 8 slides · view only</p><h2 id="p3mTitle">The Organisation · the P³ methodology</h2></div>
+   <div class="p3m-acts"><span class="p3m-count">1 / 8</span><button type="button" class="p3m-full">⤢ Full screen</button><button type="button" class="p3m-x" data-p3m-close aria-label="Close">✕</button></div>
+  </div>
+  <div class="p3m-stage" tabindex="0">
+   <img class="p3m-img" alt="Slide 1 of 8" draggable="false">
+   <div class="p3m-shield" aria-hidden="true"></div>
+   <button type="button" class="p3m-nav p3m-prev" aria-label="Previous slide">‹</button>
+   <button type="button" class="p3m-nav p3m-next" aria-label="Next slide">›</button>
+  </div>
+  <div class="p3m-strip"><button type="button" data-i="0" aria-label="Slide 1"><img src="p3-deck/organisation/thumb-01.webp" alt="" loading="lazy" draggable="false"></button><button type="button" data-i="1" aria-label="Slide 2"><img src="p3-deck/organisation/thumb-02.webp" alt="" loading="lazy" draggable="false"></button><button type="button" data-i="2" aria-label="Slide 3"><img src="p3-deck/organisation/thumb-03.webp" alt="" loading="lazy" draggable="false"></button><button type="button" data-i="3" aria-label="Slide 4"><img src="p3-deck/organisation/thumb-04.webp" alt="" loading="lazy" draggable="false"></button><button type="button" data-i="4" aria-label="Slide 5"><img src="p3-deck/organisation/thumb-05.webp" alt="" loading="lazy" draggable="false"></button><button type="button" data-i="5" aria-label="Slide 6"><img src="p3-deck/organisation/thumb-06.webp" alt="" loading="lazy" draggable="false"></button><button type="button" data-i="6" aria-label="Slide 7"><img src="p3-deck/organisation/thumb-07.webp" alt="" loading="lazy" draggable="false"></button><button type="button" data-i="7" aria-label="Slide 8"><img src="p3-deck/organisation/thumb-08.webp" alt="" loading="lazy" draggable="false"></button></div>
+  <p class="p3m-note">For review only · © 2026 DuaDesk · Ashish Dua Consulting Corporation · Please do not copy or redistribute.</p>
+ </div>
+</div>
+<style>
+.p3m{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;font-family:Inter,"Segoe UI",system-ui,Arial,sans-serif}
+.p3m[hidden]{display:none}
+.p3m *{box-sizing:border-box}
+.p3m-back{position:absolute;inset:0;background:rgba(3,8,16,.82);backdrop-filter:blur(6px)}
+.p3m-box{position:relative;width:min(1240px,100%,calc((100vh - 230px) * 16 / 9 + 40px));min-width:min(100%,320px);background:#0b1424;border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:18px 20px 14px;box-shadow:0 40px 120px rgba(0,0,0,.6);color:#eef2f8;animation:p3mIn .25s ease}
+@keyframes p3mIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+.p3m-top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:12px}
+.p3m-kick{margin:0 0 2px;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--p3m-acc)}
+.p3m-top h2{margin:0;font:700 clamp(18px,2.2vw,24px)/1.2 Georgia,serif;color:#fff}
+.p3m-acts{display:flex;gap:8px;align-items:center;flex:none}
+.p3m-count,.p3m-full{background:rgba(255,255,255,.06);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:6px 12px;font:700 12.5px Inter,sans-serif}
+.p3m-full{cursor:pointer}
+.p3m-x{width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff;font-size:16px;cursor:pointer}
+.p3m-x:hover,.p3m-full:hover{background:rgba(255,255,255,.12)}
+.p3m-stage{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#111c30;outline:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.p3m-img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
+.p3m-shield{position:absolute;inset:0}
+.p3m-nav{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,.3);background:rgba(8,16,30,.7);color:#fff;font-size:28px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.p3m-prev{left:10px}.p3m-next{right:10px}.p3m-nav:hover{background:rgba(8,16,30,.92)}
+.p3m-strip{display:flex;gap:7px;overflow-x:auto;padding:10px 2px 4px}
+.p3m-strip button{flex:none;width:96px;aspect-ratio:16/9;padding:0;border:2px solid transparent;border-radius:7px;overflow:hidden;background:#111c30;opacity:.55;cursor:pointer}
+.p3m-strip button[aria-current="true"]{border-color:var(--p3m-acc);opacity:1}
+.p3m-strip img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.p3m-note{margin:6px 0 0;font-size:11.5px;color:#7f93a8}
+.p3m-stage:fullscreen{border-radius:0;background:#000}
+@media(max-width:700px){.p3m{padding:10px}.p3m-box{padding:14px 12px 10px}.p3m-full{display:none}.p3m-nav{width:36px;height:36px;font-size:22px}.p3m-strip button{width:76px}}
+@media print{.p3m{display:none!important}}
+</style>
+<script>
+(function(){
+ var m=document.getElementById('p3Modal');if(!m)return;
+ var N=8,B='p3-deck/organisation/',i=0,last=null,stage=m.querySelector('.p3m-stage'),img=m.querySelector('.p3m-img'),cnt=m.querySelector('.p3m-count'),strip=m.querySelector('.p3m-strip');
+ var ths=[].slice.call(strip.querySelectorAll('button'));
+ function src(k){return B+'slide-'+(k<9?'0':'')+(k+1)+'.webp';}
+ function pre(k){if(k>=0&&k<N){var p=new Image();p.src=src(k);}}
+ function go(k){i=(k+N)%N;img.src=src(i);img.alt='Slide '+(i+1)+' of '+N;cnt.textContent=(i+1)+' / '+N;
+  ths.forEach(function(t,j){t.setAttribute('aria-current',j===i?'true':'false');});var t=ths[i];if(t)strip.scrollTo({left:t.offsetLeft-strip.clientWidth/2+t.clientWidth/2,behavior:'smooth'});pre(i+1);pre(i-1);}
+ function open(){last=document.activeElement;m.hidden=false;document.documentElement.style.overflow='hidden';if(!img.getAttribute('src'))go(0);stage.focus();}
+ function close(){if(document.fullscreenElement)document.exitFullscreen();m.hidden=true;document.documentElement.style.overflow='';if(last&&last.focus)last.focus();}
+ document.addEventListener('click',function(e){if(e.target.closest('[data-p3m-open]')){e.preventDefault();open();}});
+ m.querySelectorAll('[data-p3m-close]').forEach(function(b){b.addEventListener('click',close);});
+ m.querySelector('.p3m-prev').onclick=function(){go(i-1);};m.querySelector('.p3m-next').onclick=function(){go(i+1);};
+ strip.addEventListener('click',function(e){var b=e.target.closest('button');if(b)go(+b.dataset.i);});
+ document.addEventListener('keydown',function(e){if(m.hidden)return;if(e.key==='Escape'&&!document.fullscreenElement)close();if(e.key==='ArrowRight')go(i+1);if(e.key==='ArrowLeft')go(i-1);});
+ var x0=null;stage.addEventListener('touchstart',function(e){x0=e.touches[0].clientX;},{passive:true});
+ stage.addEventListener('touchend',function(e){if(x0===null)return;var dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>40)go(i+(dx<0?1:-1));x0=null;});
+ m.querySelector('.p3m-full').onclick=function(){if(document.fullscreenElement)document.exitFullscreen();else if(stage.requestFullscreen)stage.requestFullscreen();};
+ [stage,strip].forEach(function(el){el.addEventListener('contextmenu',function(e){e.preventDefault();});el.addEventListener('dragstart',function(e){e.preventDefault();});});
+ if(location.hash==='#p3-deck')open();
+})();
+</script>
+
 <main class="wrap">
  <a class="back" href="index.html#top">← Back to duadesk.com</a>
  <header class="hero">
@@ -169,7 +240,7 @@ footer{border-top:1px solid var(--line);margin-top:64px;padding:34px 0 46px;colo
     <div class="fact"><b>What lasts</b><p>The organisation: its purpose, its people, its stakeholders and its continuity.</p></div>
     <div class="fact"><b>Who serves it</b><p>The Board and owners hold its purpose; the CEO and every function head serve it for a time.</p></div>
    </div>
-   <div class="cta" style="margin-top:22px"><a class="btn world" href="#products">See the 7 products</a><a class="btn ghost" href="#rollup">How it rolls up</a></div>
+   <div class="cta" style="margin-top:22px"><button type="button" class="btn world" data-p3m-open><span aria-hidden="true">▶&nbsp;</span>View the methodology deck</button><a class="btn ghost" href="#products">See the 7 products</a><a class="btn ghost" href="#rollup">How it rolls up</a></div>
   </div>
   <div class="hero-art" aria-hidden="true"><span class="ring r2"></span><span class="ring"></span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="260" height="260" role="img" aria-label="P³: Present, Purpose, Possibility. A DuaDesk method." class="stamp"><defs><path id="s-top" d="M13,60 A47,47 0 0,1 107,60"/><path id="s-bot" d="M7.5,60 A52.5,52.5 0 0,0 112.5,60"/></defs><circle cx="60" cy="60" r="57" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="60" cy="60" r="38" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="12.5" cy="60" r="1.6" fill="currentColor"/><circle cx="107.5" cy="60" r="1.6" fill="currentColor"/><text font-family="'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif" font-size="8.6" font-weight="700" letter-spacing="1.6" fill="currentColor" text-anchor="middle"><textPath href="#s-top" startOffset="50%">PRESENT · PURPOSE</textPath></text><text font-family="'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif" font-size="8.6" font-weight="700" letter-spacing="1.6" fill="currentColor" text-anchor="middle"><textPath href="#s-bot" startOffset="50%">POSSIBILITY</textPath></text><text x="57" y="70" text-anchor="middle" font-family="'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif" font-size="34" font-weight="800" fill="currentColor">P</text><text x="73" y="54" text-anchor="middle" font-family="'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif" font-size="17" font-weight="800" fill="currentColor">3</text><text x="60" y="85" text-anchor="middle" font-family="'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif" font-size="6.6" font-weight="700" letter-spacing="1.4" fill="currentColor">DUADESK</text></svg></div>
  </header>
