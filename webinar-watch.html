@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Webinar Recording</title>
+<meta name="description" content="Watch the recording of a DuaDesk webinar with CA Ashish Dua.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="webinar-style.css">
+<style>
+.player{position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+.player iframe,.player video{position:absolute;inset:0;width:100%;height:100%;border:0}
+.grid{display:grid;grid-template-columns:1fr 340px;gap:22px;margin:22px 0}
+.chap{list-style:none;margin:0;padding:0}.chap li{border-top:1px solid var(--line)}
+.chap button{width:100%;text-align:left;background:none;border:0;color:var(--ink);padding:10px 4px;font:15px Inter,sans-serif;cursor:pointer;display:grid;grid-template-columns:64px 1fr;gap:8px}
+.chap button:hover{color:var(--gold2)}.chap span{color:var(--gold);font-weight:800}
+.tk{margin:0;padding-left:20px}.tk li{margin:0 0 6px}
+.gate{max-width:560px;margin:40px auto}
+h3{font-family:Newsreader,Georgia,serif;font-size:21px;font-weight:600;margin:0 0 10px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="brand" href="webinars.html">DUA <span>DESK</span></a><nav class="toplinks"><a href="webinars.html">All webinars</a><a href="webinars.html#past">Recordings</a></nav></div></header>
+<main class="wrap" id="app" style="padding-top:28px"><p class="note">Loading…</p></main>
+<footer class="site"><div class="wrap">CA Ashish Dua · DuaDesk · <a href="webinars.html">duadesk.com/webinars</a> · Recordings are for personal viewing. Demos use sample data; sessions are educational and are not professional advice. · <a href="webinar-privacy.html">Privacy notice</a></div></footer>
+<script>
+(function(){
+var API='/api/webinars',Q=new URLSearchParams(location.search),slug=Q.get('w')||'',app=document.getElementById('app'),player=null,DATA=null;
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function secs(t){return String(t||'0').split(':').reduce(function(a,x){return a*60+(+x||0);},0);}
+var saved=null;try{saved=JSON.parse(localStorage.getItem('dd-watch')||'null');}catch(e){}
+function call(body){return fetch(API+'?action=watch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({slug:slug},body))}).then(function(r){return r.json().then(function(j){if(!r.ok)throw Object.assign(new Error(j.error||'Error'),{status:r.status});return j;});});}
+function gate(title,err){
+ app.innerHTML='<div class="gate card"><p class="kick">Webinar recording</p><h1 style="font-size:32px">'+esc(title||'Watch the recording')+'</h1><p class="note">Enter your name and email to watch. It’s free.</p>'+
+ '<form id="g"><div class="f"><div><label>Name</label><input name="name" autocomplete="name" required></div><div><label>Email</label><input name="email" type="email" autocomplete="email" required></div>'+
+ '<div class="full"><label>Company (optional)</label><input name="company" autocomplete="organization"></div>'+
+ '<div class="full"><label class="chk"><input type="checkbox" name="consent"> Send me invitations to future DuaDesk webinars. I can unsubscribe at any time.</label></div></div>'+
+ '<p class="msg err" id="m">'+esc(err||'')+'</p><button class="btn gold" type="submit">▶ Watch now</button></form></div>';
+ document.getElementById('g').onsubmit=function(e){e.preventDefault();var f=e.target,b={name:f.elements.name.value.trim(),email:f.elements.email.value.trim(),company:f.elements.company.value.trim(),consent:f.elements.consent.checked};
+  if(!b.name||!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(b.email)){document.getElementById('m').textContent='Please enter your name and a valid email.';return;}
+  call(b).then(show).catch(function(err){document.getElementById('m').textContent=err.message;});};
+}
+function seek(t){var s=secs(t);
+ if(DATA.video.type==='file'&&player){player.currentTime=s;player.play();}
+ else if(DATA.video.type==='embed'&&player){player.src=DATA.video.url+'&start='+s+'&autoplay=1';}}
+function show(j){DATA=j;try{localStorage.setItem('dd-watch',JSON.stringify({p:j.p,t:j.t}));}catch(e){}
+ document.title=j.title+' · Recording';
+ var v=j.video,media=v.type==='embed'?'<div class="player"><iframe id="pl" src="'+esc(v.url)+'" title="'+esc(j.title)+'" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>'
+  :v.type==='file'?'<div class="player"><video id="pl" src="'+esc(v.url)+'" controls preload="metadata" controlsList="nodownload"></video></div>'
+  :'<div class="card" style="text-align:center;padding:40px"><p>This recording opens on Microsoft’s site.</p><a class="btn gold" href="'+esc(v.url)+'" target="_blank" rel="noopener">▶ Open the recording</a></div>';
+ var act='?p='+j.p+'&w='+encodeURIComponent(slug)+'&t='+j.t;
+ var prods=(j.products||[]).map(function(p){return '<a href="'+esc(p.url)+'" target="_blank" rel="noopener">'+esc(p.name)+'</a>';}).join(', ');
+ app.innerHTML='<p class="kick">Webinar recording</p><h1 style="font-size:clamp(28px,4vw,42px)">'+esc(j.title)+'</h1><p class="note" style="margin-top:-8px">'+esc(j.subtitle||'')+(j.starts_at?' · '+new Date(j.starts_at).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}):'')+'</p>'+
+ media+'<div class="grid"><div>'+
+ (j.summary?'<h3>About this session</h3><p>'+esc(j.summary)+'</p>':'')+
+ ((j.takeaways||[]).length?'<h3 style="margin-top:22px">Key takeaways</h3><ul class="tk">'+j.takeaways.map(function(t){return '<li>'+esc(t)+'</li>';}).join('')+'</ul>':'')+
+ '<div class="card" style="margin-top:24px"><h3>Would '+(prods?prods:'DuaDesk')+' help your organisation?</h3><p class="note">Ashish will personally walk you through it, on your own questions.</p><div style="display:flex;flex-wrap:wrap;gap:10px"><a class="btn gold" href="webinar-respond.html'+act+'&a=talk">🤝 Talk to us</a><a class="btn ghost" href="webinar-respond.html'+act+'&a=topic">💡 Suggest the next topic</a>'+(j.slides_url?'<a class="btn ghost" href="'+esc(j.slides_url)+'" target="_blank" rel="noopener">Download the slides</a>':'')+'</div></div>'+
+ '</div><aside>'+((j.chapters||[]).length?'<div class="card"><h3>Chapters</h3><ul class="chap">'+j.chapters.map(function(c){return '<li><button type="button" data-t="'+esc(c.t)+'"><span>'+esc(c.t)+'</span>'+esc(c.title)+'</button></li>';}).join('')+'</ul></div>':'')+
+ '<p style="margin-top:16px"><a class="btn ghost sm" href="webinars.html">See upcoming webinars</a></p></aside></div>';
+ player=document.getElementById('pl');
+ app.querySelectorAll('[data-t]').forEach(function(b){b.onclick=function(){seek(b.dataset.t);window.scrollTo({top:0,behavior:'smooth'});};});
+}
+if(!slug){app.innerHTML='<p>Recording not found. <a href="webinars.html#past">See all recordings</a>.</p>';return;}
+var cred=Q.get('p')&&Q.get('t')?{p:Q.get('p'),t:Q.get('t')}:saved;
+if(cred)call(cred).then(show).catch(function(e){if(e.status===404)app.innerHTML='<div class="gate card"><h1 style="font-size:30px">Not available yet</h1><p>This recording isn’t published yet. Please check back soon.</p><a class="btn ghost" href="webinars.html">See all webinars</a></div>';else gate();});
+else call({}).then(show).catch(function(e){if(e.status===404)app.innerHTML='<div class="gate card"><h1 style="font-size:30px">Not available yet</h1><p>This recording isn’t published yet. Please check back soon.</p><a class="btn ghost" href="webinars.html">See all webinars</a></div>';else gate();});
+})();
+</script>
+</body>
+</html>

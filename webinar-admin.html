@@ -1,0 +1,729 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Webinar Admin</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+<style>
+:root{--bg:#06101c;--card:#0f1a2e;--card2:#13203a;--line:#23314d;--ink:#e8ecf3;--mut:#a9b4c7;--gold:#d6ae55;--gold2:#f0d18a;--ok:#1fc47d;--err:#ff8a7a;--warn:#f5b84a;--wa:#25d366}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,Arial,sans-serif}
+a{color:var(--gold2)}
+.wrap{max-width:1320px;margin:0 auto;padding:0 18px}
+header{border-bottom:1px solid var(--line);background:#0a1322;position:sticky;top:0;z-index:5}
+header .wrap{display:flex;align-items:center;justify-content:space-between;min-height:58px;gap:12px;flex-wrap:wrap}
+.brand{font-weight:800;letter-spacing:.14em}.brand span{color:var(--gold)}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tab{background:none;border:1px solid transparent;color:var(--mut);padding:7px 11px;border-radius:9px;font:600 13.5px Inter,sans-serif;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--card2);color:#fff;border-color:var(--line)}
+h1{font-size:22px;margin:22px 0 4px}h2{font-size:17px;margin:20px 0 8px}h3{font-size:15px;margin:0 0 8px;color:var(--gold2)}
+.mut{color:var(--mut)}.small{font-size:13px}
+.panel{display:none}.panel.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0}
+.btn{display:inline-flex;align-items:center;gap:6px;border-radius:9px;padding:8px 13px;font:700 13.5px Inter,sans-serif;cursor:pointer;border:1px solid var(--line);background:var(--card2);color:var(--ink);text-decoration:none;white-space:nowrap}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#0b1424}.btn.red{border-color:#7a2b25;color:var(--err)}.btn.wa{background:var(--wa);border-color:var(--wa);color:#06261a}
+.btn[disabled]{opacity:.5;cursor:not-allowed}.btn.sm{padding:4px 9px;font-size:12.5px}
+input,select,textarea{background:#0a1322;border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:8px 10px;font:14px Inter,sans-serif;width:100%}
+textarea{min-height:70px;resize:vertical}
+label{font-size:12.5px;font-weight:600;color:var(--mut);display:block;margin:0 0 3px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.grid .s2{grid-column:span 2}.grid .s3{grid-column:span 3}.grid .s4{grid-column:1/-1}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--mut);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;position:sticky;top:0;background:var(--card);z-index:1}
+tr.row:hover td{background:#111e35}
+.tbl{overflow:auto;max-height:68vh;border:1px solid var(--line);border-radius:12px}
+.pill{display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.st-published{color:var(--ok);border-color:rgba(31,196,125,.5)}.st-draft{color:var(--warn);border-color:rgba(245,184,74,.5)}
+.y{color:var(--ok)}.n{color:var(--mut)}.warn{color:var(--warn)}.err{color:var(--err)}
+.login{max-width:380px;margin:12vh auto}
+.fun{display:grid;grid-template-columns:minmax(120px,190px) 1fr minmax(120px,auto);gap:8px 12px;align-items:center}
+.fun .lb{font-size:14px}.fun .tr{background:var(--card2);border-radius:6px;height:22px;position:relative}.fun .br{background:var(--gold);height:100%;border-radius:0 4px 4px 0;min-width:2px}
+.fun .vl{font-size:13px;color:var(--mut);white-space:nowrap}.fun .vl b{color:var(--ink);font-size:15px;margin-right:6px}
+.ibar{display:inline-block;height:10px;background:var(--gold);border-radius:0 3px 3px 0;vertical-align:middle;margin-right:8px;min-width:2px}
+.ltabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}.ltabs .btn .c{margin-left:6px;opacity:.8;font-weight:700}
+@media(max-width:640px){.fun{grid-template-columns:1fr auto}.fun .tr{grid-column:1/-1;order:3}}
+.drawer{position:fixed;inset:0;background:rgba(2,6,12,.7);display:none;justify-content:flex-end;z-index:30}.drawer.on{display:flex}
+.dbox{background:var(--card);width:min(780px,100%);height:100%;overflow:auto;padding:22px;border-left:1px solid var(--line)}
+.agrow,.chrow{display:grid;grid-template-columns:80px 1fr 34px;gap:8px;margin:0 0 6px}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);font-weight:500}.chk input{width:16px;height:16px}
+.log{background:#0a1322;border:1px solid var(--line);border-radius:10px;padding:10px;font:12.5px ui-monospace,Consolas,monospace;max-height:240px;overflow:auto;white-space:pre-wrap}
+.stats{display:flex;gap:10px;flex-wrap:wrap}.stat{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-width:130px}.stat b{display:block;font-size:22px}.stat span{font-size:12px;color:var(--mut)}
+.row-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.steps{counter-reset:s}.step{position:relative;padding-left:40px}.step:before{counter-increment:s;content:counter(s);position:absolute;left:0;top:16px;width:28px;height:28px;border-radius:50%;background:var(--gold);color:#0b1424;font-weight:800;display:flex;align-items:center;justify-content:center}
+.bar{height:8px;background:#0a1322;border-radius:999px;overflow:hidden}.bar i{display:block;height:100%;background:var(--gold)}
+.funnel{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.funnel div{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 10px}.funnel b{display:block;font-size:20px}
+@media(max-width:900px){.grid{grid-template-columns:1fr 1fr}.funnel{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div id="loginView" class="wrap login"><div class="card">
+ <div class="brand" style="margin-bottom:10px">DUA <span>DESK</span> · Webinar admin</div>
+ <form id="lf"><label for="pw">Admin password</label><input id="pw" type="password" autocomplete="current-password" required><p class="err small" id="lerr"></p><button class="btn gold" type="submit">Sign in</button></form>
+</div></div>
+
+<div id="app" hidden>
+<header><div class="wrap">
+ <div class="brand">DUA <span>DESK</span> · Webinars</div>
+ <nav class="tabs" role="tablist">
+  <button class="tab" data-p="today" aria-selected="true">Today</button>
+  <button class="tab" data-p="dash" aria-selected="false">Dashboard</button>
+  <button class="tab" data-p="plan" aria-selected="false">Plan</button>
+  <button class="tab" data-p="insights" aria-selected="false">Insights</button>
+  <button class="tab" data-p="send" aria-selected="false">Invite &amp; remind</button>
+  <button class="tab" data-p="regs" aria-selected="false">Registrations</button>
+  <button class="tab" data-p="after" aria-selected="false">After the webinar</button>
+  <button class="tab" data-p="people" aria-selected="false">People &amp; WhatsApp</button>
+  <button class="tab" data-p="leads" aria-selected="false">Leads</button>
+  <button class="tab" data-p="topics" aria-selected="false">Topic ideas</button>
+  <button class="tab" data-p="settings" aria-selected="false">Settings</button>
+ </nav>
+ <div class="small"><a href="webinars.html" target="_blank">Public page ↗</a> · <a href="#" id="logout">Sign out</a></div>
+</div></header>
+
+<main class="wrap">
+<!-- TODAY -->
+<section class="panel on" id="p-today">
+ <h1>Today</h1>
+ <p class="mut small" id="tMode"></p>
+ <div class="tbl" style="max-height:none"><table><thead><tr><th>Webinar</th><th>Date</th><th>Days of inviting left</th><th>Warm: sent today</th><th>Warm: planned today</th><th>Warm: still to invite</th><th>Cold: planned today</th><th>Cold: still to contact</th></tr></thead><tbody id="tPlan"></tbody></table></div>
+ <div class="row-actions"><button class="btn gold" id="tWarm">Send today’s warm invitations now</button><button class="btn" id="tDraft">Prepare today’s cold emails</button><button class="btn" id="tApprove">Approve all drafts</button><button class="btn" id="tSendCold">Send 3 approved cold emails now</button><span class="small" id="tMsg"></span></div>
+ <h2>Today’s cold emails <span class="mut small" id="tCount"></span></h2>
+ <p class="mut small">Written for each person by AI from their role and industry, sent from your outreach mailbox a few at a time between 9:30 AM and 2:30 PM. Edit anything before approving. Each email offers one-click registration and an opt-out.</p>
+ <div id="tOut"></div>
+</section>
+
+<!-- INSIGHTS -->
+<section class="panel" id="p-insights">
+ <h1>Insights</h1>
+ <div class="stats" id="iTot"></div>
+ <div class="row-actions"><button class="btn" id="iVerify">Validate unchecked emails now</button><span class="small mut" id="iVerMsg"></span></div>
+ <h2>Audience for each published webinar</h2>
+ <div class="tbl" style="max-height:none"><table><thead><tr><th>Webinar</th><th>Date</th><th>Target groups</th><th>Warm still to invite</th><th>Already invited</th><th>Cold reachable</th><th>Inviting window</th><th></th></tr></thead><tbody id="iAud"></tbody></table></div>
+ <div class="grid" style="margin-top:6px">
+  <div class="s2"><h2>Your contacts by group</h2><div class="tbl" style="max-height:420px"><table><thead><tr><th>Group</th><th>Total</th><th>Warm</th><th>Cold, reachable</th></tr></thead><tbody id="iSeg"></tbody></table></div></div>
+  <div class="s2"><h2>Biggest clusters: co-host ideas</h2><p class="mut small">Industries concentrated in one city: approach that city’s industry association as a co-host.</p><div class="tbl" style="max-height:380px"><table><thead><tr><th>Industry</th><th>City</th><th>Contacts</th></tr></thead><tbody id="iClu"></tbody></table></div></div>
+ </div>
+ <h2>Webinar ideas from your data</h2><div id="iIdeas" class="card"></div>
+ <h2>What works: registration rate by group</h2><div class="tbl" style="max-height:360px"><table><thead><tr><th>Group</th><th>Invited</th><th>Registered</th><th>Rate</th></tr></thead><tbody id="iConv"></tbody></table></div>
+</section>
+
+<!-- DASHBOARD -->
+<section class="panel" id="p-dash">
+ <h1>Dashboard</h1>
+ <div class="row-actions" style="margin-top:0"><select id="dSel" style="max-width:520px"></select><span class="small mut" id="dTeams"></span></div>
+ <div class="stats" id="dTiles"></div>
+ <div class="card"><h3>The journey <span class="mut small" id="dFunNote"></span></h3><div class="fun" id="dFunnel"></div></div>
+ <div class="card"><h3>Who to follow up</h3>
+  <div class="ltabs" id="dTabs"></div>
+  <p class="small mut" id="dListNote"></p>
+  <div class="row-actions" id="dActs"></div>
+  <div class="tbl" style="max-height:60vh"><table><thead id="dHead"></thead><tbody id="dRows"></tbody></table></div>
+ </div>
+ <div class="grid">
+  <div class="s2 card"><h3>Business interest by product</h3><p class="small mut">From “Talk to us” and leads you added. Customers = leads marked “won” in Leads.</p><div class="tbl" style="max-height:360px"><table><thead><tr><th>Product</th><th>Asked to talk</th><th>Demo or pilot</th><th>Customers</th></tr></thead><tbody id="dProd"></tbody></table></div></div>
+  <div class="s2 card"><h3>Cold contacts who became warm</h3><p class="small mut">People from your cold lists who registered, watched, asked for WhatsApp updates, suggested a topic, asked to talk or replied.</p><div id="dWarm"></div></div>
+ </div>
+ <h2>Webinar by webinar <span class="mut small">(past webinars, then the next three)</span></h2>
+ <div class="tbl" style="max-height:none"><table><thead><tr><th>Webinar</th><th>Date</th><th>Invited</th><th>Registered</th><th>Attended</th><th>Didn’t attend</th><th>Walk-ins</th><th>Avg minutes</th><th>Watched recording</th><th>Asked to talk</th><th>Customers</th><th>Rating</th><th>Attendance</th></tr></thead><tbody id="dWeb"></tbody></table></div>
+ <div class="grid" style="margin-top:16px">
+  <div class="s2"><h2>Where attendees come from</h2><div class="tbl" style="max-height:360px"><table><thead><tr><th>Source</th><th>Registered</th><th>Attended</th><th>Show-up rate</th></tr></thead><tbody id="dSrc"></tbody></table></div></div>
+  <div class="s2"><h2>Best day and time</h2><div class="tbl" style="max-height:360px"><table><thead><tr><th>Day and time (IST)</th><th>Sessions</th><th>Registered per session</th><th>Show-up rate</th></tr></thead><tbody id="dSlot"></tbody></table></div></div>
+ </div>
+</section>
+
+<!-- PLAN -->
+<section class="panel" id="p-plan">
+ <h1>Plan &amp; timetable</h1>
+ <p class="mut small"><b>published</b> = on the website with registration · <b>later</b> = “coming later” · <b>draft</b> = hidden · <b>done</b> = past (recording shown when published). Co-host and facilitator names show publicly only when ticked “confirmed”. The Teams link is never on the website; it goes only to registrants.</p>
+ <div class="row-actions"><button class="btn" id="newW">+ Add a webinar</button><span class="mut small" id="sentToday"></span></div>
+ <div class="tbl"><table><thead><tr><th>#</th><th>Date (IST)</th><th>Webinar</th><th>Status</th><th>Co-host</th><th>Facilitator</th><th>Teams</th><th>Invited</th><th>Registered</th><th>Attended</th><th>Leads</th><th></th></tr></thead><tbody id="wRows"></tbody></table></div>
+</section>
+
+<!-- SEND -->
+<section class="panel" id="p-send">
+ <h1>Invite &amp; remind</h1>
+ <div class="card">
+  <div class="grid">
+   <div class="s2"><label>Webinar</label><select id="sSel" class="wsel"></select></div>
+   <div><label>Daily sending limit</label><input id="cap" type="number" min="1" value="150"></div>
+   <div><label>Only people tagged (optional)</label><input id="tagF" placeholder="e.g. ca, cfo"></div>
+   <div class="s2"><label>Send a test to</label><input id="testTo" type="email" value="ashish@ashishduacorporation.com"></div>
+  </div>
+  <p class="mut small">Sent from <b>webinar@ashishduacorporation.com</b>, replies to <b>ashish@ashishduacorporation.com</b>. Every invitation has one-click buttons (Register · Remind me on WhatsApp · Not this one · Suggest a topic · Talk to us) and an unsubscribe link. Automatic rules: nobody gets the same invitation twice; unsubscribed, bounced and paused people are skipped; people only get the series they chose; at most the monthly limit per person (Settings). Start at 100–200 a day.</p>
+  <div class="row-actions"><button class="btn" id="bTest">1 · Send me a test</button><button class="btn gold" id="bInv">2 · Send invitations (up to today’s limit)</button><button class="btn red" id="bStop" disabled>Stop</button></div>
+  <div class="row-actions"><button class="btn" id="bRem">Send reminder with Teams link to everyone registered</button><span class="mut small">On the day, 1–2 hours before. Then post a reminder on your WhatsApp Channel and broadcast list (see People &amp; WhatsApp).</span></div>
+  <div class="log" id="sLog">Ready.</div>
+ </div>
+</section>
+
+<!-- REGISTRATIONS -->
+<section class="panel" id="p-regs">
+ <h1>Registrations</h1>
+ <div class="row-actions"><select id="regSel" class="wsel" style="max-width:520px"></select><button class="btn" id="regCsv">Download CSV</button><span id="regCount" class="mut small"></span></div>
+ <div class="stats" id="srcStats"></div>
+ <details class="card"><summary><b>Add someone who registered on WhatsApp</b> <span class="mut small">(they get the same confirmation email and calendar invite)</span></summary>
+  <form id="addReg" class="grid" style="margin-top:12px"><div><label>Name</label><input name="name" required></div><div><label>Email</label><input name="email" type="email" required></div><div><label>Mobile</label><input name="phone"></div><div><label>Company</label><input name="company"></div>
+  <div class="s3"><label class="chk"><input type="checkbox" name="wa_optin" checked> They messaged us on WhatsApp and are happy to get WhatsApp reminders</label></div><div><button class="btn gold" type="submit">Add registration</button></div></form><p class="small" id="addRegMsg"></p></details>
+ <div class="tbl"><table><thead><tr><th>When</th><th>Name</th><th>Email</th><th>Mobile</th><th>Role · Company</th><th>Source</th><th>WA</th><th>Contact?</th><th>Question</th><th>Attended</th><th>Rating</th></tr></thead><tbody id="regRows"></tbody></table></div>
+</section>
+
+<!-- AFTER -->
+<section class="panel" id="p-after">
+ <h1>After the webinar</h1>
+ <div class="row-actions"><select id="aSel" class="wsel" style="max-width:520px"></select></div>
+ <div class="funnel" id="funnel"></div>
+ <div class="steps">
+  <div class="card step"><h3>Mark who attended</h3><p class="mut small">If Teams is connected, press <b>Get attendance from Teams</b> (it also happens automatically a few hours after the webinar). Otherwise, in Teams open the meeting → <b>Attendance</b> → Download (.csv) and upload it here. People who joined without registering are added as walk-ins.</p>
+   <div class="row-actions"><button class="btn gold" id="attTeams">Get attendance from Teams</button><span class="small mut">or upload the file:</span><input type="file" id="attFile" accept=".csv,.txt" style="max-width:300px"><button class="btn" id="attGo" disabled>Import attendance file</button></div><p class="small" id="attMsg"></p><p class="small mut">People are matched by email, then by name. Anyone who joined with a different name and no email appears in Dashboard → “Teams names to match”.</p></div>
+  <div class="card step"><h3>Add the recording</h3>
+   <p class="mut small">In Teams: open the meeting chat → recording → <b>Download</b> (MP4). Choose how to share it. Viewers always enter their email first.</p>
+   <div class="grid"><div><label>Recording type</label><select id="rKind"><option value="youtube">YouTube (unlisted): free, recommended</option><option value="storage">Upload the MP4 here</option><option value="link">Link (OneDrive / SharePoint)</option></select></div>
+   <div class="s3" id="rRefBox"><label>Link</label><input id="rRef" placeholder="https://youtu.be/…"></div>
+   <div class="s3" id="rUpBox" hidden><label>MP4 file <span class="mut">(free Supabase plan: up to 50 MB per file; larger needs a paid plan, so YouTube unlisted is usually better)</span></label><input type="file" id="rFile" accept="video/mp4,video/*"><div class="bar" style="margin-top:6px"><i id="rProg" style="width:0"></i></div><span class="small mut" id="rUpMsg"></span></div>
+   <div class="s4"><label>Slides link (optional, e.g. a PDF on OneDrive)</label><input id="rSlides"></div></div>
+   <h3 style="margin-top:16px">Summary, takeaways and chapters</h3>
+   <p class="mut small">Press <b>Get transcript from Teams</b>, or in Teams: <b>Recap → Transcript → Download → .vtt</b> (choose .vtt, not .docx). Upload it and AI drafts these for you. Always read and edit before publishing.</p>
+   <div class="row-actions"><button class="btn" id="trTeams">Get transcript from Teams</button><input type="file" id="trFile" accept=".vtt,.txt" style="max-width:300px"><button class="btn" id="aiGo" disabled>Draft with AI</button><span class="small mut" id="aiMsg"></span></div>
+   <div class="grid"><div class="s4"><label>Summary (shown under the video)</label><textarea id="rSum"></textarea></div>
+   <div class="s4"><label>Key takeaways (one per line)</label><textarea id="rTk"></textarea></div>
+   <div class="s4"><label>Chapters <span class="mut">(time like 12:40, and a title)</span></label><div id="chaps"></div><button type="button" class="btn sm" id="chAdd">+ Chapter</button></div></div>
+   <div class="row-actions"><label class="chk"><input type="checkbox" id="rPub"> Published (visible on the website after email)</label><button class="btn gold" id="rSave">Save recording</button><a class="btn" id="rView" target="_blank">Preview ↗</a><span class="small" id="rMsg"></span></div>
+  </div>
+  <div class="card step"><h3>Send thank-you and missed-you emails</h3><p class="mut small">Attendees get: recording link, attendance certificate, feedback form, “talk to us”. People who registered but didn’t attend get: “sorry we missed you” with the recording. Each person gets it once.</p>
+   <div class="row-actions"><button class="btn gold" id="fuGo">Send follow-ups</button><span class="small" id="fuMsg"></span></div></div>
+ </div>
+</section>
+
+<!-- PEOPLE -->
+<section class="panel" id="p-people">
+ <h1>People &amp; WhatsApp</h1>
+ <div class="stats" id="pStats"></div>
+ <div class="card"><h3>Upload contacts (Excel or CSV)</h3>
+  <p class="mut small">Upload one file at a time, as often as you like. Each file is cleaned before loading: emails are tidied and typo-fixed (e.g. gmial.com → gmail.com), broken emails are dropped, mobiles are converted to +91 format, cells with several emails or mobiles are split into separate people, duplicates are merged, and everyone is labelled by role, industry and city. Emails are then checked against the internet (does the company’s mail server exist?). Anyone who unsubscribed or was deleted stays blocked. PDFs: open them in Excel or send them to Claude to convert first.</p>
+  <div class="grid">
+   <div class="s2"><label>File</label><input type="file" id="csv" accept=".xlsx,.xls,.csv,text/csv"></div>
+   <div><label>Sheet</label><select id="sheetSel" disabled></select></div>
+   <div><label>Label for this file</label><input id="csvSrc" placeholder="e.g. Delhi trade 2025"></div>
+   <div class="s4"><label>Who are these people?</label><div class="row-actions" style="margin:0"><label class="chk"><input type="radio" name="kind" value="warm"> <b>Warm:</b>&nbsp;people I know or have dealt with</label><label class="chk"><input type="radio" name="kind" value="cold"> <b>Cold:</b>&nbsp;purchased, directory or association list</label></div></div>
+   <div class="s2"><label>Tags for everyone in this file (optional)</label><input id="csvTags" placeholder="e.g. delhi-trade, pharma"></div>
+  </div>
+  <div id="mapBox" class="small" style="margin-top:10px"></div>
+  <div class="row-actions"><button class="btn gold" id="csvGo" disabled>Clean and load</button><span id="csvPrev" class="small mut"></span></div>
+  <div class="bar"><i id="impProg" style="width:0"></i></div>
+  <div class="log" id="csvLog" hidden></div></div>
+ <div class="card"><h3>WhatsApp, the free way</h3>
+  <p class="mut small">WhatsApp only lets you message people who opted in. These tools keep you within the rules at no cost:</p>
+  <div class="grid">
+   <div class="s2"><b>1 · Broadcast list of opted-in people</b><p class="mut small">People who ticked “WhatsApp reminders” or messaged you. Download, add them to a broadcast list in the WhatsApp Business app (they must have saved your number).</p><button class="btn" id="waExp">Download WhatsApp opt-ins (CSV)</button> <span class="small mut" id="waCount"></span></div>
+   <div class="s2"><b>2 · Personal invitations to people you know</b><p class="mut small">20–30 a day, one by one from your phone. Each button opens WhatsApp with the message ready; you check and press send.</p>
+    <div class="row-actions"><select id="pqSel" class="wsel" style="max-width:320px"></select><button class="btn" id="pqGo">Show today’s list</button></div></div>
+  </div>
+  <div id="pq"></div>
+ </div>
+
+ <div class="card"><h3>Find a person</h3>
+  <div class="row-actions"><input id="ps" placeholder="Email, mobile, name or company" style="max-width:360px"><button class="btn" id="psGo">Search</button></div>
+  <p class="mut small">Use this when someone replies to an outreach email (<b>Replied: make warm</b>), replies <b>STOP</b>, asks to be removed, or messages you on WhatsApp. Tick people and use <b>Find email with RocketReach</b> to fill missing or bad emails (uses RocketReach credits).</p>
+  <div class="row-actions"><button class="btn" id="rrGo">Find email with RocketReach (ticked)</button><span class="small" id="rrMsg"></span></div>
+  <div class="tbl" style="max-height:50vh"><table><thead><tr><th></th><th>Name · company</th><th>Email</th><th>Mobile</th><th>Type</th><th>Groups</th><th>Email status</th><th>WhatsApp</th><th>Actions</th></tr></thead><tbody id="psRows"></tbody></table></div>
+ </div>
+</section>
+
+<!-- LEADS -->
+<section class="panel" id="p-leads">
+ <h1>Leads</h1>
+ <p class="mut small">Everyone who said “talk to us”: from registration, invitations, recordings or feedback. You also get an email for each new lead, and they automatically receive your Bookings link.</p>
+ <div class="row-actions"><select id="lF"><option value="">All open</option><option>new</option><option>contacted</option><option>demo</option><option>pilot</option><option value="won">won: customer</option><option>not_now</option></select><span class="small mut" id="lCount"></span></div>
+ <div class="tbl"><table><thead><tr><th>Date</th><th>Person</th><th>Prefers</th><th>Interest · Webinar</th><th>Their note</th><th>Status</th><th>Next action</th><th>Your notes</th><th></th></tr></thead><tbody id="lRows"></tbody></table></div>
+</section>
+
+<!-- TOPICS -->
+<section class="panel" id="p-topics">
+ <h1>Topic ideas</h1>
+ <p class="mut small">Suggestions from invitations, registrations, feedback and the website, grouped by similar wording. When you schedule one, link it to a webinar and press “Notify”: everyone who asked gets a “You asked, we scheduled it” email.</p>
+ <div id="tGroups"></div>
+</section>
+
+<!-- SETTINGS -->
+<section class="panel" id="p-settings">
+ <h1>Settings</h1>
+ <form class="card grid" id="setF">
+  <div class="s4"><h3>Links</h3></div>
+  <div class="s4"><label>Microsoft Bookings page (sent to every lead)</label><input name="bookings_url" placeholder="https://outlook.office.com/book/…"></div>
+  <div class="s2"><label>WhatsApp Business number (with country code)</label><input name="whatsapp_number" placeholder="+918860046004"></div>
+  <div class="s2"><label>WhatsApp Channel link</label><input name="whatsapp_channel_url" placeholder="https://whatsapp.com/channel/…"></div>
+  <div class="s4"><h3>Daily invitations</h3></div>
+  <div><label>Warm invitations</label><select name="warm_mode"><option value="auto">Send automatically every day</option><option value="approve">Wait for me to press “Send” each day</option></select></div>
+  <div><label>Warm invitations per day (all webinars)</label><input name="daily_warm_cap" type="number" min="1"></div>
+  <div><label>Max invitations per person per 30 days</label><input name="invites_per_person_per_30_days" type="number" min="1" max="8"></div>
+  <div><label>Also invite warm contacts with no labels</label><select name="warm_include_unlabelled"><option value="yes">Yes</option><option value="no">No, only matching groups</option></select></div>
+  <div class="s4"><h3>Cold outreach</h3><p class="mut small" id="smtpState"></p></div>
+  <div><label>Cold emails</label><select name="cold_mode"><option value="approve">I approve each morning</option><option value="auto">Send automatically</option></select></div>
+  <div><label>Cold emails per day (all webinars)</label><input name="daily_cold_cap" type="number" min="1" max="60"></div>
+  <div class="s2"><label>Signature for cold emails</label><textarea name="outreach_signature" style="min-height:64px"></textarea></div>
+  <div class="s4"><h3>RocketReach</h3></div>
+  <div class="s2"><label>RocketReach API key</label><input name="rocketreach_api_key" placeholder="paste your key" autocomplete="off"></div>
+  <div><label>Max RocketReach lookups per day</label><input name="rocketreach_daily_limit" type="number" min="0"></div>
+  <div><label>&nbsp;</label><button class="btn" type="button" id="rrTest">Test connection</button></div>
+  <div class="s4 small" id="rrTestMsg"></div>
+  <div class="s2"><label>Finding new contacts</label><select name="rocketreach_mode"><option value="approve">I choose who to reveal (recommended)</option><option value="auto">Automatically, for webinars that need more people</option></select></div>
+  <div><label>Automatic reveals per day (max)</label><input name="rocketreach_auto_daily" type="number" min="0" max="50"></div>
+  <div class="small mut" style="align-self:end">Automatic mode runs once a day, only for webinars being invited now whose cold list is running low, and never goes above the daily limit.</div>
+  <div class="s4"><button class="btn gold" type="submit">Save settings</button> <span class="small" id="setMsg"></span></div>
+ </form>
+ <div class="card"><h3>Microsoft Teams</h3><p class="mut small">When connected, the app creates each Teams meeting in your Outlook calendar, fetches attendance automatically after each webinar, and can fetch the transcript for the AI summary. Connection details go in Vercel (see the setup guide).</p><div class="row-actions"><button class="btn" id="tmCheck">Check Teams connection</button><span class="small" id="tmState"></span></div></div>
+ <div class="card"><h3>Browser notifications</h3><p class="mut small"><span id="pushCount">…</span> people have tapped “Notify me”. Use Plan → Promote to notify them about a webinar. On the day of a webinar they get a reminder automatically.</p></div>
+</section>
+</main>
+</div>
+<div class="drawer" id="drawer"><div class="dbox" id="dbox"></div></div>
+
+<script>
+(function(){
+var API='/api/webinar-admin',KEY='',W=[],SET={},stop=false;
+var PRODUCTS=[['AI CFO','https://cfo.duadesk.com'],['AI CFO UAE edition','https://uae.duadesk.com'],['AI CFO Saudi edition','https://sa.duadesk.com'],['AI CFO Germany edition','https://de.duadesk.com'],['AI CFO Netherlands edition','https://nl.duadesk.com'],['AI CFO Japan edition','https://jp.duadesk.com'],['AI CPO','https://cpo.duadesk.com'],['Fixed Assets','https://fassets.duadesk.com'],['Dua Sarthi','https://sarthi.duadesk.com'],['Dua Pramaan','https://audit.duadesk.com'],['Dua Pragya','https://consulting.duadesk.com'],['Dua Vyapar','https://retail.duadesk.com'],['Philia','https://philia.duadesk.com'],['Dua Home','https://home.duadesk.com'],['Dua Parivaar','https://parenting.duadesk.com'],['Marriage Companion','https://marriage.duadesk.com'],['Dua Saathi','https://saathi.duadesk.com'],['Dua Legacy','https://legacy.duadesk.com']];
+var SEGS=[['role:finance','Finance / CFO / accounts'],['role:ceo-owner','CEO / owner / director'],['role:tax','Tax'],['role:audit','Audit / risk'],['role:procurement','Procurement'],['role:it','IT / technology'],['role:hr','HR'],['ind:finance-services','CA firms & financial services'],['ind:manufacturing','Manufacturing'],['ind:auto','Auto & components'],['ind:pharma','Pharma & healthcare'],['ind:trading','Trading & retail'],['ind:food','Food'],['ind:trade-customs','Import / export'],['ind:it-services','IT services'],['ind:real-estate','Real estate & construction'],['ind:logistics','Logistics'],['ind:education','Education'],['ind:hospitality','Hospitality'],['geo:ncr','Delhi NCR'],['geo:uae','UAE'],['size:large','Large companies']];
+function segName(k){var g=SEGS.find(function(x){return x[0]===k;});return g?g[1]:k;}
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function call(action,body){return fetch(API,{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify(Object.assign({action:action},body||{}))})
+ .then(function(r){return r.json().catch(function(){return {};}).then(function(j){if(r.status===401){signOut();throw new Error('Session expired. Please sign in again.');}if(!r.ok)throw new Error(j.error||('Error '+r.status));return j;});});}
+function ist(iso,o){return iso?new Date(iso).toLocaleString('en-IN',Object.assign({timeZone:'Asia/Kolkata'},o||{day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})):'—';}
+function toLocalInput(iso){if(!iso)return '';return new Date(new Date(iso).getTime()+330*60000).toISOString().slice(0,16);}
+function fromLocalInput(v){return v?v+':00+05:30':null;}
+function csvDownload(name,cols,rows){var q=function(v){v=v==null?'':Array.isArray(v)?v.join('; '):String(v);if(/^[=+\-@\t\r]/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"';};
+ var csv=[cols.join(',')].concat(rows.map(function(r){return cols.map(function(c){return q(r[c]);}).join(',');})).join('\r\n');
+ var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv'}));a.download=name;a.click();}
+function readText(file,cb){var rd=new FileReader();rd.onload=function(){var b=new Uint8Array(rd.result),t;
+ if(b[0]===0xFF&&b[1]===0xFE)t=new TextDecoder('utf-16le').decode(b);else if(b[0]===0xFE&&b[1]===0xFF)t=new TextDecoder('utf-16be').decode(b);else t=new TextDecoder('utf-8').decode(b);cb(t.replace(/^﻿/,''));};rd.readAsArrayBuffer(file);}
+function parseCSV(text){var delim=(text.split('\n')[0].match(/\t/g)||[]).length>(text.split('\n')[0].match(/,/g)||[]).length?'\t':',';
+ var rows=[],row=[],f='',q=false;for(var i=0;i<text.length;i++){var c=text[i];
+ if(q){if(c==='"'){if(text[i+1]==='"'){f+='"';i++;}else q=false;}else f+=c;}
+ else if(c==='"')q=true;else if(c===delim||(delim===','&&c===';'&&false)){row.push(f);f='';}else if(c==='\n'||c==='\r'){if(c==='\r'&&text[i+1]==='\n')i++;row.push(f);rows.push(row);row=[];f='';}else f+=c;}
+ if(f||row.length){row.push(f);rows.push(row);}return rows.filter(function(r){return r.some(function(x){return String(x).trim();});});}
+
+/* ---------- login & tabs ---------- */
+function signOut(){KEY='';try{sessionStorage.removeItem('wa');}catch(e){}$('app').hidden=true;$('loginView').hidden=false;}
+$('lf').onsubmit=function(e){e.preventDefault();KEY=$('pw').value;$('lerr').textContent='';call('login').then(function(){try{sessionStorage.setItem('wa',KEY);}catch(e){}start();}).catch(function(err){$('lerr').textContent=err.message;});};
+$('logout').onclick=function(e){e.preventDefault();signOut();};
+try{var k=sessionStorage.getItem('wa');if(k){KEY=k;call('login').then(start).catch(function(){});}}catch(e){}
+function start(){$('loginView').hidden=true;$('app').hidden=false;loadPlan().then(loadToday);}
+var LOADERS={today:function(){loadToday();},dash:function(){loadDash();},insights:function(){loadInsights();},plan:function(){loadPlan();},regs:function(){loadRegs();},after:function(){loadAfter();},people:function(){loadPeople();},leads:function(){loadLeads();},topics:function(){loadTopics();},settings:function(){fillSettings();}};
+document.querySelectorAll('.tab').forEach(function(t){t.onclick=function(){document.querySelectorAll('.tab').forEach(function(x){x.setAttribute('aria-selected',x===t?'true':'false');});
+ document.querySelectorAll('.panel').forEach(function(p){p.classList.toggle('on',p.id==='p-'+t.dataset.p);});if(LOADERS[t.dataset.p])LOADERS[t.dataset.p]();};});
+
+/* ---------- plan ---------- */
+function loadPlan(){return call('list').then(function(j){W=j.webinars;SET=j.settings||{};$('sentToday').textContent='Emails sent today: '+j.sent_today;renderPlan();fillSelects();});}
+function renderPlan(){$('wRows').innerHTML=W.map(function(w){var s=w.stats||{};
+ return '<tr class="row"><td>'+esc(w.n||'')+'</td><td>'+esc(ist(w.starts_at))+'</td><td><b>'+esc(w.title)+'</b><div class="mut small">'+esc((w.products||[]).map(function(p){return p.name;}).join(', '))+(w.recording_published?' · <span class="y">recording live</span>':'')+'</div></td>'+
+ '<td><span class="pill st-'+esc(w.status)+'">'+esc(w.status)+'</span></td>'+
+ '<td>'+(w.cohost_needed?(w.cohost_name?esc(w.cohost_name)+(w.cohost_confirmed?' <span class="y">✓</span>':' <span class="warn">(unconfirmed)</span>'):'<span class="warn">Needed</span><div class="mut small">'+esc(w.cohost_note||'')+'</div>'):'<span class="n">No</span>')+'</td>'+
+ '<td>'+(w.facilitator_name?esc(w.facilitator_name)+(w.facilitator_confirmed?' <span class="y">✓</span>':' <span class="warn">(unconfirmed)</span>'):'<span class="warn">To find</span><div class="mut small">'+esc(w.facilitator_note||'')+'</div>')+'</td>'+
+ '<td>'+(w.teams_link?'<span class="y">Added</span>':'<span class="warn">Missing</span>')+'</td><td>'+(s.invited||0)+'</td><td>'+(s.registered||0)+'</td><td>'+(s.attended||0)+'</td><td>'+(s.leads||0)+'</td>'+
+ '<td><div class="row-actions" style="margin:0"><button class="btn sm" data-edit="'+esc(w.slug)+'">Edit</button><button class="btn sm" data-promo="'+esc(w.slug)+'">Promote</button></div></td></tr>';}).join('');}
+function fillSelects(){var o=W.map(function(w){return '<option value="'+esc(w.slug)+'">'+esc((w.starts_at?ist(w.starts_at,{day:'numeric',month:'short'})+' · ':'')+w.title)+' ['+w.status+']</option>';}).join('');
+ document.querySelectorAll('.wsel').forEach(function(s){var v=s.value;s.innerHTML=(s.id==='regSel'?'<option value="">All webinars</option>':'')+o;if(v)s.value=v;});}
+document.addEventListener('click',function(e){var b=e.target.closest('[data-edit]');if(b)edit(W.find(function(w){return w.slug===b.dataset.edit;}));});
+$('newW').onclick=function(){edit(null);};
+function edit(w){
+ var isNew=!w;w=w||{title:'',status:'draft',series:'business',format:'webinar',agenda:[{min:5,item:'Welcome'},{min:10,item:'The problem'},{min:15,item:'Live demo'},{min:5,item:'Next steps'},{min:10,item:'Questions and answers'}],products:[],cohost_needed:false,speaker:'CA Ashish Dua',registration_open:true};
+ var has=function(n){return (w.products||[]).some(function(p){return p.name===n;});};
+ $('dbox').innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><h1 style="margin:0">'+(isNew?'Add a webinar':'Edit webinar')+'</h1><button class="btn" id="dClose">Close</button></div>'+
+ '<form id="ef"><div class="grid" style="margin-top:14px">'+
+ '<div class="s4"><label>Title</label><input name="title" value="'+esc(w.title)+'" required></div><div class="s4"><label>Subtitle</label><input name="subtitle" value="'+esc(w.subtitle)+'"></div>'+
+ '<div class="s2"><label>Date and time (IST)</label><input type="datetime-local" name="starts_at" value="'+toLocalInput(w.starts_at)+'"></div>'+
+ '<div><label>Status</label><select name="status">'+['draft','published','later','done','cancelled'].map(function(s){return '<option'+(w.status===s?' selected':'')+'>'+s+'</option>';}).join('')+'</select></div>'+
+ '<div><label>Series</label><select name="series">'+[['business','Business & Professional'],['family','Life & Family'],['roundtable','Roundtable']].map(function(s){return '<option value="'+s[0]+'"'+(w.series===s[0]?' selected':'')+'>'+s[1]+'</option>';}).join('')+'</select></div>'+
+ '<div><label>Format</label><select name="format"><option value="webinar"'+(w.format==='webinar'?' selected':'')+'>Public webinar</option><option value="roundtable"'+(w.format==='roundtable'?' selected':'')+'>Invitation-only roundtable</option></select></div>'+
+ '<div><label>Order #</label><input type="number" name="n" value="'+esc(w.n||'')+'"></div><div class="s2"><label class="chk"><input type="checkbox" name="registration_open"'+(w.registration_open!==false?' checked':'')+'> Registration open</label></div>'+
+ '<div class="s4"><label>Microsoft Teams link (sent only to registrants)</label><input name="teams_link" placeholder="https://teams.microsoft.com/l/meetup-join/..." value="'+esc(w.teams_link)+'">'+(!isNew&&!w.teams_link?'<div class="row-actions"><button class="btn sm" type="button" id="tmCreate">Create the Teams meeting for me</button><span class="small mut" id="tmMsg">Adds it to your Outlook calendar with webinar settings (guests skip the lobby, join muted, recording and transcript start automatically).</span></div>':'')+'</div>'+
+ '<div class="s4"><label>Who it’s for</label><input name="audience" value="'+esc(w.audience)+'"></div><div class="s4"><label>Short description</label><textarea name="summary">'+esc(w.summary)+'</textarea></div>'+
+ '<div class="s2"><label>Speaker</label><input name="speaker" value="'+esc(w.speaker||'CA Ashish Dua')+'"></div><div class="s2"><label>Public note (optional)</label><input name="note" value="'+esc(w.note)+'"></div>'+
+ '<div class="s4"><h2>Co-host</h2></div><div><label class="chk"><input type="checkbox" name="cohost_needed"'+(w.cohost_needed?' checked':'')+'> Co-host needed</label></div>'+
+ '<div class="s2"><label>Co-host name</label><input name="cohost_name" value="'+esc(w.cohost_name)+'"></div><div><label class="chk"><input type="checkbox" name="cohost_confirmed"'+(w.cohost_confirmed?' checked':'')+'> Confirmed (show publicly)</label></div>'+
+ '<div class="s2"><label>Co-host email (private)</label><input name="cohost_email" type="email" value="'+esc(w.cohost_email)+'"></div><div class="s2"><label>Co-host mobile (private)</label><input name="cohost_phone" value="'+esc(w.cohost_phone)+'"></div>'+
+ '<div class="s4"><label>Private note on co-host</label><input name="cohost_note" value="'+esc(w.cohost_note)+'"></div>'+
+ '<div class="s4"><h2>Facilitator (asks the questions)</h2></div><div class="s2"><label>Facilitator name</label><input name="facilitator_name" value="'+esc(w.facilitator_name)+'"></div>'+
+ '<div class="s2"><label class="chk"><input type="checkbox" name="facilitator_confirmed"'+(w.facilitator_confirmed?' checked':'')+'> Confirmed (show publicly)</label></div>'+
+ '<div class="s2"><label>Facilitator email (private)</label><input name="facilitator_email" type="email" value="'+esc(w.facilitator_email)+'"></div><div class="s2"><label>Facilitator mobile (private)</label><input name="facilitator_phone" value="'+esc(w.facilitator_phone)+'"></div>'+
+ '<div class="s4"><label>Private note on facilitator</label><input name="facilitator_note" value="'+esc(w.facilitator_note)+'"></div><p class="s4 small mut">Contact details are never shown on the website. With Teams connected, the co-host and facilitator receive the Teams invitation from your calendar; make them presenters in Teams → Meeting options.</p>'+
+ '<div class="s4"><h2>DuaDesk products</h2>'+PRODUCTS.map(function(p,i){return '<label class="chk" style="display:inline-flex;margin:0 14px 6px 0"><input type="checkbox" name="prod" value="'+i+'"'+(has(p[0])?' checked':'')+'> '+esc(p[0])+'</label>';}).join('')+'</div>'+
+ '<div class="s4"><h2>Who to invite</h2><p class="mut small">Contacts in any ticked group are invited. Cold outreach only goes to these groups; leave all unticked for family topics (warm contacts only).</p>'+SEGS.map(function(g){return '<label class="chk" style="display:inline-flex;margin:0 14px 6px 0"><input type="checkbox" name="seg" value="'+g[0]+'"'+((w.target_segments||[]).indexOf(g[0])>-1?' checked':'')+'> '+esc(g[1])+'</label>';}).join('')+'</div>'+
+ '<div><label class="chk"><input type="checkbox" name="drip_on"'+(w.drip_on!==false?' checked':'')+'> Daily invitations on</label></div><div><label>Start inviting (days before)</label><input type="number" name="drip_start_days" min="3" max="60" value="'+esc(w.drip_start_days||28)+'"></div><div><label>Stop inviting (days before)</label><input type="number" name="drip_end_days" min="0" max="30" value="'+(w.drip_end_days==null?5:esc(w.drip_end_days))+'"></div><div></div>'+
+ '<div class="s4"><h2>Agenda <span class="mut small" id="agTot"></span></h2><div id="ag"></div><button type="button" class="btn sm" id="agAdd">+ Add item</button></div>'+
+ '</div><p class="err small" id="eErr"></p><div class="row-actions"><button class="btn gold" type="submit">Save</button></div></form>';
+ var ag=$('ag');function agRow(a){var d=document.createElement('div');d.className='agrow';d.innerHTML='<input type="number" min="1" value="'+esc(a.min)+'" aria-label="Minutes"><input value="'+esc(a.item)+'" aria-label="Agenda item"><button type="button" class="btn sm" aria-label="Remove">×</button>';d.querySelector('button').onclick=function(){d.remove();tot();};d.querySelector('input').oninput=tot;ag.appendChild(d);}
+ function tot(){var t=[].reduce.call(ag.querySelectorAll('.agrow'),function(s,r){return s+(+r.children[0].value||0);},0);$('agTot').innerHTML='Total: <b class="'+(t===45?'y':'warn')+'">'+t+' min</b>';}
+ (w.agenda||[]).forEach(agRow);tot();$('agAdd').onclick=function(){agRow({min:5,item:''});tot();};
+ $('dClose').onclick=function(){$('drawer').classList.remove('on');};
+ $('ef').onsubmit=function(e){e.preventDefault();var f=e.target,o={};
+  ['title','subtitle','status','series','format','teams_link','audience','summary','speaker','note','cohost_name','cohost_note','facilitator_name','facilitator_note','cohost_email','cohost_phone','facilitator_email','facilitator_phone'].forEach(function(k){o[k]=f.elements[k].value.trim();});
+  o.n=f.elements.n.value?+f.elements.n.value:null;o.starts_at=fromLocalInput(f.elements.starts_at.value);
+  ['cohost_needed','cohost_confirmed','facilitator_confirmed','registration_open'].forEach(function(k){o[k]=f.elements[k].checked;});
+  o.products=[].filter.call(f.querySelectorAll('[name=prod]'),function(c){return c.checked;}).map(function(c){var p=PRODUCTS[+c.value];return {name:p[0],url:p[1]};});
+  o.target_segments=[].filter.call(f.querySelectorAll('[name=seg]'),function(c){return c.checked;}).map(function(c){return c.value;});o.drip_on=f.elements.drip_on.checked;o.drip_start_days=+f.elements.drip_start_days.value||28;o.drip_end_days=f.elements.drip_end_days.value===''?5:+f.elements.drip_end_days.value;
+  o.agenda=[].map.call(ag.querySelectorAll('.agrow'),function(r){return {min:+r.children[0].value||0,item:r.children[1].value.trim()};}).filter(function(a){return a.item;});
+  if(o.status==='published'&&!o.starts_at){$('eErr').textContent='A published webinar needs a date and time.';return;}
+  (isNew?call('create',{webinar:o}):call('save',{slug:w.slug,webinar:o})).then(function(j){if(j&&j.teams_note)alert(j.teams_note);$('drawer').classList.remove('on');loadPlan();}).catch(function(err){$('eErr').textContent=err.message;});};
+ var tc=$('tmCreate');if(tc)tc.onclick=function(){if(!w.starts_at){$('tmMsg').textContent='Save a date and time first.';return;}tc.disabled=true;$('tmMsg').textContent='Creating the meeting in Teams…';
+  call('teams_create',{slug:w.slug}).then(function(j){document.querySelector('#dbox [name=teams_link]').value=j.teams_link;w.teams_link=j.teams_link;$('tmMsg').innerHTML='<span class="y">Created and saved.</span> It is in your Outlook calendar.'+(j.notes.length?' <span class="warn">'+esc(j.notes.join(' '))+'</span>':'');tc.remove();})
+  .catch(function(e){tc.disabled=false;$('tmMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';});};
+ $('drawer').classList.add('on');}
+$('drawer').addEventListener('click',function(e){if(e.target.id==='drawer')$('drawer').classList.remove('on');});
+
+/* ---------- send ---------- */
+function slog(t){var l=$('sLog');l.textContent+='\n'+new Date().toLocaleTimeString()+'  '+t;l.scrollTop=1e9;}
+function busy(b){['bTest','bInv','bRem'].forEach(function(id){$(id).disabled=b;});$('bStop').disabled=!b;}
+function tags(){return $('tagF').value.split(/[,;]/).map(function(t){return t.trim().toLowerCase();}).filter(Boolean);}
+$('bTest').onclick=function(){busy(true);call('send_invites',{slug:$('sSel').value,test_email:$('testTo').value}).then(function(){slog('Test invitation sent to '+$('testTo').value+'. Check it (and the spam folder) before sending to everyone.');}).catch(function(e){slog('Error: '+e.message);}).then(function(){busy(false);});};
+$('bInv').onclick=function(){var w=W.find(function(x){return x.slug===$('sSel').value;});if(!w)return;var tg=tags();
+ if(!confirm('Send invitations for “'+w.title+'”'+(tg.length?' to people tagged '+tg.join(', '):'')+', up to '+$('cap').value+' emails today?'))return;
+ stop=false;busy(true);var total=0;slog('Sending invitations for “'+w.title+'”…');
+ (function round(){if(stop){slog('Stopped. '+total+' sent in this run.');busy(false);loadPlan();return;}
+  call('send_invites',{slug:w.slug,daily_cap:+$('cap').value,tags:tg}).then(function(j){total+=j.sent||0;
+   if(j.failed){slog('A batch failed: '+(j.error||'unknown error')+'. Stopping.');busy(false);loadPlan();return;}
+   if(j.finished){slog('Everyone eligible has been invited. '+total+' sent in this run.');busy(false);loadPlan();return;}
+   if(j.done_for_today||j.remaining_today<=0){slog('Daily limit reached. '+total+' sent. Press the button again tomorrow; nobody gets the same invitation twice.');busy(false);loadPlan();return;}
+   slog('Sent '+j.sent+' (total '+total+')');setTimeout(round,1200);}).catch(function(e){slog('Error: '+e.message);busy(false);});})();};
+$('bStop').onclick=function(){stop=true;};
+$('bRem').onclick=function(){var w=W.find(function(x){return x.slug===$('sSel').value;});if(!w)return;if(!w.teams_link){slog('Add the Teams link to this webinar first (Plan → Edit).');return;}
+ if(!confirm('Email the Teams link to everyone registered for “'+w.title+'”?'))return;busy(true);var total=0;
+ (function round(){call('send_reminders',{slug:w.slug}).then(function(j){total+=j.sent||0;if(j.failed){slog('Error: '+(j.error||''));busy(false);return;}
+  if(j.finished){slog('Reminders done. '+total+' sent.');busy(false);loadPlan();return;}setTimeout(round,1200);}).catch(function(e){slog('Error: '+e.message);busy(false);});})();};
+
+/* ---------- registrations ---------- */
+var REGS=[];
+function loadRegs(){var s=$('regSel').value;call('registrations',{slug:s||null}).then(function(j){REGS=j.registrations;$('regCount').textContent=REGS.length+' registration(s)';
+ $('srcStats').innerHTML=(j.sources||[]).map(function(x){return '<div class="stat"><b>'+x.n+'</b><span>'+esc(x.source)+'</span></div>';}).join('');
+ $('regRows').innerHTML=REGS.map(function(r){return '<tr class="row"><td>'+esc(ist(r.created_at,{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}))+'</td><td>'+esc(r.name)+(r.kind==='invite_request'?' <span class="pill">seat request</span>':r.kind==='walk_in'?' <span class="pill">walk-in</span>':'')+'</td><td>'+esc(r.email)+'</td><td>'+(r.phone?'+'+esc(r.phone):'')+'</td><td>'+esc([r.role,r.company,r.company_size].filter(Boolean).join(' · '))+'</td><td>'+esc(r.ref||r.source||'')+'</td><td>'+(r.wa_optin?'<span class="y">✓</span>':'')+'</td><td>'+(r.contact_ok==='call'||r.contact_ok==='email'?'<span class="y">'+esc(r.contact_ok)+'</span>':'')+'</td><td>'+esc(r.challenge)+'</td><td>'+(r.attended?'<span class="y">'+(r.attended_minutes||0)+' min</span>':'')+'</td><td>'+(r.feedback_rating?'★'+r.feedback_rating:'')+'</td></tr>';}).join('')||'<tr><td colspan="11" class="mut">No registrations yet.</td></tr>';}).catch(function(e){alert(e.message);});}
+$('regSel').onchange=loadRegs;
+$('regCsv').onclick=function(){csvDownload('registrations-'+($('regSel').value||'all')+'.csv',['created_at','webinar_slug','kind','name','email','phone','role','company','company_size','challenge','source','ref','wa_optin','contact_ok','attended','attended_minutes','feedback_rating','feedback_text'],REGS);};
+$('addReg').onsubmit=function(e){e.preventDefault();var f=e.target,s=$('regSel').value;if(!s){$('addRegMsg').textContent='Choose the webinar above first.';return;}
+ call('add_registration',{slug:s,data:{name:f.elements.name.value,email:f.elements.email.value,phone:f.elements.phone.value,company:f.elements.company.value,wa_optin:f.elements.wa_optin.checked}})
+ .then(function(){$('addRegMsg').innerHTML='<span class="y">Added. Confirmation email sent.</span>';f.reset();loadRegs();}).catch(function(err){$('addRegMsg').innerHTML='<span class="err">'+esc(err.message)+'</span>';});};
+
+/* ---------- after the webinar ---------- */
+var ATT=[],TRANSCRIPT='';
+function curA(){return W.find(function(x){return x.slug===$('aSel').value;});}
+function chapRow(c){var d=document.createElement('div');d.className='chrow';d.innerHTML='<input value="'+esc(c.t||'')+'" placeholder="12:40"><input value="'+esc(c.title||'')+'" placeholder="Chapter title"><button type="button" class="btn sm">×</button>';d.querySelector('button').onclick=function(){d.remove();};$('chaps').appendChild(d);}
+function loadAfter(){var w=curA();if(!w)return;var s=w.stats||{};
+ $('funnel').innerHTML=[['Invited',s.invited],['Registered',s.registered],['Attended',s.attended],['Watched recording',s.watched],['Leads',s.leads],['Avg rating',s.avg_rating?('★'+s.avg_rating+' ('+s.feedback+')'):'—']].map(function(x){return '<div><span class="small mut">'+x[0]+'</span><b>'+(x[1]==null?0:x[1])+'</b></div>';}).join('');
+ $('rKind').value=w.recording_kind||'youtube';$('rRef').value=w.recording_kind==='storage'?'':(w.recording_ref||'');$('rSlides').value=w.slides_url||'';$('rSum').value=w.recording_summary||'';$('rTk').value=(w.recording_takeaways||[]).join('\n');
+ $('chaps').innerHTML='';(w.recording_chapters||[]).forEach(chapRow);$('rPub').checked=!!w.recording_published;$('rView').href='webinar-watch.html?w='+encodeURIComponent(w.slug);
+ $('rUpMsg').textContent=w.recording_kind==='storage'&&w.recording_ref?'Uploaded file: '+w.recording_ref:'';kindUI();$('attMsg').textContent='';$('fuMsg').textContent='';$('rMsg').textContent='';}
+$('aSel').onchange=loadAfter;
+function kindUI(){var k=$('rKind').value;$('rRefBox').hidden=k==='storage';$('rUpBox').hidden=k!=='storage';$('rRef').placeholder=k==='youtube'?'https://youtu.be/…':'https://…sharepoint.com/…';}
+$('rKind').onchange=kindUI;$('chAdd').onclick=function(){chapRow({});};
+$('attFile').onchange=function(){var file=this.files[0];if(!file)return;readText(file,function(t){
+ var rows=parseCSV(t),hi=rows.findIndex(function(r){return r.some(function(c){return /e-?mail/i.test(c);})&&r.some(function(c){return /duration|time in meeting/i.test(c);});});
+ if(hi<0)hi=rows.findIndex(function(r){return r.some(function(c){return /e-?mail/i.test(c);});});
+ if(hi<0)hi=rows.findIndex(function(r){return r.some(function(c){return /^\s*(full )?name\s*$/i.test(c);})&&r.some(function(c){return /duration|time in meeting/i.test(c);});});
+ if(hi<0){$('attMsg').innerHTML='<span class="err">Could not find the name or email columns. Make sure this is the Teams attendance report.</span>';return;}
+ var h=rows[hi].map(function(c){return c.trim().toLowerCase();}),ei=h.findIndex(function(c){return /e-?mail/.test(c);}),ni=h.findIndex(function(c){return /^name$|full name|participant/.test(c);}),di=h.findIndex(function(c){return /duration|time in meeting/.test(c);});
+ function mins(s){s=String(s||'');var m=s.match(/(\d+):(\d+):(\d+)/);if(m)return +m[1]*60+ +m[2]+(+m[3]>=30?1:0);var hh=(s.match(/(\d+)\s*h/)||[])[1]||0,mm=(s.match(/(\d+)\s*m(?!s)/)||[])[1]||0,ss=(s.match(/(\d+)\s*s/)||[])[1]||0;return +hh*60+ +mm+(+ss>=30?1:0);}
+ var seen={};ATT=[];var ri=h.findIndex(function(c){return /^role$/.test(c);});rows.slice(hi+1).forEach(function(r){if(r.length<2)return;if(ri>=0&&/organi[sz]er/i.test(r[ri]||''))return;var em=ei>=0?(r[ei]||'').trim().toLowerCase():'';if(!/@/.test(em))em='';var nm=ni>=0?(r[ni]||'').trim():'';if(!em&&!nm)return;if(/^\d+\.\s|^(meeting|activities|summary|participants)\b/i.test(nm)&&!em)return;var key=em||'n:'+nm.toLowerCase(),m=di>=0?mins(r[di]):0;if(seen[key]){seen[key].minutes+=m;return;}seen[key]={email:em,name:nm,minutes:m};ATT.push(seen[key]);});
+ $('attMsg').textContent='Found '+ATT.length+' attendees ('+ATT.filter(function(a){return a.email;}).length+' with an email address).';$('attGo').disabled=!ATT.length;});};
+function attDone(j){if(j.reports===0){$('attMsg').innerHTML='<span class="warn">'+esc(j.message)+'</span>';return;}$('attMsg').innerHTML='<span class="y">'+(j.matched+j.matched_by_name)+' registrants marked as attended'+(j.matched_by_name?' ('+j.matched_by_name+' matched by name)':'')+', '+j.walkins+' walk-ins added.</span>'+(j.unmatched?' <span class="warn">'+j.unmatched+' names to match in Dashboard → “Teams names to match”.</span>':'');loadPlan().then(loadAfter);}
+$('attGo').onclick=function(){var w=curA();this.disabled=true;call('import_attendance',{slug:w.slug,rows:ATT}).then(attDone).catch(function(e){$('attMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';});};
+$('attTeams').onclick=function(){var w=curA(),b=this;if(!w)return;b.disabled=true;$('attMsg').textContent='Fetching the attendance report from Teams…';call('teams_attendance',{slug:w.slug}).then(function(j){b.disabled=false;attDone(j);}).catch(function(e){b.disabled=false;$('attMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';});};
+$('trTeams').onclick=function(){var w=curA(),b=this;if(!w)return;b.disabled=true;$('aiMsg').textContent='Fetching the transcript from Teams…';call('teams_transcript',{slug:w.slug}).then(function(j){b.disabled=false;TRANSCRIPT=j.transcript;$('aiGo').disabled=!TRANSCRIPT;$('aiMsg').innerHTML='<span class="y">Transcript fetched ('+Math.round(TRANSCRIPT.length/1000)+'k characters).</span> Press “Draft with AI”.';}).catch(function(e){b.disabled=false;$('aiMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';});};
+$('rFile').onchange=function(){var file=this.files[0],w=curA();if(!file||!w)return;$('rUpMsg').textContent='Preparing upload…';
+ call('recording_upload_url',{slug:w.slug,filename:file.name}).then(function(j){var fd=new FormData();fd.append('cacheControl','3600');fd.append('',file);
+  var x=new XMLHttpRequest();x.open('PUT',j.upload_url);x.setRequestHeader('x-upsert','false');
+  x.upload.onprogress=function(e){if(e.lengthComputable)$('rProg').style.width=(e.loaded/e.total*100).toFixed(1)+'%';};
+  x.onload=function(){if(x.status>=200&&x.status<300){$('rUpMsg').innerHTML='<span class="y">Uploaded. Press “Save recording”.</span>';$('rUpMsg').dataset.path=j.path;}else $('rUpMsg').innerHTML='<span class="err">Upload failed ('+x.status+'). '+esc((x.responseText||'').slice(0,160))+'</span>';};
+  x.onerror=function(){$('rUpMsg').innerHTML='<span class="err">Upload failed. Check your connection, or use YouTube unlisted.</span>';};x.send(fd);}).catch(function(e){$('rUpMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';});};
+$('trFile').onchange=function(){var file=this.files[0];if(!file)return;
+ readText(file,function(t){TRANSCRIPT=t;$('aiGo').disabled=!t;$('aiMsg').textContent='Transcript loaded ('+Math.round(t.length/1000)+'k characters).';});};
+$('aiGo').onclick=function(){var w=curA(),b=this;b.disabled=true;$('aiMsg').textContent='AI is reading the transcript (up to a minute)…';
+ call('ai_summary',{slug:w.slug,transcript:TRANSCRIPT}).then(function(j){$('rSum').value=j.summary;$('rTk').value=(j.takeaways||[]).join('\n');$('chaps').innerHTML='';(j.chapters||[]).forEach(chapRow);$('aiMsg').innerHTML='<span class="y">Draft ready. Please review and edit, then save.</span>';})
+ .catch(function(e){$('aiMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';}).then(function(){b.disabled=false;});};
+$('rSave').onclick=function(){var w=curA(),k=$('rKind').value,ref=k==='storage'?($('rUpMsg').dataset.path||(w.recording_kind==='storage'?w.recording_ref:'')):$('rRef').value.trim();
+ if($('rPub').checked&&!ref){$('rMsg').innerHTML='<span class="err">Add the recording link or upload the file first.</span>';return;}
+ var o={recording_kind:k,recording_ref:ref||null,slides_url:$('rSlides').value.trim()||null,recording_summary:$('rSum').value.trim(),recording_takeaways:$('rTk').value.split('\n').map(function(x){return x.trim();}).filter(Boolean),
+  recording_chapters:[].map.call(document.querySelectorAll('#chaps .chrow'),function(r){return {t:r.children[0].value.trim(),title:r.children[1].value.trim()};}).filter(function(c){return c.t&&c.title;}),recording_published:$('rPub').checked};
+ if(o.recording_published&&w.status==='published'&&w.starts_at&&new Date(w.starts_at)<new Date())o.status='done';
+ call('save',{slug:w.slug,webinar:o}).then(function(){$('rMsg').innerHTML='<span class="y">Saved.</span>';loadPlan();}).catch(function(e){$('rMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';});};
+$('fuGo').onclick=function(){var w=curA(),b=this;if(!confirm('Send thank-you and missed-you emails for “'+w.title+'”?'))return;b.disabled=true;var total=0;
+ (function round(){call('send_followups',{slug:w.slug}).then(function(j){total+=j.sent||0;$('fuMsg').textContent='Sent '+total+'…';
+  if(j.failed){$('fuMsg').innerHTML='<span class="err">Stopped: '+esc(j.error||'')+'</span>';b.disabled=false;return;}
+  if(j.finished){$('fuMsg').innerHTML='<span class="y">Done. '+total+' emails sent.</span>';b.disabled=false;return;}setTimeout(round,1200);}).catch(function(e){$('fuMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';b.disabled=false;});})();};
+
+/* ---------- people ---------- */
+function loadPeople(){call('people_stats').then(function(j){$('pStats').innerHTML=[['People',j.total],['With email',j.withEmail],['Can be emailed',j.subscribed],['Unsubscribed / bounced',j.unsub],['With mobile',j.withPhone],['WhatsApp opt-ins',j.waOpt],['Said STOP on WhatsApp',j.waStop],['Known personally',j.known]].map(function(x){return '<div class="stat"><b>'+(x[1]||0).toLocaleString('en-IN')+'</b><span>'+x[0]+'</span></div>';}).join('');$('waCount').textContent=(j.waOpt||0)+' opted in';}).catch(function(){});}
+/* ---------- upload: Excel/CSV → clean → load → validate ---------- */
+var WB=null,ROWS=[],HEAD=[],MAP={},PARSED=[];
+var FIELDS=[['email','Email',/e-?mail/],['phone','Mobile',/mobile|cell|whatsapp|mob\.?\s*no/],['phone2','Other phone',/^phone|contact no|contact number|tel|landline|office no/],['name','Full name',/^(name|full name|contact name|contact person|executive name|person|display name)$/],
+ ['first','First name',/first name|given name/],['last','Last name',/last name|surname|family name/],['company','Company',/company|organi[sz]ation|firm|business name/],['role','Designation',/designation|job title|^title$|role|position/],
+ ['role2','Function / department',/^function|department/],['industry','Industry',/industry 1|^industry|sector|^category|segment/],['industry2','Sub-industry',/sub.?industry/],['details','Business details / products',/business details|product|description|about|nature of business|business/],
+ ['city','City',/^city|location|town/],['state','State',/^state/],['turnover','Turnover / size',/turnover|revenue|employees|company size/],['website','Website',/website|web site|^url|domain/],['linkedin','LinkedIn',/linkedin/],['tags','Tags',/^tags?$|^labels?$/],['known','Known (yes/no)',/^known|^warm/]];
+function autoMap(h){var m={},used={};FIELDS.forEach(function(f){var i=h.findIndex(function(x,ix){return !used[ix]&&f[2].test(String(x).trim().toLowerCase());});if(i>-1){m[f[0]]=i;used[i]=1;}});return m;}
+function showMap(){var opts=function(sel){return '<option value="">—</option>'+HEAD.map(function(h,i){return '<option value="'+i+'"'+(sel===i?' selected':'')+'>'+esc(h||('Column '+(i+1)))+'</option>';}).join('');};
+ $('mapBox').innerHTML='<b>Columns</b> <span class="mut">(detected automatically, change if needed)</span><div class="grid" style="margin-top:6px">'+FIELDS.map(function(f){return '<div><label>'+f[1]+'</label><select data-map="'+f[0]+'">'+opts(MAP[f[0]])+'</select></div>';}).join('')+'</div>';
+ $('mapBox').querySelectorAll('[data-map]').forEach(function(s){s.onchange=function(){MAP[s.dataset.map]=s.value===''?undefined:+s.value;build();};});}
+var EMAIL_RE=/[A-Z0-9._%+'-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi,MOB_RE=/(?:\+?91[\s-]?|0)?[6-9]\d{2}[\s-]?\d{3}[\s-]?\d{4}/g;
+function mobiles(t){return (String(t||'').match(MOB_RE)||[]).map(function(x){return x.replace(/\D/g,'').slice(-10);}).filter(function(x,i,a){return /^[6-9]\d{9}$/.test(x)&&a.indexOf(x)===i;});}
+function build(){var g=function(r,k){var i=MAP[k];return i==null?'':String(r[i]==null?'':r[i]).trim();};PARSED=[];var multi=0;
+ ROWS.forEach(function(r){
+  var emails=(g(r,'email').match(EMAIL_RE)||[]);if(!emails.length&&MAP.email==null)emails=(r.join(' ').match(EMAIL_RE)||[]);
+  emails=emails.map(function(e){return e.toLowerCase();}).filter(function(e,i,a){return a.indexOf(e)===i;});
+  var mobs=mobiles(g(r,'phone')).concat(mobiles(g(r,'phone2'))).filter(function(x,i,a){return a.indexOf(x)===i;});
+  var name=g(r,'name')||[g(r,'first'),g(r,'last')].filter(Boolean).join(' ');
+  var names=name.split(/\s*[;\n]\s*|\s*,\s*(?=(?:sh|shri|mr|mrs|ms|dr|smt)\b)/i).filter(Boolean);
+  var base={company:g(r,'company'),role:[g(r,'role'),g(r,'role2')].filter(function(x,i,a){return x&&a.indexOf(x)===i;}).join(' / '),industry:[g(r,'industry'),g(r,'industry2')].filter(Boolean).join(', '),details:g(r,'details'),city:g(r,'city'),state:g(r,'state'),turnover:g(r,'turnover'),website:g(r,'website'),linkedin_url:g(r,'linkedin'),tags:g(r,'tags'),known:g(r,'known')};
+  if(emails.length>1||mobs.length>1&&!emails.length)multi++;
+  if(emails.length){emails.forEach(function(e,i){PARSED.push(Object.assign({},base,{email:e,phone:i===0?(mobs[0]||''):(emails.length===mobs.length?mobs[i]:''),name:(names.length===emails.length?names[i]:(i===0?names[0]||'':''))}));});}
+  else if(mobs.length){PARSED.push(Object.assign({},base,{email:'',phone:mobs[0],name:names[0]||''}));}
+ });
+ var ne=PARSED.filter(function(p){return p.email;}).length,nm=PARSED.filter(function(p){return p.phone;}).length;
+ $('csvPrev').innerHTML='<b>'+ROWS.length.toLocaleString('en-IN')+'</b> rows → <b>'+PARSED.length.toLocaleString('en-IN')+'</b> people ('+ne.toLocaleString('en-IN')+' with email, '+nm.toLocaleString('en-IN')+' with mobile'+(multi?', '+multi+' rows split into several people':'')+').';
+ $('csvGo').disabled=!PARSED.length;}
+function loadSheet(name){var ws=WB.Sheets[name],a=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,defval:''});
+ var hi=0;for(var i=0;i<Math.min(15,a.length);i++){var j=a[i].join(' ').toLowerCase();if(/e-?mail|mobile|name|company/.test(j)){hi=i;break;}}
+ HEAD=a[hi]||[];ROWS=a.slice(hi+1).filter(function(r){return r.some(function(x){return String(x).trim();});});MAP=autoMap(HEAD);showMap();build();}
+$('csv').onchange=function(){var file=this.files[0];if(!file)return;$('csvPrev').textContent='Reading file… (large files can take a minute)';$('csvGo').disabled=true;
+ if(!window.XLSX){$('csvPrev').textContent='The Excel reader is still loading. Please try again in a few seconds.';return;}
+ if(!$('csvSrc').value)$('csvSrc').value=file.name.replace(/\.[^.]+$/,'').slice(0,60);
+ var rd=new FileReader();rd.onload=function(){setTimeout(function(){try{WB=XLSX.read(new Uint8Array(rd.result),{type:'array',dense:true,cellDates:false});
+  var names=WB.SheetNames.filter(function(n){var r=WB.Sheets[n]['!ref'];return r&&r!=='A1';});
+  $('sheetSel').innerHTML=names.map(function(n){return '<option>'+esc(n)+'</option>';}).join('');$('sheetSel').disabled=names.length<2;loadSheet(names[0]);}catch(e){$('csvPrev').innerHTML='<span class="err">Could not read this file: '+esc(e.message)+'</span>';}},30);};rd.readAsArrayBuffer(file);};
+$('sheetSel').onchange=function(){loadSheet(this.value);};
+$('csvGo').onclick=function(){var kind=(document.querySelector('[name=kind]:checked')||{}).value;if(!kind){alert('Please choose: are these people warm (you know them) or cold (purchased / directory list)?');return;}
+ var btn=this,log=$('csvLog'),i=0,t={added:0,merged:0,invalid:0,blocked:0,dup:0,bad:0},src=$('csvSrc').value||'import',tg=$('csvTags').value.split(/[,;]/).map(function(x){return x.trim();}).filter(Boolean),t0=Date.now();
+ btn.disabled=true;log.hidden=false;log.textContent='Cleaning and loading '+PARSED.length.toLocaleString('en-IN')+' people as '+kind.toUpperCase()+'. Keep this page open.\n';
+ (function next(){if(i>=PARSED.length){log.textContent+='Loaded. New: '+t.added.toLocaleString('en-IN')+' · merged with existing: '+t.merged.toLocaleString('en-IN')+' · duplicates in file: '+t.dup+' · broken emails dropped: '+t.bad+' · rows with no email or mobile: '+t.invalid+' · kept blocked (unsubscribed earlier): '+t.blocked+'\nNow checking emails…\n';verifyLoop(log);return;}
+  var part=PARSED.slice(i,i+500);call('import_people',{rows:part,source:src,tags:tg,kind:kind}).then(function(j){t.added+=j.added;t.merged+=j.merged;t.invalid+=j.invalid;t.blocked+=j.blocked;t.dup+=j.duplicates_in_file;t.bad+=j.invalid_emails_dropped||0;i+=part.length;
+   var pct=i/PARSED.length,eta=Math.round((Date.now()-t0)/pct*(1-pct)/1000);$('impProg').style.width=(pct*100).toFixed(1)+'%';
+   log.textContent=log.textContent.replace(/\nProcessed[^\n]*$/,'')+'\nProcessed '+Math.min(i,PARSED.length).toLocaleString('en-IN')+' / '+PARSED.length.toLocaleString('en-IN')+(eta>5?' · about '+Math.ceil(eta/60)+' min left':'');log.scrollTop=1e9;next();})
+  .catch(function(e){log.textContent+='\nStopped: '+e.message+'. Press “Clean and load” again to continue; already loaded people are merged, not duplicated.\n';btn.disabled=false;});})();};
+function verifyLoop(log,tot){tot=tot||{valid:0,no_mx:0};call('verify_emails',{limit:400}).then(function(j){tot.valid+=j.valid||0;tot.no_mx+=j.no_mx||0;
+ if(log)log.textContent=log.textContent.replace(/\nEmails checked[^\n]*$/,'')+'\nEmails checked: '+(tot.valid+tot.no_mx).toLocaleString('en-IN')+' (mail server found: '+tot.valid.toLocaleString('en-IN')+', no mail server: '+tot.no_mx.toLocaleString('en-IN')+')';
+ if(!j.done&&j.checked>0)setTimeout(function(){verifyLoop(log,tot);},300);else{if(log)log.textContent+='\nDone. Remaining checks (if any) continue automatically each day.';loadPeople();}}).catch(function(e){if(log)log.textContent+='\nEmail check paused: '+e.message;});}
+
+$('waExp').onclick=function(){call('wa_optins').then(function(j){csvDownload('whatsapp-optins.csv',['name','phone','wa_optin_at','wa_optin_source'],j.people.map(function(p){return Object.assign({},p,{phone:'+'+p.phone});}));});};
+$('pqGo').onclick=function(){var w=W.find(function(x){return x.slug===$('pqSel').value;});if(!w)return;
+ call('personal_queue',{slug:w.slug,n:25}).then(function(j){var num=function(p){return String(p.phone).replace(/\D/g,'');};
+  if(!j.people.length){$('pq').innerHTML='<p class="mut small">Nobody left for today. Mark people as “known personally” in your import or below to add them.</p>';return;}
+  var date=w.starts_at?new Date(w.starts_at).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',weekday:'long',day:'numeric',month:'long',hour:'numeric',minute:'2-digit',hour12:true}):'';
+  $('pq').innerHTML='<table><thead><tr><th>Name</th><th>Mobile</th><th>Company</th><th></th></tr></thead><tbody>'+j.people.map(function(p){
+   var msg='Namaste '+((p.name||'').split(' ')[0]||'')+' ji, I’m holding a free 45-minute webinar “'+w.title+'” on '+date+' IST. I’d be glad if you could join. Register here: '+location.origin+'/webinars.html#'+w.slug+'\n\nIf you’d prefer not to get such messages, just reply STOP. – Ashish Dua';
+   return '<tr class="row" id="pq'+p.id+'"><td>'+esc(p.name)+'</td><td>+'+esc(p.phone)+'</td><td>'+esc(p.company)+'</td><td><a class="btn wa sm" target="_blank" rel="noopener" data-pq="'+p.id+'" href="https://wa.me/'+num(p)+'?text='+encodeURIComponent(msg)+'">Open WhatsApp</a></td></tr>';}).join('')+'</tbody></table>';});};
+document.addEventListener('click',function(e){var a=e.target.closest('[data-pq]');if(a){var id=a.dataset.pq;call('personal_mark',{id:id}).then(function(){var r=$('pq'+id);if(r)r.style.opacity=.4;a.textContent='Sent ✓';});}});
+function chk(c){return c==='valid'?'<span class="y">valid</span>':c==='role'?'<span class="warn">generic (info@…)</span>':c==='no_mx'?'<span class="err">no mail server</span>':c==='invalid'||c==='disposable'?'<span class="err">'+c+'</span>':'<span class="mut">not checked yet</span>';}
+function psSearch(){call('people_search',{q:$('ps').value}).then(function(j){$('psRows').innerHTML=j.people.map(function(p){return '<tr class="row"><td><input type="checkbox" class="psk" value="'+p.id+'" aria-label="Select"></td><td><b>'+esc(p.name||'')+'</b><div class="small mut">'+esc([p.role,p.company,p.city].filter(Boolean).join(' · '))+'</div></td><td>'+esc(p.email||'')+(p.email?'<div class="small">'+chk(p.email_check)+'</div>':'')+'</td><td>'+(p.phone?'+'+esc(p.phone):'')+'</td>'+
+ '<td>'+(p.kind==='warm'?'<span class="pill" style="color:var(--ok)">warm</span>':'<span class="pill">cold</span>')+(p.cold_touches?'<div class="small mut">'+p.cold_touches+' outreach</div>':'')+'</td><td class="small">'+esc((p.segments||[]).map(segName).join(', '))+'</td>'+
+ '<td>'+esc(p.email_status==='no_invites'?'registered only (no invitations)':p.email_status)+(p.paused_until?' (paused)':'')+(p.pref_series!=='all'?' · '+esc(p.pref_series)+' only':'')+'</td><td>'+(p.wa_stopped?'<span class="err">STOP</span>':p.wa_optin?'<span class="y">opted in</span>':'—')+'</td>'+
+ '<td><div class="row-actions" style="margin:0">'+(p.kind==='cold'?'<button class="btn sm" data-pa="replied" data-id="'+p.id+'">Replied: make warm</button>':'<button class="btn sm" data-pa="cold" data-id="'+p.id+'">Make cold</button>')+
+ (p.email&&p.email_status==='subscribed'?'<button class="btn sm" data-pa="unsub" data-id="'+p.id+'">Said STOP (email)</button>':'')+(p.phone&&!p.wa_stopped?'<button class="btn sm" data-pa="stop" data-id="'+p.id+'">WhatsApp STOP</button>':'')+(p.phone&&!p.wa_optin&&!p.wa_stopped?'<button class="btn sm" data-pa="optin" data-id="'+p.id+'">Messaged us: WA opt-in</button>':'')+
+ '<button class="btn sm" data-pa="known" data-v="'+(p.known_personally?0:1)+'" data-id="'+p.id+'">'+(p.known_personally?'Not known':'Know personally')+'</button><button class="btn sm red" data-pa="del" data-id="'+p.id+'">Delete</button></div></td></tr>';}).join('')||'<tr><td colspan="9" class="mut">No match.</td></tr>';});}
+$('psGo').onclick=psSearch;$('ps').onkeydown=function(e){if(e.key==='Enter')psSearch();};
+document.addEventListener('click',function(e){var b=e.target.closest('[data-pa]');if(!b)return;var id=b.dataset.id,a=b.dataset.pa,p;
+ if(a==='del'){if(!confirm('Delete this person completely? They will never be re-imported or contacted again.'))return;p=call('people_delete',{id:id});}
+ else p=call('people_update',{id:id,fields:a==='stop'?{wa_stopped:true}:a==='optin'?{wa_optin:true}:a==='unsub'?{email_status:'unsubscribed'}:a==='replied'?{replied:true}:a==='cold'?{kind:'cold'}:{known_personally:b.dataset.v==='1'}});
+ p.then(function(){psSearch();loadPeople();}).catch(function(err){alert(err.message);});});
+$('rrGo').onclick=function(){var ids=[].map.call(document.querySelectorAll('.psk:checked'),function(c){return +c.value;});if(!ids.length){$('rrMsg').textContent='Tick one or more people first.';return;}
+ $('rrMsg').textContent='Looking up '+ids.length+' in RocketReach…';call('rocketreach_enrich',{ids:ids}).then(function(j){$('rrMsg').innerHTML=j.results.map(function(r){return esc(r.status);}).join(' · ')+' <span class="mut">('+j.remaining_today+' lookups left today)</span>';psSearch();}).catch(function(e){$('rrMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';});};
+
+
+/* ---------- leads ---------- */
+var LEADS=[];
+function loadLeads(){call('leads').then(function(j){LEADS=j.leads;renderLeads();});}
+function renderLeads(){var f=$('lF').value,rows=LEADS.filter(function(l){return f?l.status===f:!['won','not_now'].includes(l.status);});$('lCount').textContent=rows.length+' lead(s)';
+ $('lRows').innerHTML=rows.map(function(l){var ph=l.phone?String(l.phone).replace(/\D/g,''):'';return '<tr class="row"><td>'+esc(ist(l.created_at,{day:'numeric',month:'short'}))+'</td><td><b>'+esc(l.name)+'</b><div class="small">'+esc(l.company||'')+'</div><div class="small">'+(l.email?'<a href="mailto:'+esc(l.email)+'">'+esc(l.email)+'</a>':'')+(ph?' · <a href="tel:+'+ph+'">+'+ph+'</a> · <a href="https://wa.me/'+ph+'" target="_blank">WA</a>':'')+'</div></td><td>'+esc(l.how)+'</td><td>'+esc(l.interest||'')+'<div class="small mut">'+esc(l.from_webinar||'')+'</div></td><td class="small">'+esc(l.note||'')+'</td>'+
+ '<td><select data-l="status" data-id="'+l.id+'">'+['new','contacted','demo','pilot','won','not_now'].map(function(s){return '<option value="'+s+'"'+(l.status===s?' selected':'')+'>'+(s==='won'?'won: customer':s)+'</option>';}).join('')+'</select></td><td><input type="date" data-l="next_action_at" data-id="'+l.id+'" value="'+esc(l.next_action_at||'')+'"></td><td><textarea data-l="admin_notes" data-id="'+l.id+'" style="min-height:44px">'+esc(l.admin_notes||'')+'</textarea></td><td class="small" id="ls'+l.id+'"></td></tr>';}).join('')||'<tr><td colspan="9" class="mut">No leads here yet.</td></tr>';}
+$('lF').onchange=renderLeads;
+document.addEventListener('change',function(e){var el=e.target.closest('[data-l]');if(!el)return;var f={};f[el.dataset.l]=el.value;call('lead_update',{id:el.dataset.id,fields:f}).then(function(j){var i=LEADS.findIndex(function(x){return x.id===j.lead.id;});LEADS[i]=j.lead;var s=$('ls'+j.lead.id);if(s)s.innerHTML='<span class="y">Saved</span>';}).catch(function(err){alert(err.message);});});
+
+/* ---------- topics ---------- */
+function norm(t){return String(t).toLowerCase().replace(/\b(ai|the|for|and|of|in|on|a|an|to|with|webinar|session|about|how)\b/g,' ').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();}
+function loadTopics(){call('topics').then(function(j){var groups={};j.topics.forEach(function(t){var k=norm(t.text).split(' ').filter(function(w){return w.length>2;}).slice(0,3).sort().join(' ')||t.text.toLowerCase();(groups[k]=groups[k]||[]).push(t);});
+ var g=Object.keys(groups).map(function(k){return groups[k];}).sort(function(a,b){return b.length-a.length;});
+ var opts='<option value="">Link to a webinar…</option>'+W.map(function(w){return '<option value="'+esc(w.slug)+'">'+esc(w.title)+'</option>';}).join('');
+ $('tGroups').innerHTML=g.map(function(list,i){var ids=list.map(function(t){return t.id;}).join(','),planned=list.find(function(t){return t.planned_slug;});
+  return '<div class="card"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><h3 style="margin:0">'+esc(list[0].text)+' <span class="pill">'+list.length+' request'+(list.length>1?'s':'')+'</span> <span class="pill">'+esc(list[0].status)+'</span></h3>'+
+  '<div class="row-actions" style="margin:0"><select data-tg="'+ids+'" style="max-width:300px">'+opts.replace('value="'+(planned?planned.planned_slug:'@')+'"','value="'+(planned?planned.planned_slug:'@')+'" selected')+'</select><button class="btn sm" data-tn="'+ids+'">Notify requesters</button><button class="btn sm" data-ts="'+ids+'">Not now</button></div></div>'+
+  '<ul class="small mut" style="margin:8px 0 0">'+list.map(function(t){return '<li>“'+esc(t.text)+'” · '+esc(t.people?(t.people.name||t.people.email||''):'')+' · '+esc(ist(t.created_at,{day:'numeric',month:'short'}))+(t.notified_at?' · <span class="y">notified</span>':'')+'</li>';}).join('')+'</ul></div>';}).join('')||'<p class="mut">No suggestions yet. They’ll appear here as people send them.</p>';});}
+document.addEventListener('change',function(e){var s=e.target.closest('[data-tg]');if(!s)return;call('topic_update',{ids:s.dataset.tg.split(','),status:s.value?'planned':'new',planned_slug:s.value||null}).then(loadTopics);});
+document.addEventListener('click',function(e){var n=e.target.closest('[data-tn]'),x=e.target.closest('[data-ts]');
+ if(x)call('topic_update',{ids:x.dataset.ts.split(','),status:'not_now'}).then(loadTopics);
+ if(n){var sel=n.parentNode.querySelector('select');if(!sel.value){alert('First link this idea to a published webinar.');return;}if(!confirm('Email everyone who asked for this topic that it is scheduled?'))return;
+  call('topic_notify',{slug:sel.value}).then(function(j){alert(j.sent+' people notified.');loadTopics();}).catch(function(err){alert(err.message);});}});
+
+/* ---------- settings ---------- */
+/* ---------- settings ---------- */
+var SKEYS=['bookings_url','whatsapp_number','whatsapp_channel_url','invites_per_person_per_30_days','warm_mode','cold_mode','daily_warm_cap','daily_cold_cap','warm_include_unlabelled','rocketreach_api_key','rocketreach_daily_limit','outreach_signature','rocketreach_mode','rocketreach_auto_daily'];
+function fillSettings(){var f=$('setF');SKEYS.forEach(function(k){if(f.elements[k])f.elements[k].value=SET[k]||'';});
+ call('today').then(function(j){$('smtpState').innerHTML=j.smtp?'<span class="y">Outreach mailbox connected.</span> Cold emails go from it, a few at a time between 9:30 AM and 2:30 PM.':'<span class="warn">Outreach mailbox not connected yet</span> (add the OUTREACH_SMTP settings in Vercel, see the setup guide). Until then cold emails are prepared but not sent.';}).catch(function(){});
+ call('push_stats').then(function(j){$('pushCount').textContent=j.subscribers;}).catch(function(){});}
+$('setF').onsubmit=function(e){e.preventDefault();var f=e.target,s={};SKEYS.forEach(function(k){if(f.elements[k])s[k]=f.elements[k].value.trim();});
+ call('settings_save',{settings:s}).then(function(j){SET=j.settings;fillSettings();$('setMsg').innerHTML='<span class="y">Saved.</span>';}).catch(function(err){$('setMsg').innerHTML='<span class="err">'+esc(err.message)+'</span>';});};
+$('tmCheck').onclick=function(){$('tmState').textContent='Checking…';call('teams_status').then(function(j){var y=function(ok,t){return ok?'<span class="y">✓ '+t+'</span>':'<span class="err">✗ '+t+'</span>';};
+ if(!j.connected){$('tmState').innerHTML='Not connected yet: add MS_TENANT_ID, MS_CLIENT_ID, MS_CLIENT_SECRET and MS_ORGANIZER_ID in Vercel.';return;}
+ $('tmState').innerHTML=y(j.signin,'sign-in')+(j.signin?' · '+y(j.calendar,'calendar (create meetings)')+' · '+(j.meetings===null?'<span class="mut">meetings: check again once a webinar has a Teams link</span>':y(j.meetings,'meetings (attendance and transcript)')):'')+'<div class="small err">'+esc(j.error||j.calendar_error||j.meetings_error||'')+'</div>';}).catch(function(e){$('tmState').innerHTML='<span class="err">'+esc(e.message)+'</span>';});};
+$('rrTest').onclick=function(){$('rrTestMsg').textContent='Testing…';call('rocketreach_test').then(function(j){$('rrTestMsg').innerHTML='<span class="y">Connected</span> · '+esc(j.account.name)+(j.account.lookups!=null?' · lookup credits: '+esc(j.account.lookups):'');}).catch(function(e){$('rrTestMsg').innerHTML='<span class="err">'+esc(e.message)+'</span> (save the key first)';});};
+
+/* ---------- today ---------- */
+var TODAY=null;
+function loadToday(){return call('today').then(function(j){TODAY=j;
+ $('tMode').innerHTML='Warm invitations: <b>'+(j.warm_mode==='auto'?'sent automatically each day':'waiting for you to press Send')+'</b> · cold emails: <b>'+(j.cold_mode==='auto'?'sent automatically':'you approve each morning')+'</b> · outreach mailbox: '+(j.smtp?'<span class="y">connected</span>':'<span class="warn">not connected</span>')+' · warm invitations sent today: <b>'+j.sent_warm_today+'</b>. Change these in Settings.';
+ $('tPlan').innerHTML=j.plan.map(function(p){return '<tr class="row"><td><b>'+esc(p.title)+'</b></td><td>'+esc(ist(p.starts_at,{day:'numeric',month:'short'}))+'</td><td>'+p.days_left+'</td><td>'+p.warm_sent_today+'</td><td>'+p.warm_today+'</td><td>'+p.warm_left+'</td><td>'+p.cold_today+'</td><td>'+p.cold_left+'</td></tr>';}).join('')||'<tr><td colspan="8" class="mut">No webinar is in its inviting window today. Invitations start '+'automatically 28 days before each published webinar (change per webinar in Plan → Edit).</td></tr>';
+ $('tCount').textContent='('+j.outreach.length+')';
+ $('tOut').innerHTML=j.outreach.map(function(m){var p=m.people||{};return '<div class="card" id="o'+m.id+'"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b>'+esc(p.name||m.email)+'</b> <span class="mut small">'+esc([p.role,p.company,p.city].filter(Boolean).join(' · '))+' · '+esc(m.email)+'</span></div><span class="pill">'+esc(m.status)+(m.error?' · '+esc(m.error):'')+'</span></div>'+
+  (m.status==='sent'?'<p class="small mut">'+esc(m.subject)+'</p>':'<input class="osub" value="'+esc(m.subject)+'" style="margin:8px 0"><textarea class="obody" style="min-height:190px;font:13px/1.5 ui-monospace,Consolas,monospace">'+esc(m.body)+'</textarea><div class="row-actions"><button class="btn sm gold" data-o="approved" data-id="'+m.id+'">Approve</button><button class="btn sm" data-o="save" data-id="'+m.id+'">Save edits</button><button class="btn sm" data-o="skipped" data-id="'+m.id+'">Skip</button></div>')+'</div>';}).join('')||'<p class="mut">No cold emails for today yet. They are prepared automatically at 9:30 AM, or press “Prepare today’s cold emails”.</p>';});}
+document.addEventListener('click',function(e){var b=e.target.closest('[data-o]');if(!b)return;var box=$('o'+b.dataset.id),f={};
+ if(box.querySelector('.osub')){f.subject=box.querySelector('.osub').value;f.body=box.querySelector('.obody').value;}
+ if(b.dataset.o!=='save')f.status=b.dataset.o;call('outreach_update',{id:b.dataset.id,fields:f}).then(loadToday).catch(function(err){alert(err.message);});});
+$('tWarm').onclick=function(){var b=this;if(!confirm('Send today’s warm invitations now?'))return;b.disabled=true;$('tMsg').textContent='Sending…';call('today_send_warm').then(function(j){$('tMsg').innerHTML='<span class="y">'+j.sent+' sent.</span>'+(j.error?' <span class="err">'+esc(j.error)+'</span>':'');loadToday();}).catch(function(e){$('tMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';}).then(function(){b.disabled=false;});};
+$('tDraft').onclick=function(){var b=this;b.disabled=true;$('tMsg').textContent='AI is writing today’s emails (up to a minute)…';call('today_draft').then(function(j){$('tMsg').innerHTML='<span class="y">'+j.drafted+' prepared.</span>';loadToday();}).catch(function(e){$('tMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';}).then(function(){b.disabled=false;});};
+$('tApprove').onclick=function(){var ids=(TODAY&&TODAY.outreach||[]).filter(function(m){return m.status==='draft';}).map(function(m){return m.id;});if(!ids.length){$('tMsg').textContent='No drafts to approve.';return;}
+ call('outreach_update',{ids:ids,fields:{status:'approved'}}).then(function(){$('tMsg').innerHTML='<span class="y">'+ids.length+' approved. They go out a few at a time today.</span>';loadToday();});};
+$('tSendCold').onclick=function(){var b=this;b.disabled=true;call('outreach_send_now',{n:3}).then(function(j){$('tMsg').innerHTML=j.reason?'<span class="warn">'+esc(j.reason)+'</span>':'<span class="y">'+j.sent+' sent</span>'+(j.failed?' · <span class="err">'+j.failed+' failed</span>':'');loadToday();}).catch(function(e){$('tMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';}).then(function(){b.disabled=false;});};
+
+/* ---------- insights ---------- */
+var IDEAS={'ind:auto':'AI for Auto-Component Makers: cash, sourcing and assets','ind:pharma':'AI for Pharma Finance: compliance, costing and close','ind:manufacturing':'AI for Manufacturing (already planned)','ind:trading':'AI Munim for Traders (already planned)','ind:food':'AI for Food Businesses: stock, GST and cash flow','ind:real-estate':'AI for Builders: project costing and compliance','ind:logistics':'AI for Logistics: billing, fleet costs and GST','ind:education':'AI for School and Institute Administration','ind:hospitality':'AI for Hotels and Restaurants: costs and reviews','ind:trade-customs':'Customs SVB and UAE e-invoicing (already planned)','ind:it-services':'From Excel to AI Agents for IT companies','ind:finance-services':'AI for CA Firms (already planned)'};
+function loadInsights(){call('insights').then(function(j){var t=j.totals||{};var n=function(x){return (x||0).toLocaleString('en-IN');};
+ $('iTot').innerHTML=[['People',t.people],['Warm',t.warm],['Cold',t.cold],['With email',t.emails],['Valid email',t.valid],['Generic (info@)',t.role],['No mail server',t.no_mx],['Invalid',t.invalid],['Not checked yet',t.unchecked],['Unsubscribed',t.unsubscribed],['With mobile',t.mobiles]].map(function(x){return '<div class="stat"><b>'+n(x[1])+'</b><span>'+x[0]+'</span></div>';}).join('');
+ $('iAud').innerHTML=(j.webinars||[]).map(function(w){return '<tr class="row"><td><b>'+esc(w.title)+'</b></td><td>'+esc(ist(w.starts_at,{day:'numeric',month:'short'}))+'</td><td class="small">'+esc((w.target_segments||[]).map(segName).join(', ')||'all warm contacts')+'</td><td>'+n(w.warm_left)+'</td><td>'+n(w.invited)+'</td><td>'+n(w.cold_left)+'</td><td class="small">'+(w.drip?'<span class="y">inviting now</span> · '+w.drip.daysLeft+' days left':(w.drip_on?'starts '+w.drip_start_days+' days before':'off'))+'</td><td><div class="row-actions" style="margin:0;flex-wrap:nowrap"><button class="btn sm" data-rr="'+esc(w.slug)+'">Find new contacts</button><button class="btn sm" data-li="'+esc(w.slug)+'">LinkedIn company list</button></div></td></tr>';}).join('');
+ $('iSeg').innerHTML=(j.segments||[]).map(function(s){return '<tr class="row"><td>'+esc(segName(s.segment))+'</td><td>'+n(s.total)+'</td><td>'+n(s.warm)+'</td><td>'+n(s.cold_reachable)+'</td></tr>';}).join('')||'<tr><td colspan="4" class="mut">Upload contacts to see groups.</td></tr>';
+ $('iClu').innerHTML=(j.clusters||[]).map(function(c){return '<tr class="row"><td>'+esc(segName(c.industry))+'</td><td>'+esc(c.city)+'</td><td>'+n(c.n)+'</td></tr>';}).join('')||'<tr><td colspan="3" class="mut">—</td></tr>';
+ var ideas=(j.segments||[]).filter(function(s){return /^ind:/.test(s.segment)&&IDEAS[s.segment];}).slice(0,6);
+ $('iIdeas').innerHTML=ideas.length?'<ul style="margin:0">'+ideas.map(function(s){return '<li><b>'+esc(IDEAS[s.segment])+'</b> <span class="mut small">· '+n(s.total)+' '+esc(segName(s.segment))+' contacts ('+n(s.warm)+' warm, '+n(s.cold_reachable)+' cold reachable)</span></li>';}).join('')+'</ul>':'<span class="mut">Ideas appear once contacts are loaded and labelled.</span>';
+ $('iConv').innerHTML=(j.by_segment_conversion||[]).map(function(c){return '<tr class="row"><td>'+esc(segName(c.segment))+'</td><td>'+n(c.invited)+'</td><td>'+n(c.registered)+'</td><td>'+(c.invited?(c.registered/c.invited*100).toFixed(1)+'%':'—')+'</td></tr>';}).join('')||'<tr><td colspan="4" class="mut">Appears after the first invitations go out.</td></tr>';});}
+$('iVerify').onclick=function(){$('iVerMsg').textContent='Checking…';var tot=0;(function go(){call('verify_emails',{limit:400}).then(function(j){tot+=j.checked||0;$('iVerMsg').textContent=tot+' checked'+(j.done?'. All done.':'…');if(!j.done&&j.checked>0)go();else loadInsights();}).catch(function(e){$('iVerMsg').textContent=e.message;});})();};
+document.addEventListener('click',function(e){var b=e.target.closest('[data-li]');if(!b)return;call('linkedin_companies',{slug:b.dataset.li}).then(function(j){csvDownload('linkedin-companies-'+b.dataset.li+'.csv',['companyname','companywebsite','companyemaildomain','city','state','companycountry'],j.companies);});});
+
+/* ---------- dashboard ---------- */
+var DASH=null,DL={list:'noshow',rows:[]};
+function pct(a,b){return b?Math.round(a*100/b)+'%':'—';}
+function nf(x){return (x||0).toLocaleString('en-IN');}
+function loadDash(){call('dashboard').then(function(j){DASH=j;var v=$('dSel').value;
+  $('dSel').innerHTML='<option value="">All past webinars</option>'+j.webinars.slice().reverse().map(function(w){return '<option value="'+esc(w.slug)+'">'+esc(ist(w.starts_at,{day:'numeric',month:'short',year:'numeric'})+' · '+w.title)+(w.past?'':' (upcoming)')+'</option>';}).join('');
+  if(v&&j.webinars.some(function(w){return w.slug===v;}))$('dSel').value=v;
+  $('dTeams').innerHTML=j.teams?'<span class="y">Teams connected</span> · attendance arrives automatically after each webinar':'Teams not connected: upload the attendance file in “After the webinar”, or connect Teams (see the setup guide)';
+  renderDash();}).catch(function(e){$('dTiles').innerHTML='<span class="err">'+esc(e.message)+'</span>';});}
+$('dSel').onchange=renderDash;
+function renderDash(){var j=DASH;if(!j)return;var slug=$('dSel').value;
+ var ws=slug?j.webinars.filter(function(w){return w.slug===slug;}):j.webinars.filter(function(w){return w.past;});
+ var t={invited:0,registered:0,attended_reg:0,walk_ins:0,attended:0,watched:0,leads:0,customers:0,unmatched:0},rs=[],mins=[];
+ ws.forEach(function(w){for(var k in t)t[k]+=+w[k]||0;if(w.rating)rs.push(+w.rating);if(w.avg_minutes)mins.push(+w.avg_minutes);});
+ var noshow=t.registered-t.attended_reg,avg=function(a){return a.length?Math.round(a.reduce(function(x,y){return x+y;},0)/a.length*10)/10:'—';};
+ var tile=function(v,l,sub){return '<div class="stat"><b>'+v+'</b><span>'+l+(sub?'<br>'+sub:'')+'</span></div>';};
+ $('dTiles').innerHTML=tile(nf(t.registered),'Registered')+tile(nf(t.attended_reg),'Attended',pct(t.attended_reg,t.registered)+' of registered')+tile(nf(noshow),'Registered, didn’t attend')+tile(nf(t.walk_ins),'Walk-ins','joined without registering')+
+  tile(nf(t.watched),'Watched the recording')+tile(nf(t.leads),'Asked to talk (leads)')+tile(nf(t.customers),'Customers')+tile(avg(rs),'Average rating','out of 5')+tile(avg(mins),'Average minutes','in the session')+(t.unmatched?tile(nf(t.unmatched),'Teams names to match','<span class="warn">see below</span>'):'');
+ var steps=[['Invited by email',t.invited,''],['Registered',t.registered,t.invited?pct(t.registered,t.invited)+' of invited':''],['Attended',t.attended,pct(t.attended_reg,t.registered)+' of registered'+(t.walk_ins?' + '+t.walk_ins+' walk-ins':'')],['Watched the recording',t.watched,''],['Asked to talk',t.leads,t.attended?pct(t.leads,t.attended)+' of attendees':''],['Became customers',t.customers,t.leads?pct(t.customers,t.leads)+' of leads':'']];
+ var mx=Math.max.apply(null,steps.map(function(s){return s[1];}).concat([1]));
+ $('dFunnel').innerHTML=steps.map(function(s){return '<div class="lb">'+s[0]+'</div><div class="tr" title="'+esc(s[0]+': '+nf(s[1]))+'"><div class="br" style="width:'+(s[1]/mx*100).toFixed(1)+'%"></div></div><div class="vl"><b>'+nf(s[1])+'</b>'+esc(s[2])+'</div>';}).join('');
+ $('dFunNote').textContent=slug?'':'(all past webinars together)';
+ var wl=j.webinars.filter(function(w){return w.past;}).reverse().concat(j.webinars.filter(function(w){return !w.past;}).slice(0,3));
+ $('dWeb').innerHTML=wl.map(function(w){return '<tr class="row"><td><b>'+esc(w.title)+'</b>'+(w.past?'':' <span class="pill">upcoming</span>')+'</td><td>'+esc(ist(w.starts_at,{day:'numeric',month:'short',year:'2-digit'}))+'</td><td>'+nf(w.invited)+'</td><td>'+nf(w.registered)+'</td><td>'+nf(w.attended_reg)+' <span class="mut small">'+pct(w.attended_reg,w.registered)+'</span></td><td>'+(w.past?nf(w.registered-w.attended_reg):'—')+'</td><td>'+nf(w.walk_ins)+'</td><td>'+(w.avg_minutes||'—')+'</td><td>'+nf(w.watched)+'</td><td>'+nf(w.leads)+'</td><td>'+nf(w.customers)+'</td><td>'+(w.rating||'—')+'</td><td class="small">'+(w.past?(w.attended?'<span class="y">imported</span>'+(w.unmatched?' · <span class="warn">'+w.unmatched+' to match</span>':''):'<span class="warn">not imported yet</span>'):'')+'</td></tr>';}).join('');
+ var pm=Math.max.apply(null,j.products.map(function(p){return p.leads;}).concat([1]));
+ $('dProd').innerHTML=j.products.length?j.products.map(function(p){return '<tr class="row"><td>'+esc(p.product)+'</td><td><span class="ibar" style="width:'+Math.round(p.leads/pm*120)+'px"></span>'+nf(p.leads)+'</td><td>'+nf(p.in_progress)+'</td><td>'+nf(p.customers)+'</td></tr>';}).join(''):'<tr><td colspan="4" class="mut">No leads yet.</td></tr>';
+ var pp=j.people||{};$('dWarm').innerHTML='<div class="stats" style="margin-bottom:10px"><div class="stat"><b>'+nf(pp.became_warm)+'</b><span>became warm</span></div><div class="stat"><b>'+nf(pp.warm)+'</b><span>warm now</span></div><div class="stat"><b>'+nf(pp.cold)+'</b><span>still cold</span></div></div>'+
+  (j.warm_by_month.length?'<table><thead><tr><th>Month</th><th>Became warm</th></tr></thead><tbody>'+j.warm_by_month.map(function(m){return '<tr><td>'+esc(m.month)+'</td><td>'+nf(m.n)+'</td></tr>';}).join('')+'</tbody></table>':'');
+ var srcs=j.sources.filter(function(x){return x.registered>0;});$('dSrc').innerHTML=srcs.length?srcs.map(function(x){return '<tr class="row"><td>'+esc(x.source)+'</td><td>'+nf(x.registered)+'</td><td>'+nf(x.attended)+'</td><td>'+pct(x.attended,x.registered)+'</td></tr>';}).join(''):'<tr><td colspan="4" class="mut">Appears after the first webinar.</td></tr>';
+ var DAYS=['','Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+ $('dSlot').innerHTML=j.slots.length?j.slots.map(function(x){var h=x.hour%12||12;return '<tr class="row"><td>'+DAYS[x.dow]+', '+h+(x.hour<12?' AM':' PM')+'</td><td>'+x.sessions+'</td><td>'+Math.round(x.registered/x.sessions)+'</td><td>'+pct(x.attended,x.registered)+'</td></tr>';}).join(''):'<tr><td colspan="4" class="mut">Appears after the first webinar.</td></tr>';
+ loadDashLists();}
+var LCOLS={noshow:'reg',followup:'reg',hot:'reg',leads_due:'lead',customers:'lead',unmatched:'un'};
+function loadDashLists(){var slug=$('dSel').value,order=['noshow','followup','hot','leads_due','customers','unmatched'],res={};
+ Promise.all(order.map(function(l){return call('dashboard_list',{slug:slug,list:l}).then(function(j){res[l]=j.rows;});})).then(function(){
+  if(!res[DL.list]||(!res[DL.list].length&&DL.list==='unmatched'))DL.list='noshow';
+  $('dTabs').innerHTML=order.map(function(l){return '<button class="btn sm'+(l===DL.list?' gold':'')+'" data-dl="'+l+'">'+esc({noshow:'Didn’t attend',followup:'Attended, not yet talking',hot:'Very interested',leads_due:'Leads to act on',customers:'Customers',unmatched:'Teams names to match'}[l])+'<span class="c">'+res[l].length+'</span></button>';}).join('');
+  DL.all=res;showDashList();});}
+document.addEventListener('click',function(e){var b=e.target.closest('[data-dl]');if(!b)return;DL.list=b.dataset.dl;document.querySelectorAll('[data-dl]').forEach(function(x){x.classList.toggle('gold',x===b);});showDashList();});
+function wTitle(slug){var w=(DASH.webinars||[]).find(function(x){return x.slug===slug;});return w?w.title:slug||'';}
+function showDashList(){var l=DL.list,rows=(DL.all||{})[l]||[],kind=LCOLS[l],slug=$('dSel').value;DL.rows=rows;
+ $('dListNote').textContent=DASH.lists[l]+'.'+(l==='noshow'?' They received (or will receive) the “sorry we missed you” email with the recording.':l==='followup'?' Good people to call or message personally. Tick and add them to Leads to track the conversation.':l==='hot'?' Your warmest prospects who have not asked to talk yet.':l==='unmatched'?' These people joined Teams without signing in and used a different name. Choose who each one was, so they get their certificate.':l==='customers'?' Mark a lead as “won” in the Leads tab when they start using an application.':' New leads, or leads whose next action date has come.');
+ var acts='<button class="btn sm" id="dCsv">Download CSV</button>';
+ if(kind==='reg')acts='<label class="chk"><input type="checkbox" id="dAll"> Tick all</label><button class="btn sm gold" id="dMk">Add ticked to Leads</button>'+acts+'<span class="small" id="dMsg"></span>';
+ if(kind==='lead')acts+='<button class="btn sm" onclick="document.querySelector(\'.tab[data-p=leads]\').click()">Open Leads</button>';
+ $('dActs').innerHTML=acts;
+ if(kind==='reg'){$('dHead').innerHTML='<tr><th></th><th>Name</th><th>Email · mobile</th><th>Role · company</th>'+(slug?'':'<th>Webinar</th>')+'<th>Came from</th><th>Minutes</th><th>Rating</th><th>Their question</th></tr>';
+  $('dRows').innerHTML=rows.length?rows.map(function(r){return '<tr class="row"><td><input type="checkbox" class="dk" value="'+r.id+'" aria-label="Select"></td><td><b>'+esc(r.name)+'</b>'+(r.teams_name&&r.teams_name!==r.name?'<div class="small mut">in Teams: '+esc(r.teams_name)+'</div>':'')+'</td><td>'+esc(r.email)+(r.phone?'<div class="small mut">+'+esc(r.phone)+'</div>':'')+'</td><td class="small">'+esc([r.role,r.company].filter(Boolean).join(' · '))+'</td>'+(slug?'':'<td class="small">'+esc(wTitle(r.webinar_slug))+'</td>')+'<td class="small">'+esc(r.ref||r.source||'')+'</td><td>'+(r.attended?(r.attended_minutes||0):'—')+'</td><td>'+(r.feedback_rating||'')+'</td><td class="small">'+esc(r.challenge||'')+(r.feedback_text?'<div class="mut">Feedback: '+esc(r.feedback_text)+'</div>':'')+'</td></tr>';}).join(''):'<tr><td colspan="9" class="mut">Nobody here.</td></tr>';
+  $('dAll').onchange=function(){var v=this.checked;document.querySelectorAll('.dk').forEach(function(c){c.checked=v;});};
+  $('dMk').onclick=function(){var ids=[].map.call(document.querySelectorAll('.dk:checked'),function(c){return +c.value;});if(!ids.length){$('dMsg').textContent='Tick people first.';return;}
+   call('dashboard_make_leads',{ids:ids}).then(function(j){$('dMsg').innerHTML='<span class="y">'+j.made+' added to Leads</span>'+(ids.length>j.made?' · '+(ids.length-j.made)+' were already leads':'');loadDash();}).catch(function(e){$('dMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';});};}
+ else if(kind==='lead'){$('dHead').innerHTML='<tr><th>Since</th><th>Person</th><th>Prefers</th><th>Interest</th><th>From webinar</th><th>Status</th><th>Next action</th><th>Notes</th></tr>';
+  $('dRows').innerHTML=rows.length?rows.map(function(r){return '<tr class="row"><td class="small">'+esc(ist(r.created_at,{day:'numeric',month:'short'}))+'</td><td><b>'+esc(r.name||'')+'</b><div class="small mut">'+esc([r.company,r.email,r.phone?'+'+r.phone:''].filter(Boolean).join(' · '))+'</div></td><td>'+esc(r.how||'')+'</td><td class="small">'+esc(r.interest||'')+'</td><td class="small">'+esc(wTitle(r.from_webinar))+'</td><td>'+esc(r.status==='won'?'customer':r.status)+'</td><td class="small">'+esc(r.next_action_at||'')+'</td><td class="small">'+esc(r.admin_notes||r.note||'')+'</td></tr>';}).join(''):'<tr><td colspan="8" class="mut">Nobody here.</td></tr>';}
+ else{$('dHead').innerHTML='<tr><th>Name in Teams</th>'+(slug?'':'<th>Webinar</th>')+'<th>Minutes</th><th>Who was this?</th><th></th></tr>';
+  $('dRows').innerHTML=rows.length?rows.map(function(r){return '<tr class="row" id="um'+r.id+'"><td><b>'+esc(r.name)+'</b></td>'+(slug?'':'<td class="small">'+esc(wTitle(r.webinar_slug))+'</td>')+'<td>'+r.minutes+'</td><td><select class="umSel" data-slug="'+esc(r.webinar_slug)+'" data-id="'+r.id+'" style="max-width:320px"><option value="">Choose a registrant…</option></select></td><td><div class="row-actions" style="margin:0"><button class="btn sm gold" data-um="'+r.id+'">Save</button><button class="btn sm" data-umx="'+r.id+'">Not a registrant</button></div></td></tr>';}).join(''):'<tr><td colspan="5" class="mut">Nothing to match.</td></tr>';
+  var cache={};document.querySelectorAll('.umSel').forEach(function(sel){var s=sel.dataset.slug;(cache[s]=cache[s]||call('attendance_candidates',{slug:s})).then(function(j){sel.innerHTML='<option value="">Choose a registrant…</option>'+j.rows.map(function(c){return '<option value="'+c.id+'">'+esc(c.name+' · '+c.email+(c.company?' · '+c.company:''))+'</option>';}).join('');});});}
+ $('dCsv').onclick=function(){if(!rows.length)return;var cols=Object.keys(rows[0]).filter(function(k){return !/^(id|person_id|registration_id)$/.test(k);});csvDownload('duadesk-'+l+(slug?'-'+slug:'')+'.csv',cols,rows);};}
+document.addEventListener('click',function(e){var b=e.target.closest('[data-um]'),x=e.target.closest('[data-umx]');
+ if(b){var sel=document.querySelector('.umSel[data-id="'+b.dataset.um+'"]');if(!sel.value){sel.focus();return;}call('attendance_match',{id:+b.dataset.um,registration_id:+sel.value}).then(loadDash);}
+ if(x)call('attendance_match',{id:+x.dataset.umx,ignore:true}).then(loadDash);});
+
+/* ---------- RocketReach: find new contacts for a webinar ---------- */
+document.addEventListener('click',function(e){var b=e.target.closest('[data-rr]');if(b)rrOpen(b.dataset.rr);});
+var RRS={slug:'',tab:'found'};
+function rrOpen(slug){RRS.slug=slug;RRS.tab='found';$('dbox').innerHTML='<p class="mut">Loading…</p>';$('drawer').classList.add('on');
+ call('rr_prospect_plan',{slug:slug}).then(function(j){var p=j.plan,w=j.webinar;
+  $('dbox').innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h1 style="margin:0">Find new contacts</h1><button class="btn" id="dClose">Close</button></div>'+
+  '<p class="mut">For <b>'+esc(w.title)+'</b>'+(w.target_segments.length?' · groups: '+esc(w.target_segments.map(segName).join(', ')):'')+'</p>'+
+  (j.connected?'':'<div class="card" style="border-color:var(--warn)"><b>RocketReach is not connected.</b> <span class="mut">Paste your API key in Settings → RocketReach, then come back.</span></div>')+
+  '<div class="stats"><div class="stat"><b>'+j.companies_waiting+(j.companies_waiting>=200?'+':'')+'</b><span>companies in your data to search</span></div><div class="stat"><b>'+j.found_waiting+'</b><span>found, waiting for you</span></div><div class="stat"><b>'+j.added+'</b><span>added for this webinar</span></div><div class="stat"><b>'+j.used_today+' / '+j.limit+'</b><span>reveals used today</span></div></div>'+
+  '<div class="card"><h3>How it works</h3><ol class="small" style="margin:0;padding-left:18px"><li><b>Search (free):</b> RocketReach lists people in the right roles. No emails yet, no credits.</li><li><b>You choose:</b> tick the right people; skip anyone who looks wrong.</li><li><b>Reveal (1 credit each):</b> only work emails graded A or A- are kept. They join your cold contacts and get one AI-written email you approve in <b>Today</b>.</li></ol></div>'+
+  '<div class="card"><h3>1 · Search</h3><div class="row-actions" style="margin-top:0"><label class="chk"><input type="radio" name="rrm" value="companies" checked> In companies already in my data</label><label class="chk"><input type="radio" name="rrm" value="open"> Open search (whole market)</label></div>'+
+  '<div class="grid"><div class="s4"><label>Job titles (comma separated)</label><textarea id="rrT" style="min-height:58px">'+esc(p.titles.join(', '))+'</textarea></div>'+
+  '<div class="s2 rrOpen" hidden><label>Places</label><input id="rrP" value="'+esc(p.places.join('; '))+'"></div><div class="s2 rrOpen" hidden><label>Industries (RocketReach names; leave empty for all)</label><input id="rrI" value="'+esc(p.industries.join('; '))+'"></div></div>'+
+  '<p class="small mut rrCo">'+(j.companies_waiting?'Next companies: '+esc(j.companies_sample.join(' · '))+(j.companies_waiting>8?' …':''):'All matching companies in your data have been searched. Try the open search, or upload more files.')+'</p>'+
+  '<div class="row-actions"><button class="btn gold" id="rrGoS"'+(j.connected?'':' disabled')+'>Search (free)</button><span class="small" id="rrSMsg"></span></div></div>'+
+  '<div class="card"><h3>2 · Choose and reveal</h3><div class="row-actions" style="margin-top:0" id="rrTabs">'+['found','added','no_email','duplicate','skipped'].map(function(t){return '<button class="btn sm'+(t==='found'?' gold':'')+'" data-rrt="'+t+'">'+({found:'Waiting for you',added:'Added',no_email:'No good email',duplicate:'Already had',skipped:'Skipped'})[t]+'</button>';}).join('')+'</div>'+
+  '<div class="row-actions" id="rrActs"><label class="chk"><input type="checkbox" id="rrAll"> Tick all</label><button class="btn gold" id="rrRev"'+(j.connected?'':' disabled')+'>Reveal ticked</button><button class="btn" id="rrSkip">Skip ticked</button><span class="small" id="rrRMsg"></span></div>'+
+  '<div class="tbl" style="max-height:52vh"><table><thead><tr><th></th><th>Person</th><th>Company</th><th>Where</th><th>Result</th></tr></thead><tbody id="rrRows"></tbody></table></div></div>';
+  $('dClose').onclick=function(){$('drawer').classList.remove('on');};
+  document.querySelectorAll('[name=rrm]').forEach(function(r){r.onchange=function(){var o=this.value==='open';document.querySelectorAll('.rrOpen').forEach(function(x){x.hidden=!o;});document.querySelector('.rrCo').hidden=o;};});
+  $('rrGoS').onclick=rrDoSearch;$('rrRev').onclick=rrDoReveal;$('rrSkip').onclick=function(){var ids=rrTicked();if(!ids.length)return;call('rr_prospect_skip',{ids:ids}).then(rrList);};
+  $('rrAll').onchange=function(){var v=this.checked;document.querySelectorAll('.rrk').forEach(function(c){c.checked=v;});rrCount();};
+  document.querySelectorAll('[data-rrt]').forEach(function(b){b.onclick=function(){RRS.tab=b.dataset.rrt;document.querySelectorAll('[data-rrt]').forEach(function(x){x.classList.toggle('gold',x===b);});$('rrActs').style.display=RRS.tab==='found'?'':'none';rrList();};});
+  rrList();
+ }).catch(function(e){$('dbox').innerHTML='<p class="err">'+esc(e.message)+'</p><button class="btn" onclick="document.getElementById(\'drawer\').classList.remove(\'on\')">Close</button>';});}
+function rrTicked(){return [].map.call(document.querySelectorAll('.rrk:checked'),function(c){return +c.value;});}
+function rrCount(){var n=rrTicked().length;$('rrRev').textContent=n?'Reveal '+n+' ticked (uses up to '+n+' credit'+(n>1?'s':'')+')':'Reveal ticked';}
+function rrList(){call('rr_prospects',{slug:RRS.slug,status:RRS.tab}).then(function(j){
+ $('rrRows').innerHTML=j.rows.length?j.rows.map(function(p){return '<tr class="row"><td>'+(RRS.tab==='found'?'<input type="checkbox" class="rrk" value="'+p.id+'" aria-label="Select">':'')+'</td><td><b>'+esc(p.name||'')+'</b><div class="small mut">'+esc(p.title||'')+'</div>'+(p.linkedin_url?'<a class="small" target="_blank" rel="noopener" href="'+esc(p.linkedin_url)+'">LinkedIn ↗</a>':'')+'</td><td>'+esc(p.company||'')+'<div class="small mut">'+esc(p.found_by||'')+'</div></td><td class="small">'+esc(p.location||p.city||'')+'</td><td class="small">'+(p.email?esc(p.email)+' <span class="y">'+esc(p.grade||'')+'</span>':'')+(p.error?'<div class="mut">'+esc(p.error)+'</div>':'')+'</td></tr>';}).join(''):'<tr><td colspan="5" class="mut">'+(RRS.tab==='found'?'Nobody waiting. Press “Search (free)” above.':'Nobody here yet.')+'</td></tr>';
+ document.querySelectorAll('.rrk').forEach(function(c){c.onchange=rrCount;});$('rrAll').checked=false;rrCount();});}
+function rrDoSearch(){var mode=document.querySelector('[name=rrm]:checked').value,btn=$('rrGoS');btn.disabled=true;$('rrSMsg').textContent=mode==='open'?'Searching RocketReach…':'Searching companies one by one (up to 45 seconds)…';
+ var a={slug:RRS.slug,mode:mode,titles:$('rrT').value};if(mode==='open'){a.places=$('rrP').value.split(';');a.industries=$('rrI').value.trim()?$('rrI').value.split(';'):[];}
+ call('rr_search',a).then(function(j){btn.disabled=false;$('rrSMsg').innerHTML='<span class="y">'+(mode==='open'?j.found+' people found':j.searched+' companies searched, '+j.found+' people in the right roles')+'</span> · '+j.new_prospects+' new for you to review · no credits used'+(j.total!=null?' · about '+Number(j.total).toLocaleString('en-IN')+' match in total':'')+(j.notes&&j.notes.length?'<div class="mut">'+esc(j.notes.join(' '))+'</div>':'');rrList();})
+ .catch(function(e){btn.disabled=false;$('rrSMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';});}
+function rrDoReveal(){var ids=rrTicked();if(!ids.length){$('rrRMsg').textContent='Tick the people you want first.';return;}
+ if(!confirm('Reveal '+ids.length+' contact'+(ids.length>1?'s':'')+'? This uses up to '+ids.length+' RocketReach credit'+(ids.length>1?'s':'')+'.'))return;
+ var btn=$('rrRev');btn.disabled=true;$('rrRMsg').textContent='Revealing… (a few seconds each)';
+ call('rr_reveal',{ids:ids}).then(function(j){btn.disabled=false;$('rrRMsg').innerHTML='<span class="y">'+j.added+' added as cold contacts</span>'+(j.no_email?' · '+j.no_email+' without a good work email':'')+(j.duplicate?' · '+j.duplicate+' already in your data':'')+(j.blocked?' · '+j.blocked+' kept blocked (unsubscribed earlier)':'')+(j.left_for_later?' · '+j.left_for_later+' left for later (limit or time)':'')+' · '+j.remaining_today+' reveals left today'+(j.errors.length?'<div class="err">'+esc(j.errors[0])+'</div>':'');rrList();})
+ .catch(function(e){btn.disabled=false;$('rrRMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';});}
+
+/* ---------- promote ---------- */
+document.addEventListener('click',function(e){var b=e.target.closest('[data-promo]');if(b)promo(W.find(function(w){return w.slug===b.dataset.promo;}));});
+function promo(w){var base=location.origin,url=base+'/webinars.html#'+w.slug,when=w.starts_at?new Date(w.starts_at).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',weekday:'long',day:'numeric',month:'long',hour:'numeric',minute:'2-digit',hour12:true})+' IST':'';
+ var wa='📢 *Free 45-minute webinar*\n\n*'+w.title+'*\n_'+(w.subtitle||'')+'_\n\n🗓 '+when+'\n💻 Online on Microsoft Teams\n🎤 CA Ashish Dua'+(w.cohost_confirmed&&w.cohost_name?' with '+w.cohost_name:'')+'\n\n'+(w.summary||'')+'\n\nRegister free 👉 '+url;
+ var li='I’m hosting a free 45-minute webinar: '+w.title+'.\n\n'+(w.summary||'')+'\n\nWhat we’ll cover:\n'+(w.agenda||[]).map(function(a){return '• '+a.item;}).join('\n')+'\n\n🗓 '+when+' · Microsoft Teams\nRegister free: '+url+'\n\n#AI #DuaDesk';
+ $('dbox').innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><h1 style="margin:0">Promote: '+esc(w.title)+'</h1><button class="btn" id="dClose">Close</button></div>'+
+ '<div class="card"><h3>Share image</h3><canvas id="pc" width="1200" height="630" style="width:100%;border-radius:10px;border:1px solid var(--line)"></canvas><div class="row-actions"><button class="btn gold" id="pcDl">Download image</button><span class="mut small">For WhatsApp Status, your Channel, LinkedIn and email.</span></div></div>'+
+ '<div class="card"><h3>QR code (posters and slides)</h3><div id="qr" style="background:#fff;padding:12px;display:inline-block;border-radius:8px"></div><div class="row-actions"><button class="btn" id="qrDl">Download QR</button><span class="mut small">'+esc(url)+'</span></div></div>'+
+ '<div class="card"><h3>WhatsApp Channel post</h3><textarea id="tWa" style="min-height:200px">'+esc(wa)+'</textarea><div class="row-actions"><button class="btn sm" data-copy="tWa">Copy</button></div></div>'+
+ '<div class="card"><h3>LinkedIn post</h3><textarea id="tLi" style="min-height:220px">'+esc(li)+'</textarea><div class="row-actions"><button class="btn sm" data-copy="tLi">Copy</button></div></div>'+
+ '<div class="card"><h3>Browser notification</h3><p class="mut small">Sends “Free webinar: '+esc(w.title)+'” to everyone who tapped “Notify me”.</p><div class="row-actions"><button class="btn gold" id="pushGo"'+(w.status!=='published'?' disabled':'')+'>Notify subscribers now</button><span class="small" id="pushMsg"></span></div></div>'+
+ '<div class="card"><h3>For partner and co-host websites</h3><p class="mut small">Partners paste this on their site to show your upcoming webinars, with their own tracking code (change <code>partner-name</code>).</p><textarea id="tEm" style="min-height:90px;font:12.5px ui-monospace,Consolas,monospace">&lt;div id="dd-webinars"&gt;&lt;/div&gt;\n&lt;script src="'+esc(base)+'/dd-webinar-bar.js" data-mode="list" data-ref="partner-name" defer&gt;&lt;/script&gt;</textarea><div class="row-actions"><button class="btn sm" data-copy="tEm">Copy</button><span class="mut small">Registration link with tracking: '+esc(base)+'/webinars.html?ref=partner-name#'+esc(w.slug)+'</span></div></div>'+
+ '<div class="card"><h3>LinkedIn ads: company list</h3><p class="mut small">Companies in your data that match this webinar’s groups, in LinkedIn’s company-list format. Upload in Campaign Manager → Audiences → Upload a list, then target finance or leadership roles at those companies.</p><button class="btn" data-li="'+esc(w.slug)+'">Download company list</button></div>'+
+ '<div class="card"><h3>Find new contacts with RocketReach</h3><p class="mut small">Look for people in the right roles for this webinar, in companies already in your data or across the market. Searching is free; you choose who to reveal (1 credit each).</p><button class="btn" data-rr="'+esc(w.slug)+'">Find new contacts</button></div>';
+ $('dClose').onclick=function(){$('drawer').classList.remove('on');};$('drawer').classList.add('on');
+ var c=$('pc'),x=c.getContext('2d');x.fillStyle='#0b1424';x.fillRect(0,0,1200,630);var gr=x.createRadialGradient(1050,80,10,1050,80,520);gr.addColorStop(0,'rgba(214,174,85,.35)');gr.addColorStop(1,'rgba(214,174,85,0)');x.fillStyle=gr;x.fillRect(0,0,1200,630);
+ x.fillStyle='#d6ae55';x.font='800 24px Inter, Arial';x.fillText('DUADESK  ·  FREE WEBINAR',70,90);
+ function wrap(t,y,size,col,font,max){x.fillStyle=col;x.font=font.replace('S',size);var words=String(t).split(' '),line='',lines=0;for(var i=0;i<words.length;i++){var tl=line+words[i]+' ';if(x.measureText(tl).width>1060&&line){x.fillText(line.trim(),70,y);y+=size*1.18;line=words[i]+' ';if(++lines>=max-1){}}else line=tl;}x.fillText(line.trim(),70,y);return y+size*1.18;}
+ var y=wrap(w.title,190,62,'#ffffff','700 Spx Georgia, serif',3);y=wrap(w.subtitle||'',y+4,30,'#f0d18a','italic Spx Georgia, serif',2);
+ x.fillStyle='#e8ecf3';x.font='600 30px Inter, Arial';x.fillText(when,70,520);x.fillStyle='#a9b4c7';x.font='26px Inter, Arial';x.fillText('Microsoft Teams · 45 minutes · CA Ashish Dua',70,565);
+ x.fillStyle='#d6ae55';x.fillRect(880,500,250,72);x.fillStyle='#0b1424';x.font='800 28px Inter, Arial';x.fillText('Register free',905,546);
+ $('pcDl').onclick=function(){var a=document.createElement('a');a.href=c.toDataURL('image/png');a.download=w.slug+'.png';a.click();};
+ if(window.QRCode){new QRCode($('qr'),{text:url,width:220,height:220,correctLevel:QRCode.CorrectLevel.M});}
+ $('qrDl').onclick=function(){var img=$('qr').querySelector('img')||$('qr').querySelector('canvas');if(!img)return;var a=document.createElement('a');a.href=img.src||img.toDataURL('image/png');a.download=w.slug+'-qr.png';a.click();};
+ $('pushGo').onclick=function(){if(!confirm('Send a browser notification about this webinar to all subscribers?'))return;$('pushMsg').textContent='Sending…';call('push_send',{slug:w.slug}).then(function(j){$('pushMsg').innerHTML='<span class="y">Sent to '+j.delivered+' of '+j.total+'.</span>';}).catch(function(e){$('pushMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';});};
+}
+document.addEventListener('click',function(e){var b=e.target.closest('[data-copy]');if(!b||!$(b.dataset.copy))return;var t=$(b.dataset.copy);t.select();try{navigator.clipboard.writeText(t.value);}catch(err){document.execCommand('copy');}b.textContent='Copied ✓';setTimeout(function(){b.textContent='Copy';},1500);});
+
+})();
+</script>
+</body>
+</html>

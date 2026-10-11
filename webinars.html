@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DuaDesk Webinars</title>
+<meta name="description" content="Free 45-minute webinars with CA Ashish Dua on AI for CAs, CFOs, business owners and families. Live demos, real questions. Register free, or watch past sessions.">
+<meta property="og:title" content="DuaDesk Webinars 2026–27">
+<meta property="og:description" content="Free 45-minute sessions with CA Ashish Dua: AI for CAs, CFOs, business owners and families.">
+<meta property="og:image" content="og-image.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="webinar-style.css">
+<style>
+.hero{padding:60px 0 24px;background:radial-gradient(900px 380px at 15% -10%,rgba(214,174,85,.16),transparent 60%),radial-gradient(700px 360px at 95% 0%,rgba(61,139,255,.12),transparent 60%)}
+.facts{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 20px;padding:0;list-style:none}
+.facts li{border:1px solid var(--line);background:var(--card);padding:7px 13px;border-radius:999px;font-size:13.5px}
+.facts b{color:var(--gold2)}
+.heroacts{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start}
+.calmenu{position:relative;display:inline-block}.calmenu summary{list-style:none;cursor:pointer}.calmenu summary::-webkit-details-marker{display:none}
+.calpop{position:absolute;z-index:30;top:calc(100% + 6px);left:0;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px;min-width:280px;display:flex;flex-direction:column;gap:2px;box-shadow:0 12px 30px rgba(0,0,0,.4)}
+.calpop a{color:var(--ink);text-decoration:none;padding:8px 10px;border-radius:8px}.calpop a:hover{background:var(--card2)}.calpop .note{padding:6px 10px}
+
+.next{margin:30px 0 8px;border:1px solid rgba(214,174,85,.45);background:linear-gradient(135deg,#132038,#0c1628);border-radius:18px;padding:24px;display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center}
+.next .lab{font-size:12px;font-weight:800;letter-spacing:.16em;color:var(--gold);text-transform:uppercase;margin:0 0 6px}
+.next h2{font-family:Newsreader,Georgia,serif;font-size:27px;line-height:1.15;margin:0 0 4px;font-weight:600}
+.next p{margin:0;color:var(--mut)}
+.count{display:flex;gap:8px}.count div{background:#0a1322;border:1px solid var(--line);border-radius:12px;padding:8px 10px;text-align:center;min-width:58px}.count b{display:block;font-size:22px;color:#fff;line-height:1.1}.count span{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:30px 0 14px;position:sticky;top:62px;z-index:10;background:var(--bg);padding:12px 0}
+.tab{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 15px;border-radius:999px;font:600 14px Inter,sans-serif;cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--gold);color:#0b1424;border-color:var(--gold)}
+.month{font-family:Newsreader,Georgia,serif;font-size:22px;color:var(--gold2);margin:28px 0 12px;font-weight:600}
+.w{display:grid;grid-template-columns:96px 1fr;gap:20px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin:0 0 14px;scroll-margin-top:140px}
+.w.hl{border-color:var(--gold);box-shadow:0 0 0 3px rgba(214,174,85,.18)}
+.date{background:var(--bg2);border:1px solid var(--line);border-radius:12px;text-align:center;padding:10px 6px;align-self:start}
+.date .d{font-size:30px;font-weight:800;line-height:1;color:#fff}.date .m{font-size:12px;font-weight:800;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;margin-top:3px}
+.date .wd{font-size:12px;color:var(--mut);margin-top:6px}.date .t{font-size:13px;font-weight:700;margin-top:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.w h3{font-family:Newsreader,Georgia,serif;font-size:24px;line-height:1.2;margin:0 0 2px;font-weight:600}
+.w .sub{color:var(--gold2);font-style:italic;font-family:Newsreader,Georgia,serif;font-size:17px;margin:0 0 10px}
+.w .sum{margin:0 0 10px;font-size:15.5px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--mut);margin:0 0 12px}.meta b{color:var(--ink);font-weight:600}
+.prod a{color:var(--gold2);text-decoration:none;border-bottom:1px dashed rgba(240,209,138,.5)}
+.bar{display:flex;height:10px;border-radius:999px;overflow:hidden;margin:4px 0 8px;background:#0a1322}.bar i{display:block;height:100%;border-right:2px solid var(--card)}
+details.ag summary{cursor:pointer;color:var(--gold2);font-weight:700;font-size:14px;list-style:none}
+details.ag summary::-webkit-details-marker{display:none}details.ag summary:before{content:"▸ "}details.ag[open] summary:before{content:"▾ "}
+.ag ol{list-style:none;margin:10px 0 4px;padding:0}.ag li{display:grid;grid-template-columns:62px 1fr;gap:8px;padding:6px 0;border-top:1px solid rgba(35,49,77,.6);font-size:14.5px}.ag li span{color:var(--gold);font-weight:800}
+.act{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;align-items:center}
+.share{display:inline-flex;gap:6px;align-items:center;margin-left:auto}
+.share a,.share button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--mut);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;font:700 13px Inter,sans-serif}
+.share a:hover,.share button:hover{border-color:var(--gold);color:#fff}
+.past{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.past .card h4{margin:6px 0 4px;font-family:Newsreader,Georgia,serif;font-size:20px;font-weight:600;line-height:1.2}
+.past .card p{margin:0 0 12px;color:var(--mut);font-size:14px}
+.later{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.later div{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:16px}
+.later h4{margin:6px 0 4px;font-family:Newsreader,Georgia,serif;font-size:18px;font-weight:600}.later p{margin:0;color:var(--mut);font-size:14px}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:46px 0}
+.how div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}.how b{display:block;font-size:30px;color:var(--gold);font-family:Newsreader,Georgia,serif}
+.suggest{display:grid;grid-template-columns:1fr 1.3fr;gap:24px;align-items:start}
+.mod{position:fixed;inset:0;z-index:50;display:none;align-items:flex-start;justify-content:center;background:rgba(2,6,12,.72);padding:4vh 14px;overflow:auto}
+.mod.on{display:flex}
+.box{background:var(--card);border:1px solid var(--line);border-radius:18px;max-width:600px;width:100%;padding:26px;position:relative}
+.box h2{font-family:Newsreader,Georgia,serif;font-size:25px;line-height:1.2;margin:0 0 4px;font-weight:600}
+.box .when{color:var(--gold2);font-weight:600;margin:0 0 14px;font-size:14.5px}
+.x{position:absolute;right:14px;top:12px;background:none;border:0;color:var(--mut);font-size:26px;cursor:pointer;line-height:1}
+.alt{display:flex;gap:10px;align-items:center;justify-content:space-between;background:#0b1626;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 16px;font-size:14px}
+.done{text-align:center;padding:6px 0}
+@media (max-width:760px){
+ .next{grid-template-columns:1fr}.w{grid-template-columns:1fr;gap:12px}.date{display:flex;gap:10px;align-items:baseline;padding:8px 12px}.date .d{font-size:22px}.date .wd,.date .t{margin:0}
+ .how,.suggest{grid-template-columns:1fr}.share{margin-left:0}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+ <a class="brand" href="index.html">DUA <span>DESK</span></a>
+ <nav class="toplinks"><a href="index.html" class="hide-s">Home</a><a href="#timetable">Timetable</a><a href="#past">Recordings</a><a href="#suggest" class="hide-s">Suggest a topic</a></nav>
+</div></header>
+
+<section class="hero"><div class="wrap">
+ <p class="kick">DuaDesk Webinars · 2026–27</p>
+ <h1>Learn what AI can do for you, <em>live, in 45 minutes</em></h1>
+ <p class="lede">Free sessions with CA Ashish Dua for CAs, CFOs, business owners and families. Each one tackles one real problem, shows a live demo on sample data, and leaves time for your questions.</p>
+ <ul class="facts"><li><b>45</b> minutes</li><li><b>Free</b> to attend</li><li>On <b>Microsoft Teams</b></li><li>Recordings of past sessions</li></ul>
+ <div class="heroacts" id="heroActs"></div>
+ <div id="next"></div>
+</div></section>
+
+<main class="wrap" id="timetable">
+ <div class="tabs" role="group" aria-label="Filter sessions">
+  <button class="tab" data-f="all" aria-pressed="true">All sessions</button>
+  <button class="tab" data-f="business" aria-pressed="false">Business &amp; Professional</button>
+  <button class="tab" data-f="family" aria-pressed="false">Life &amp; Family</button>
+  <button class="tab" data-f="roundtable" aria-pressed="false">Private roundtables</button>
+ </div>
+ <div id="list"><p class="note">Loading the timetable…</p></div>
+
+ <h2 class="sec" id="past" hidden>Watch past sessions</h2>
+ <p class="note" id="pastNote" hidden>Enter your email once to watch any recording.</p>
+ <div class="past" id="pastList"></div>
+
+ <h2 class="sec" id="laterH" hidden>Coming later</h2>
+ <div class="later" id="later"></div>
+
+ <h2 class="sec" id="suggest">What should we cover next?</h2>
+ <div class="suggest">
+  <p class="lede" style="font-size:16.5px">Tell us the topic you’d most like a 45-minute session on. When we schedule it, you’ll be the first to know.</p>
+  <form class="card" id="sf" novalidate>
+   <div class="f">
+    <div><label for="sn">Your name</label><input id="sn" name="name" autocomplete="name"></div>
+    <div><label for="se">Email</label><input id="se" name="email" type="email" autocomplete="email"></div>
+    <div class="full"><label for="st">Topic you’d like</label><textarea id="st" name="text" maxlength="300" placeholder="e.g. AI for internal audit in manufacturing"></textarea></div>
+    <div class="full"><label class="chk"><input type="checkbox" name="consent"> Also send me invitations to future DuaDesk webinars. I can unsubscribe at any time.</label></div>
+    <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+   </div>
+   <p class="msg" id="sm" role="status"></p>
+   <button class="btn gold" type="submit" style="margin-top:10px">Send my suggestion</button>
+  </form>
+ </div>
+
+ <div class="how">
+  <div><b>1</b>Register on this page or on WhatsApp. You’ll get a confirmation and a calendar invite.</div>
+  <div><b>2</b>Your Microsoft Teams link arrives by email (and on WhatsApp if you choose) before the session.</div>
+  <div><b>3</b>Join on the day, see the live demo, and ask your questions live. Missed it? Watch the recording.</div>
+ </div>
+</main>
+
+<footer class="site"><div class="wrap">
+ CA Ashish Dua · DuaDesk · <a href="index.html">duadesk.com</a> · +91 98995 73717 · <a href="mailto:ashish@ashishduacorporation.com">ashish@ashishduacorporation.com</a><br>
+ All demos use sample data. Sessions are educational and are not legal, tax, medical or financial advice. We use your details only for DuaDesk webinars and, if you ask us to, to contact you about DuaDesk. You can unsubscribe at any time. <a href="webinar-privacy.html">Privacy notice</a>
+</div></footer>
+
+<div class="mod" id="mod" role="dialog" aria-modal="true" aria-labelledby="mTitle"><div class="box"><button class="x" type="button" aria-label="Close" data-close>×</button><div id="mBody"></div></div></div>
+
+<script>
+(function(){
+var API='/api/webinars',SET={whatsapp_number:'',whatsapp_channel_url:''};
+var REF=(function(){try{return (new URLSearchParams(location.search).get('ref')||'').slice(0,60);}catch(e){return '';}})();
+var ROLES=['CA in practice','CA / accountant in industry','CFO / finance head','CEO / founder / MD','Procurement / operations','Tax / compliance','Student','Parent / family member','RWA / community leader','Other'];
+var SIZES=['Just me','2–10','11–50','51–200','201–1,000','1,000+'];
+var SERIES={business:'Business & Professional',family:'Life & Family',roundtable:'Private roundtable'};
+var COLORS=['#d6ae55','#3d8bff','#1fc47d','#ff4f9a','#a78bfa','#39d8c1'];
+var all=[],filter='all';
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function d(iso){return iso?new Date(iso):null;}
+function fmt(iso,o){return d(iso).toLocaleString('en-IN',Object.assign({timeZone:'Asia/Kolkata'},o));}
+function timeIST(iso){return fmt(iso,{hour:'numeric',minute:'2-digit',hour12:true}).toUpperCase();}
+function isUAE(w){return /uae/i.test(w.slug);}
+function whenLong(w){if(!w.starts_at)return 'Date to be announced';
+ var s=fmt(w.starts_at,{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' · '+timeIST(w.starts_at)+' IST';
+ if(isUAE(w))s+=' ('+d(w.starts_at).toLocaleTimeString('en-GB',{timeZone:'Asia/Dubai',hour:'numeric',minute:'2-digit',hour12:true}).toUpperCase()+' UAE)';
+ try{var tz=Intl.DateTimeFormat().resolvedOptions().timeZone;if(tz&&!/^Asia\/(Kolkata|Calcutta)$/.test(tz)&&!(isUAE(w)&&tz==='Asia/Dubai'))s+=' · '+d(w.starts_at).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})+' your time';}catch(e){}
+ return s;}
+function past(w){return w.starts_at&&d(w.starts_at).getTime()+45*60000<Date.now();}
+function open(w){return w.status==='published'&&w.registration_open!==false&&!past(w);}
+function pageUrl(w){return location.origin+location.pathname+(REF?'?ref='+encodeURIComponent(REF):'')+'#'+w.slug;}
+function waNum(){return String(SET.whatsapp_number||'').replace(/\D/g,'');}
+function waRegister(w){return 'https://wa.me/'+waNum()+'?text='+encodeURIComponent('Hello, please register me for the DuaDesk webinar “'+w.title+'” ('+(w.starts_at?fmt(w.starts_at,{day:'numeric',month:'short'}):'')+'). My name is ');}
+function shareWA(w){return 'https://wa.me/?text='+encodeURIComponent('Free 45-minute webinar: “'+w.title+'” by CA Ashish Dua, '+whenLong(w)+'. Register: '+pageUrl(w));}
+function shareLI(w){return 'https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent(pageUrl(w));}
+
+function bar(w){var tot=(w.agenda||[]).reduce(function(a,x){return a+(+x.min||0);},0)||45;return '<div class="bar" aria-hidden="true">'+(w.agenda||[]).map(function(a,i){return '<i style="width:'+(a.min/tot*100)+'%;background:'+COLORS[i%COLORS.length]+'"></i>';}).join('')+'</div>';}
+function card(w){
+ var dt=w.starts_at?'<div class="date"><div class="d">'+fmt(w.starts_at,{day:'numeric'})+'</div><div class="m">'+fmt(w.starts_at,{month:'short'})+' '+fmt(w.starts_at,{year:'2-digit'})+'</div><div class="wd">'+fmt(w.starts_at,{weekday:'short'})+'</div><div class="t">'+timeIST(w.starts_at)+' IST</div></div>':'<div class="date"><div class="m">Date TBA</div></div>';
+ var prods=(w.products||[]).map(function(p){return '<a href="'+esc(p.url)+'" target="_blank" rel="noopener">'+esc(p.name)+'</a>';}).join(', ');
+ var people='<span><b>Speaker:</b> '+esc(w.speaker||'CA Ashish Dua')+'</span>'+(w.cohost?'<span><b>In association with:</b> '+esc(w.cohost)+'</span>':'')+(w.facilitator?'<span><b>Facilitator:</b> '+esc(w.facilitator)+'</span>':'');
+ var rt=w.format==='roundtable',act='';
+ if(open(w)){act='<button class="btn gold" data-reg="'+esc(w.slug)+'">'+(rt?'Request an invitation':'Register free')+'</button>';
+  if(waNum()&&!rt)act+='<a class="btn wa" href="'+esc(waRegister(w))+'" target="_blank" rel="noopener">Register on WhatsApp</a>';
+  act+='<a class="btn ghost" href="'+API+'?action=ics&slug='+encodeURIComponent(w.slug)+'">Add to calendar</a>';}
+ else if(w.has_recording)act='<a class="btn gold" href="webinar-watch.html?w='+encodeURIComponent(w.slug)+'">Watch the recording</a>';
+ else act='<span class="note">'+(past(w)?'This session has taken place. The recording will be available soon.':'Registration opens soon.')+'</span>';
+ var share=open(w)?'<span class="share"><a href="'+esc(shareWA(w))+'" target="_blank" rel="noopener" aria-label="Share on WhatsApp" title="Share on WhatsApp">WA</a><a href="'+esc(shareLI(w))+'" target="_blank" rel="noopener" aria-label="Share on LinkedIn" title="Share on LinkedIn">in</a><button type="button" data-copy="'+esc(pageUrl(w))+'" aria-label="Copy link" title="Copy link">⧉</button></span>':'';
+ return '<article class="w" id="'+esc(w.slug)+'">'+dt+'<div>'+
+  '<div class="chips"><span class="chip c-'+esc(w.series)+'">'+esc(SERIES[w.series]||w.series)+'</span>'+(rt?'<span class="chip c-n">By invitation · 8–12 seats</span>':'')+'</div>'+
+  '<h3>'+esc(w.title)+'</h3><p class="sub">'+esc(w.subtitle||'')+'</p><p class="sum">'+esc(w.summary||'')+'</p>'+
+  '<div class="meta"><span><b>For:</b> '+esc(w.audience||'')+'</span>'+people+'<span class="prod"><b>DuaDesk product:</b> '+prods+'</span>'+(w.note?'<span>'+esc(w.note)+'</span>':'')+'</div>'+
+  '<details class="ag"><summary>45-minute agenda</summary>'+bar(w)+'<ol>'+(w.agenda||[]).map(function(a){return '<li><span>'+esc(a.min)+' min</span>'+esc(a.item)+'</li>';}).join('')+'</ol></details>'+
+  '<div class="act">'+act+share+'</div></div></article>';}
+
+function render(){
+ var up=all.filter(function(w){return w.status==='published'&&!past(w)&&(filter==='all'||w.series===filter);});
+ var html='',last='';
+ up.forEach(function(w){var m=w.starts_at?fmt(w.starts_at,{month:'long',year:'numeric'}):'Date to be announced';if(m!==last){html+='<h2 class="month">'+esc(m)+'</h2>';last=m;}html+=card(w);});
+ document.getElementById('list').innerHTML=html||'<p class="note">No upcoming sessions in this category yet.</p>';
+ var pw=all.filter(function(w){return w.has_recording&&(filter==='all'||w.series===filter);}).sort(function(a,b){return d(b.starts_at)-d(a.starts_at);});
+ ['past','pastNote'].forEach(function(id){document.getElementById(id).hidden=!pw.length;});
+ document.getElementById('pastList').innerHTML=pw.map(function(w){return '<div class="card"><span class="chip c-'+esc(w.series)+'">'+esc(SERIES[w.series]||'')+'</span><h4>'+esc(w.title)+'</h4><p>'+esc(w.starts_at?fmt(w.starts_at,{day:'numeric',month:'long',year:'numeric'}):'')+(w.recording_teaser?' · '+esc(w.recording_teaser):'')+'</p><a class="btn gold sm" href="webinar-watch.html?w='+encodeURIComponent(w.slug)+'">▶ Watch the recording</a></div>';}).join('');
+ var lt=all.filter(function(w){return w.status==='later'&&(filter==='all'||w.series===filter);});
+ document.getElementById('laterH').hidden=!lt.length;
+ document.getElementById('later').innerHTML=lt.map(function(w){return '<div><span class="chip c-'+esc(w.series)+'">'+esc(SERIES[w.series]||'')+'</span><h4>'+esc(w.title)+'</h4><p>'+esc(w.subtitle||'')+'</p></div>';}).join('');
+ if(location.hash){var el=document.getElementById(location.hash.slice(1));if(el)el.classList.add('hl');}
+}
+function renderHero(){var h='';
+ if('serviceWorker' in navigator&&'PushManager' in window)h+='<button class="btn gold" type="button" id="notifyBtn">🔔 Notify me about new webinars</button>';
+ h+='<details class="calmenu"><summary class="btn ghost">📅 Add all webinars to my calendar</summary><div class="calpop"><a href="'+esc(calG())+'" target="_blank" rel="noopener">Google Calendar</a><a href="'+esc(calO('outlook.office.com'))+'" target="_blank" rel="noopener">Outlook (work / Microsoft 365)</a><a href="'+esc(calO('outlook.live.com'))+'" target="_blank" rel="noopener">Outlook.com</a><a href="'+esc(calW())+'">Apple Calendar / other</a><span class="note">New webinars appear in your calendar automatically (Google may take up to a day).</span></div></details>';
+ if(SET.whatsapp_channel_url)h+='<a class="btn wa" href="'+esc(SET.whatsapp_channel_url)+'" target="_blank" rel="noopener">Follow on WhatsApp</a>';
+ document.getElementById('heroActs').innerHTML=h;
+ var nb=document.getElementById('notifyBtn');if(nb){nb.onclick=subscribePush;try{if(Notification.permission==='granted'&&localStorage.getItem('dd-push')==='1'){nb.textContent='🔔 Notifications on';}}catch(e){}}}
+function feedUrl(){return location.origin+API+'?action=feed';}
+function calW(){return feedUrl().replace(/^https?:/,'webcal:');}
+function calG(){return 'https://calendar.google.com/calendar/r?cid='+encodeURIComponent(calW());}
+function calO(host){return 'https://'+host+'/calendar/0/addfromweb?url='+encodeURIComponent(feedUrl())+'&name='+encodeURIComponent('DuaDesk Webinars');}
+function u8(b){var p='='.repeat((4-b.length%4)%4),s=atob((b+p).replace(/-/g,'+').replace(/_/g,'/')),a=new Uint8Array(s.length);for(var i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return a;}
+function subscribePush(){var nb=document.getElementById('notifyBtn');
+ if(/iPhone|iPad/.test(navigator.userAgent)&&!window.navigator.standalone){alert('On iPhone: tap Share → “Add to Home Screen”, open DuaDesk from your home screen, then tap “Notify me” again.');return;}
+ nb.disabled=true;nb.textContent='Setting up…';
+ navigator.serviceWorker.register('/dd-push-sw.js').then(function(reg){return Notification.requestPermission().then(function(p){if(p!=='granted')throw new Error('denied');
+  return fetch(API+'?action=push_key').then(function(r){return r.json();}).then(function(j){return reg.pushManager.getSubscription().then(function(s){return s||reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(j.key)});});});});})
+ .then(function(sub){return fetch(API+'?action=push_subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON()})});})
+ .then(function(){try{localStorage.setItem('dd-push','1');}catch(e){}nb.textContent='🔔 Notifications on';})
+ .catch(function(e){nb.disabled=false;nb.textContent='🔔 Notify me about new webinars';alert(e&&e.message==='denied'?'Notifications are blocked for this site. You can allow them from the padlock icon in the address bar.':'Sorry, notifications could not be set up on this browser.');});}
+function jsonLd(){var ev=all.filter(function(w){return w.status==='published'&&w.starts_at&&!past(w);}).map(function(w){return {'@context':'https://schema.org','@type':'Event',name:w.title,description:(w.subtitle?w.subtitle+'. ':'')+(w.summary||''),startDate:w.starts_at,endDate:new Date(d(w.starts_at).getTime()+(w.duration_min||45)*60000).toISOString(),eventAttendanceMode:'https://schema.org/OnlineEventAttendanceMode',eventStatus:'https://schema.org/EventScheduled',location:{'@type':'VirtualLocation',url:location.origin+location.pathname+'#'+w.slug},image:[location.origin+'/og-image.png'],organizer:{'@type':'Organization',name:'DuaDesk',url:location.origin},performer:{'@type':'Person',name:w.speaker||'CA Ashish Dua'},offers:{'@type':'Offer',price:'0',priceCurrency:'INR',availability:'https://schema.org/InStock',url:location.origin+location.pathname+'#'+w.slug,validFrom:new Date().toISOString().slice(0,10)},isAccessibleForFree:true};});
+ if(!ev.length)return;var sc=document.createElement('script');sc.type='application/ld+json';sc.textContent=JSON.stringify(ev);document.head.appendChild(sc);}
+function renderNext(){
+ var n=all.filter(open).sort(function(a,b){return d(a.starts_at)-d(b.starts_at);})[0];
+ var box=document.getElementById('next');if(!n){box.innerHTML='';return;}
+ box.innerHTML='<div class="next"><div class="count" id="cd"></div><div><p class="lab">Next session</p><h2>'+esc(n.title)+'</h2><p>'+esc(whenLong(n))+'</p></div><div><button class="btn gold" data-reg="'+esc(n.slug)+'">'+(n.format==='roundtable'?'Request an invitation':'Register free')+'</button></div></div>';
+ function tick(){var ms=Math.max(0,d(n.starts_at)-Date.now()),D=Math.floor(ms/864e5),H=Math.floor(ms%864e5/36e5),M=Math.floor(ms%36e5/6e4);
+  var c=document.getElementById('cd');if(c)c.innerHTML='<div><b>'+D+'</b><span>days</span></div><div><b>'+H+'</b><span>hrs</span></div><div><b>'+M+'</b><span>min</span></div>';}
+ tick();setInterval(tick,30000);}
+
+/* registration */
+var mod=document.getElementById('mod'),mBody=document.getElementById('mBody'),lastFocus=null;
+function close(){mod.classList.remove('on');document.body.style.overflow='';if(lastFocus)lastFocus.focus();}
+function showForm(w){
+ lastFocus=document.activeElement;var rt=w.format==='roundtable',prods=(w.products||[]).map(function(p){return p.name;}).join(', ')||'DuaDesk';
+ mBody.innerHTML='<h2 id="mTitle">'+esc(w.title)+'</h2><p class="when">'+esc(whenLong(w))+' · Microsoft Teams · 45 min</p>'+
+ (rt?'<p class="note" style="margin:-4px 0 14px">This is a small, private roundtable. Request a seat and Ashish will confirm personally.</p>':'')+
+ (waNum()&&!rt?'<div class="alt"><span>Prefer WhatsApp? Send us a message and we’ll register you.</span><a class="btn wa sm" href="'+esc(waRegister(w))+'" target="_blank" rel="noopener">Register on WhatsApp</a></div>':'')+
+ '<form id="rf" novalidate><div class="f">'+
+ '<div><label for="fn">Full name *</label><input id="fn" name="name" required autocomplete="name"></div>'+
+ '<div><label for="fe">Email *</label><input id="fe" name="email" type="email" required autocomplete="email"></div>'+
+ '<div><label for="fp">Mobile / WhatsApp</label><input id="fp" name="phone" type="tel" autocomplete="tel" placeholder="+91 98xxx xxxxx"></div>'+
+ '<div><label for="fr">Your role</label><select id="fr" name="role"><option value="">Choose…</option>'+ROLES.map(function(r){return '<option>'+esc(r)+'</option>';}).join('')+'</select></div>'+
+ '<div><label for="fc">Company / firm</label><input id="fc" name="company" autocomplete="organization"></div>'+
+ '<div><label for="fs">Team size</label><select id="fs" name="company_size"><option value="">Choose…</option>'+SIZES.map(function(r){return '<option>'+esc(r)+'</option>';}).join('')+'</select></div>'+
+ '<div class="full"><label for="fq">Your question for the speaker</label><textarea id="fq" name="challenge" maxlength="1000" placeholder="We’ll try to answer it live"></textarea></div>'+
+ '<div class="full"><fieldset class="fieldset"><legend>After the webinar</legend><p class="note" style="margin:0 0 8px">May DuaDesk contact you to discuss how '+esc(prods)+' could work for your organisation?</p>'+
+ '<div class="radios"><label><input type="radio" name="contact_ok" value="call"> Yes, call me</label><label><input type="radio" name="contact_ok" value="email"> Yes, email me</label><label><input type="radio" name="contact_ok" value="no" checked> Not now</label></div></fieldset></div>'+
+ '<div class="full"><label for="ft">A topic you’d like a future webinar on (optional)</label><input id="ft" name="topic" maxlength="300"></div>'+
+ '<div class="full"><label class="chk"><input type="checkbox" name="wa_optin" id="fw"> Send my reminders on WhatsApp too. I’ll save +'+esc(waNum()||'918860046004')+' in my phone, and can reply STOP at any time.</label></div>'+
+ '<div class="full"><label class="chk"><input type="checkbox" name="consent" id="fk"> Send me invitations to future DuaDesk webinars. I can unsubscribe at any time.</label></div><p class="note full" style="margin:0">How we use your details: <a href="webinar-privacy.html" target="_blank" rel="noopener">privacy notice</a>.</p>'+
+ '<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">'+
+ '</div><p class="msg" id="fm" role="alert"></p><div class="act"><button class="btn gold" type="submit" id="fb">'+(rt?'Request my seat':'Register free')+'</button></div></form>';
+ mod.classList.add('on');document.body.style.overflow='hidden';setTimeout(function(){document.getElementById('fn').focus();},30);
+ document.getElementById('rf').onsubmit=function(ev){ev.preventDefault();submit(w,ev.target);};
+}
+function submit(w,f){
+ var fm=document.getElementById('fm'),fb=document.getElementById('fb');fm.className='msg';fm.textContent='';
+ var data={slug:w.slug,ref:REF};['name','email','phone','role','company','company_size','challenge','topic','website'].forEach(function(k){data[k]=(f.elements[k].value||'').trim();});
+ data.consent=f.elements.consent.checked;data.wa_optin=f.elements.wa_optin.checked;data.contact_ok=(f.querySelector('[name=contact_ok]:checked')||{}).value||'no';
+ if(!data.name){fm.className='msg err';fm.textContent='Please enter your name.';f.elements.name.focus();return;}
+ if(!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(data.email)){fm.className='msg err';fm.textContent='Please enter a valid email address.';f.elements.email.focus();return;}
+ if((data.wa_optin||data.contact_ok==='call')&&data.phone.replace(/\D/g,'').length<10){fm.className='msg err';fm.textContent='Please add your mobile number for WhatsApp reminders or a call.';f.elements.phone.focus();return;}
+ fb.disabled=true;fb.textContent='Registering…';
+ fetch(API+'?action=register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+ .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
+ .then(function(x){if(!x.ok)throw new Error(x.j.error||'Something went wrong.');
+  var rt=x.j.kind==='invite_request';
+  mBody.innerHTML='<div class="done"><div class="big">'+(x.j.already?'👍':'🎉')+'</div><h2 id="mTitle" style="margin-top:8px">'+(x.j.already?'You’re already registered':rt?'Request received':'You’re registered')+'</h2>'+
+   '<p>'+(x.j.already?'We already have your registration for <b>'+esc(w.title)+'</b>.':rt?'Ashish will confirm your seat personally by email.':'A confirmation with a calendar invite is on its way to <b>'+esc(data.email)+'</b>. Your Teams link will reach you before the session.')+'</p>'+
+   (data.contact_ok==='call'||data.contact_ok==='email'?'<p class="note">Thank you for your interest. We’ll be in touch about '+esc((w.products||[]).map(function(p){return p.name;}).join(', ')||'DuaDesk')+'.</p>':'')+
+   '<p style="margin:16px 0 8px"><b>Know someone who should attend?</b></p><div class="act" style="justify-content:center"><a class="btn wa sm" href="'+esc(shareWA(w))+'" target="_blank" rel="noopener">Share on WhatsApp</a><a class="btn ghost sm" href="'+esc(shareLI(w))+'" target="_blank" rel="noopener">Share on LinkedIn</a>'+
+   (SET.whatsapp_channel_url?'<a class="btn ghost sm" href="'+esc(SET.whatsapp_channel_url)+'" target="_blank" rel="noopener">Follow our WhatsApp Channel</a>':'')+'</div>'+
+   '<p class="note" style="margin-top:14px">Not in your inbox in a few minutes? Check your spam or promotions folder.</p><button class="btn ghost" data-close style="margin-top:6px">Close</button></div>';
+ }).catch(function(e){fb.disabled=false;fb.textContent=w.format==='roundtable'?'Request my seat':'Register free';fm.className='msg err';
+  fm.textContent=(e&&e.message&&e.message!=='Failed to fetch')?e.message:'We could not reach the server. Please try again, or email ashish@ashishduacorporation.com.';});
+}
+/* topic suggestion */
+document.getElementById('sf').onsubmit=function(ev){ev.preventDefault();var f=ev.target,m=document.getElementById('sm');
+ var data={name:f.elements.name.value.trim(),email:f.elements.email.value.trim(),text:f.elements.text.value.trim(),consent:f.elements.consent.checked,website:f.elements.website.value};
+ if(!data.name||!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(data.email)||!data.text){m.className='msg err';m.textContent='Please enter your name, a valid email and a topic.';return;}
+ var b=f.querySelector('button');b.disabled=true;
+ fetch(API+'?action=suggest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error);});})
+ .then(function(){f.innerHTML='<p style="margin:0"><b>Thank you!</b> We’ve noted your idea and will email you if we schedule it.</p>';})
+ .catch(function(e){b.disabled=false;m.className='msg err';m.textContent=e.message||'Please try again.';});};
+
+document.addEventListener('click',function(e){
+ var r=e.target.closest('[data-reg]');if(r){var w=all.find(function(x){return x.slug===r.getAttribute('data-reg');});if(w)showForm(w);return;}
+ var c=e.target.closest('[data-copy]');if(c){try{navigator.clipboard.writeText(c.getAttribute('data-copy'));c.textContent='✓';setTimeout(function(){c.textContent='⧉';},1500);}catch(err){}return;}
+ if(e.target.closest('[data-close]')||e.target===mod)close();
+ var t=e.target.closest('.tab');if(t){filter=t.getAttribute('data-f');document.querySelectorAll('.tab').forEach(function(b){b.setAttribute('aria-pressed',b===t?'true':'false');});render();}
+});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&mod.classList.contains('on'))close();});
+
+function load(j){all=(j.webinars||j||[]).slice().sort(function(a,b){if(!a.starts_at)return 1;if(!b.starts_at)return -1;return d(a.starts_at)-d(b.starts_at);});
+ if(j.settings)SET=j.settings;renderHero();render();renderNext();jsonLd();
+ var h=location.hash.slice(1);if(h){var el=document.getElementById(h);if(el)el.scrollIntoView({block:'start'});}}
+fetch(API+'?action=list').then(function(r){if(!r.ok)throw 0;return r.json();}).then(load)
+.catch(function(){fetch('webinars-fallback.json').then(function(r){return r.json();}).then(function(rows){load({webinars:rows});}).catch(function(){document.getElementById('list').innerHTML='<p class="note">The timetable could not be loaded. Please refresh the page.</p>';});});
+})();
+</script>
+</body>
+</html>

@@ -1370,7 +1370,7 @@ ol.pf-start li b,ol.pf-phases li b{display:block;color:#fff}
    <g><ellipse cx="140" cy="26.6" rx="12.5" ry="3.4" fill="#16273f" stroke="#f0d18a" stroke-width="1"/><circle cx="140" cy="17.5" r="8.5" fill="#f0d18a" stroke="#d6ae55" stroke-width="1.2"/><text x="140" y="21.2" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="700" fill="#3a2c07">₹</text><animateTransform attributeName="transform" type="translate" values="0 0;0 -1.6;0 0" dur="1.9s" repeatCount="indefinite"/></g>
    <text x="158" y="16" text-anchor="middle" font-family="Georgia,serif" font-size="8" font-weight="700" fill="#50d69a">+₹<animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.7;1" dur="2.6s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" values="0 5;0 -6" dur="2.6s" repeatCount="indefinite"/></text>
   </svg></div>
-  <div class="navlinks" id="navLinks"><a href="#how">The story</a><a href="#enterprise" class="wpill w-ent" data-w="ent">Organisation</a><a href="#community" class="wpill w-com" data-w="com">Social Leadership</a><a href="#life" class="wpill w-fam" data-w="fam">Life Journey</a><a href="#value" class="ent-only" data-w="ent">Value Lab</a><a href="#" class="pl-menu-link">All product links</a></div>
+  <div class="navlinks" id="navLinks"><a href="#how">The story</a><a href="webinars.html">Webinars</a><a href="#enterprise" class="wpill w-ent" data-w="ent">Organisation</a><a href="#community" class="wpill w-com" data-w="com">Social Leadership</a><a href="#life" class="wpill w-fam" data-w="fam">Life Journey</a><a href="#value" class="ent-only" data-w="ent">Value Lab</a><a href="#" class="pl-menu-link">All product links</a></div>
   <!-- Language selector hidden for now: translations for the new sections are not ready. The selector and all translation code (DD_T, DD_I18N, ddTranslate) are kept; to restore, put the langbox markup back here and set DD_LANG_ENABLED to true. -->
 <div class="navcta"><button id="assessTop" class="btn gold ent-only" onclick="goTo('assessment')">Free assessment</button><button id="demoTop" class="btn ghost" onclick="openDemo()">Request a demo →</button></div>
 <button class="menubtn" id="menuBtn" type="button" aria-expanded="false" aria-controls="navLinks">Menu</button>
@@ -2622,7 +2622,7 @@ button.pl-link em:after{content:""}
  <div>
   <div class="brand">DUA <span>DESK</span></div>
   <div class="footerline">Organisation. Social Leadership. Life Journey. For a Smarter, More Prosperous World.</div>
-  <a href="mailto:ashish@ashishduacorporation.com">ashish@ashishduacorporation.com</a><br><a href="tel:+919899573717">+91 98995 73717</a>
+  <a href="mailto:ashish@ashishduacorporation.com">ashish@ashishduacorporation.com</a><br><a href="tel:+919899573717">+91 98995 73717</a><br><a href="webinars.html">Free webinars: timetable and recordings</a>
   <div style="margin-top:16px"><button class="btn gold" type="button" onclick="openDemo()">Request a demo</button></div>
  </div>
  <div><h4>Organisation</h4><ul>
@@ -2830,6 +2830,7 @@ function recordLead(email){
  if(leadRecorded) return;
  if(!LEAD_ENDPOINT || LEAD_ENDPOINT.indexOf("http")!==0) return;  // not configured yet
  leadRecorded=true;
+ try{fetch("/api/webinars?action=site_lead",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.assign({kind:"value_lab"},leadSnapshot(email))),keepalive:true}).catch(function(){});}catch(e){}
  try{
   fetch(LEAD_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({access_key:WEB3FORMS_KEY,subject:"DuaDesk Value Lab lead — "+email,from_name:"DuaDesk website · Value Lab",...leadSnapshot(email)}),keepalive:true}).catch(()=>{});
  }catch(e){/* never block the unlock */}
@@ -2927,6 +2928,8 @@ async function submitDemo(e){
   );
   window.location.href="mailto:ashish@ashishduacorporation.com?subject="+subject+"&body="+body;
  };
+ // Also record the request in the DuaDesk Leads list (webinars admin); never blocks the form.
+ try{fetch("/api/webinars?action=site_lead",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.assign({kind:"demo"},vals)),keepalive:true}).catch(function(){});}catch(e){}
  // Send for real via Web3Forms; fall back to the visitor's email app only if it fails.
  if(WEB3FORMS_KEY && WEB3FORMS_KEY.indexOf("PASTE")!==0){
   try{
@@ -3730,17 +3733,17 @@ var FA=(function(){
   // torso
   var sx=x+stoop*0.6;
   if(sex==='f'&&!o.sit&&age!=='child'){
-   s+='<path d="M'+f(sx-sw/2)+' '+f(neck+h*0.03)+'q0 -'+f(h*0.03)+' '+f(h*0.04)+' -'+f(h*0.03)+'h'+f(sw-h*0.08)+'q'+f(h*0.04)+' 0 '+f(h*0.04)+' '+f(h*0.03)+'l'+f(h*0.1)+' '+f(y-neck-h*0.09)+'h-'+f(sw+h*0.2)+'z" fill="'+c+'"/>';
+   s+='<path d="M'+f(sx-sw/2)+' '+f(neck+h*0.03)+'q0 -'+f(h*0.03)+' '+f(h*0.04)+' -'+f(h*0.03)+'h'+f(sw-h*0.08)+'q'+f(h*0.04)+' 0 '+f(h*0.04)+' '+f(h*0.03)+'l'+f(h*0.1)+' '+f(y-neck-h*0.09)+'h'+f(-(sw+h*0.2))+'z" fill="'+c+'"/>';
    s+='<rect x="'+f(x-h*0.06)+'" y="'+f(y-h*0.07)+'" width="'+f(h*0.045)+'" height="'+f(h*0.07)+'" fill="'+c+'"/><rect x="'+f(x+h*0.02)+'" y="'+f(y-h*0.07)+'" width="'+f(h*0.045)+'" height="'+f(h*0.07)+'" fill="'+c+'"/>';
   }else{
-   s+='<path d="M'+f(sx-sw/2)+' '+f(neck+h*0.04)+'q0 -'+f(h*0.04)+' '+f(h*0.045)+' -'+f(h*0.04)+'h'+f(sw-h*0.09)+'q'+f(h*0.045)+' 0 '+f(h*0.045)+' '+f(h*0.04)+'l'+f(h*0.01)+' '+f(hip-neck-h*0.02)+'h-'+f(sw+h*0.02)+'z" fill="'+c+'"/>';
+   s+='<path d="M'+f(sx-sw/2)+' '+f(neck+h*0.04)+'q0 -'+f(h*0.04)+' '+f(h*0.045)+' -'+f(h*0.04)+'h'+f(sw-h*0.09)+'q'+f(h*0.045)+' 0 '+f(h*0.045)+' '+f(h*0.04)+'l'+f(h*0.01)+' '+f(hip-neck-h*0.02)+'h'+f(-(sw+h*0.02))+'z" fill="'+c+'"/>';
    if(o.sit){
-    s+='<path d="M'+f(sx-sw/2)+' '+f(hip-h*0.04)+'h'+f(h*0.3*d)+'v'+f(h*0.07)+'h-'+f(h*0.3*d)+'z" fill="'+c+'"/>';
+    s+='<path d="M'+f(sx-sw/2)+' '+f(hip-h*0.04)+'h'+f(h*0.3*d)+'v'+f(h*0.07)+'h'+f(-(h*0.3*d))+'z" fill="'+c+'"/>';
     s+='<rect x="'+f(sx-sw/2+h*0.26*d-(d<0?h*0.07:0))+'" y="'+f(hip)+'" width="'+f(h*0.07)+'" height="'+f(y-hip)+'" fill="'+c+'"/>';
    }else{
     var lw=h*(kid?0.07:0.075);
-    s+='<path d="M'+f(x-sw/2+h*0.01)+' '+f(hip-h*0.01)+'h'+f(lw)+'l'+f(-h*0.005)+' '+f(y-hip)+'h-'+f(lw)+'z" fill="'+c+'"/>';
-    s+='<path d="M'+f(x+sw/2-h*0.01-lw)+' '+f(hip-h*0.01)+'h'+f(lw)+'l'+f(h*0.005)+' '+f(y-hip)+'h-'+f(lw)+'z" fill="'+c+'"/>';
+    s+='<path d="M'+f(x-sw/2+h*0.01)+' '+f(hip-h*0.01)+'h'+f(lw)+'l'+f(-h*0.005)+' '+f(y-hip)+'h'+f(-lw)+'z" fill="'+c+'"/>';
+    s+='<path d="M'+f(x+sw/2-h*0.01-lw)+' '+f(hip-h*0.01)+'h'+f(lw)+'l'+f(h*0.005)+' '+f(y-hip)+'h'+f(-lw)+'z" fill="'+c+'"/>';
    }
   }
   if(o.cane)s+='<path d="M'+f(sx+sw*0.75*d)+' '+f(hip-h*0.08)+'L'+f(sx+sw*0.95*d)+' '+f(y)+'" stroke="'+c+'" stroke-width="'+f(h*0.02)+'" stroke-linecap="round"/>';
@@ -4284,5 +4287,6 @@ var ST_WORLDS={
 
 </script>
 <script src="dd-lang.js?v=3" defer></script>
+<script src="/dd-webinar-bar.js" defer></script>
 </body>
 </html>

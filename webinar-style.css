@@ -1,0 +1,49 @@
+/* DuaDesk Webinars · shared styles for the public pages */
+:root{--bg:#06101c;--bg2:#0b1424;--card:#0f1a2e;--card2:#13203a;--line:#23314d;--ink:#e8ecf3;--mut:#a9b4c7;--gold:#d6ae55;--gold2:#f0d18a;--blue:#3d8bff;--green:#1fc47d;--pink:#ff4f9a;--violet:#a78bfa;--wa:#25d366;--err:#ff8a7a}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Inter,system-ui,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--gold2)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+header.top{position:sticky;top:0;z-index:20;background:rgba(6,16,28,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;align-items:center;justify-content:space-between;height:62px;gap:12px}
+.brand{font-weight:800;letter-spacing:.14em;color:#fff;text-decoration:none;font-size:17px}.brand span{color:var(--gold)}
+.toplinks{display:flex;gap:18px;align-items:center;font-size:14px}.toplinks a{color:var(--mut);text-decoration:none}.toplinks a:hover{color:#fff}
+.kick{color:var(--gold);font-weight:800;letter-spacing:.2em;font-size:12px;text-transform:uppercase;margin:0 0 12px}
+h1{font-family:Newsreader,Georgia,serif;font-weight:600;font-size:clamp(32px,5vw,54px);line-height:1.06;margin:0 0 16px;letter-spacing:-.01em}
+h1 em{color:var(--gold2);font-style:italic}
+h2.sec{font-family:Newsreader,Georgia,serif;font-size:28px;margin:46px 0 6px;font-weight:600}
+.lede{color:var(--mut);font-size:18px;max-width:720px;margin:0 0 24px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:10px;padding:11px 18px;font:700 15px Inter,sans-serif;cursor:pointer;border:1px solid transparent;text-decoration:none;line-height:1.2}
+.btn.gold{background:var(--gold);color:#0b1424}.btn.gold:hover{background:var(--gold2)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}.btn.ghost:hover{border-color:var(--gold)}
+.btn.wa{background:var(--wa);color:#06261a}.btn.wa:hover{filter:brightness(1.08)}
+.btn.sm{padding:7px 12px;font-size:13.5px;border-radius:8px}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
+.note{font-size:13px;color:var(--mut)}
+.chip{display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;border:1px solid}
+.c-business{color:#8fbaff;border-color:rgba(61,139,255,.5);background:rgba(61,139,255,.1)}
+.c-family{color:#ff8fbf;border-color:rgba(255,79,154,.45);background:rgba(255,79,154,.1)}
+.c-roundtable{color:#c4b5fd;border-color:rgba(167,139,250,.5);background:rgba(167,139,250,.1)}
+.c-n{color:var(--mut);border-color:var(--line)}
+.f{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.f label{display:block;font-size:13px;font-weight:600;color:var(--mut);margin:0 0 4px}
+.f .full{grid-column:1/-1}
+.f input,.f select,.f textarea,input.in,textarea.in,select.in{width:100%;background:#0a1322;border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:11px 12px;font:15px Inter,sans-serif}
+.f input:focus,.f select:focus,.f textarea:focus,.in:focus{outline:2px solid rgba(214,174,85,.5);border-color:var(--gold)}
+.f textarea,textarea.in{min-height:76px;resize:vertical}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--ink);font-weight:500!important}
+.chk input{width:18px!important;height:18px;margin-top:3px;flex:none;padding:0!important}
+.radios{display:flex;flex-wrap:wrap;gap:8px}
+.radios label{display:inline-flex!important;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:7px 13px;cursor:pointer;color:var(--ink)!important;font-weight:500!important;margin:0!important}
+.radios input{width:auto!important;margin:0}
+.radios label:has(input:checked){border-color:var(--gold);background:rgba(214,174,85,.12)}
+.hp{position:absolute;left:-9999px}
+.msg{margin:12px 0 0;font-size:14px}.msg.err{color:var(--err)}
+.fieldset{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0}
+.fieldset legend{font-size:13px;font-weight:700;color:var(--gold2);padding:0 6px}
+footer.site{border-top:1px solid var(--line);padding:28px 0 40px;color:var(--mut);font-size:14px;margin-top:50px}
+.center{min-height:calc(100vh - 62px);display:flex;align-items:center;justify-content:center;padding:30px 16px}
+.panel{max-width:620px;width:100%}
+.big{font-size:44px;line-height:1}
+@media (max-width:760px){.f{grid-template-columns:1fr}.toplinks .hide-s{display:none}}

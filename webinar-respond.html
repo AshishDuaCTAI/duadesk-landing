@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>DuaDesk Webinars</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="webinar-style.css">
+<style>
+.panel h1{font-size:clamp(28px,4.4vw,38px)}
+.wbox{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 18px}
+.wbox b{font-family:Newsreader,Georgia,serif;font-size:19px;font-weight:600;display:block}
+.stars{display:flex;gap:8px}.stars button{width:46px;height:46px;border-radius:12px;border:1px solid var(--line);background:#0a1322;color:var(--mut);font-size:22px;cursor:pointer}
+.stars button.on{background:var(--gold);color:#0b1424;border-color:var(--gold)}
+.opts{display:grid;gap:10px}.opts label{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer}
+.opts label:has(input:checked){border-color:var(--gold);background:rgba(214,174,85,.08)}
+.opts input{margin-top:4px}
+.links{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="brand" href="webinars.html">DUA <span>DESK</span></a><nav class="toplinks"><a href="webinars.html">All webinars</a></nav></div></header>
+<div class="center"><div class="panel card" id="app"><p class="note">Loading…</p></div></div>
+<script>
+(function(){
+var API='/api/webinars',Q=new URLSearchParams(location.search),A=Q.get('a')||'',app=document.getElementById('app'),CTX=null;
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function when(iso){if(!iso)return '';var d=new Date(iso);return d.toLocaleString('en-IN',{timeZone:'Asia/Kolkata',weekday:'long',day:'numeric',month:'long',hour:'numeric',minute:'2-digit',hour12:true})+' IST';}
+function post(body){return fetch(API+'?action=act',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({p:Q.get('p'),t:Q.get('t'),w:Q.get('w')},body))}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||'Something went wrong.');return j;});});}
+function wbox(){var w=CTX&&CTX.webinar;return w?'<div class="wbox"><span class="note">DuaDesk webinar</span><b>'+esc(w.title)+'</b><span class="note">'+esc(when(w.starts_at))+'</span></div>':'';}
+function done(icon,title,text,extra){app.innerHTML='<div style="text-align:center"><div class="big">'+icon+'</div><h1 style="margin-top:10px">'+title+'</h1><p>'+text+'</p>'+(extra||'')+'<div class="links" style="justify-content:center"><a class="btn ghost" href="webinars.html">See all webinars</a></div></div>';}
+function fail(e){app.innerHTML='<h1>Sorry</h1><p>'+esc(e.message)+'</p><p class="note">You can always write to <a href="mailto:ashish@ashishduacorporation.com">ashish@ashishduacorporation.com</a>.</p><a class="btn ghost" href="webinars.html">See all webinars</a>';}
+function moreLinks(){var s=CTX&&CTX.settings||{},h='<div class="links" style="justify-content:center">';
+ if(A!=='topic')h+='<a class="btn ghost sm" href="?a=topic&p='+Q.get('p')+(Q.get('w')?'&w='+encodeURIComponent(Q.get('w')):'')+'&t='+Q.get('t')+'">💡 Suggest a topic</a>';
+ if(A!=='talk')h+='<a class="btn ghost sm" href="?a=talk&p='+Q.get('p')+(Q.get('w')?'&w='+encodeURIComponent(Q.get('w')):'')+'&t='+Q.get('t')+'">🤝 Talk to us about DuaDesk</a>';
+ if(s.whatsapp_channel_url)h+='<a class="btn wa sm" href="'+esc(s.whatsapp_channel_url)+'" target="_blank" rel="noopener">Follow on WhatsApp</a>';
+ return h+'</div>';}
+
+var views={
+ register:function(){var p=CTX.person,w=CTX.webinar;if(!w)return fail(new Error('Webinar not found.'));
+  var rt=w.format==='roundtable';
+  app.innerHTML='<p class="kick">One-click registration</p><h1>'+(rt?'Request your seat':'Confirm your place')+'</h1>'+wbox()+
+  '<form id="f"><div class="f"><div><label>Name</label><input name="name" value="'+esc(p.name||'')+'" required></div><div><label>Email</label><input value="'+esc(p.email||'')+'" disabled></div>'+
+  '<div class="full"><label>Mobile / WhatsApp (optional)</label><input name="phone" type="tel" value="'+esc(p.phone?'+'+p.phone:'')+'"></div>'+
+  '<div class="full"><label class="chk"><input type="checkbox" name="wa_optin"> Send my reminders on WhatsApp too (I’ll save +'+esc(String(CTX.settings.whatsapp_number||'').replace(/\D/g,''))+')</label></div>'+
+  '<div class="full"><fieldset class="fieldset"><legend>After the webinar</legend><p class="note" style="margin:0 0 8px">May DuaDesk contact you to discuss how '+esc((w.products||[]).map(function(x){return x.name;}).join(', ')||'DuaDesk')+' could work for your organisation?</p><div class="radios"><label><input type="radio" name="contact_ok" value="call"> Yes, call me</label><label><input type="radio" name="contact_ok" value="email"> Yes, email me</label><label><input type="radio" name="contact_ok" value="no" checked> Not now</label></div></fieldset></div>'+
+  '<div class="full"><label>Your question for the speaker (optional)</label><textarea name="challenge" maxlength="1000"></textarea></div></div>'+
+  '<p class="msg err" id="m"></p><button class="btn gold" type="submit">'+(rt?'Request my seat':'Register me')+'</button></form>';
+  document.getElementById('f').onsubmit=function(e){e.preventDefault();var f=e.target,b=f.querySelector('button');b.disabled=true;
+   var c=(f.querySelector('[name=contact_ok]:checked')||{}).value;
+   if((f.elements.wa_optin.checked||c==='call')&&f.elements.phone.value.replace(/\D/g,'').length<10){document.getElementById('m').textContent='Please add your mobile number.';b.disabled=false;return;}
+   post({a:'register',name:f.elements.name.value.trim(),phone:f.elements.phone.value.trim(),wa_optin:f.elements.wa_optin.checked,contact_ok:c,challenge:f.elements.challenge.value.trim()})
+   .then(function(j){done(j.already?'👍':'🎉',j.already?'You’re already registered':(rt?'Request received':'You’re registered'),j.already?'See you at the session.':(rt?'Ashish will confirm your seat personally.':'Your confirmation and calendar invite are on the way to <b>'+esc(p.email)+'</b>.'),moreLinks());})
+   .catch(function(err){b.disabled=false;document.getElementById('m').textContent=err.message;});};
+ },
+ not_this_one:function(){post({a:'not_this_one'}).then(function(){done('👌','No problem','We won’t remind you about this one. You’ll still hear about future webinars on other topics.',
+   '<p class="note">Getting too many invitations? <a href="?a=prefs&p='+Q.get('p')+'&t='+Q.get('t')+'">Choose which ones you get</a>.</p>'+moreLinks());}).catch(fail);},
+ topic:function(){app.innerHTML='<p class="kick">Your idea</p><h1>What should our next webinar cover?</h1><p class="note">Tell us the topic you’d most like a 45-minute session on. If we schedule it, you’ll be the first to know.</p>'+
+  '<form id="f"><textarea class="in" name="text" maxlength="300" placeholder="e.g. AI for internal audit in manufacturing" required></textarea><p class="msg err" id="m"></p><button class="btn gold" type="submit" style="margin-top:10px">Send my suggestion</button></form>';
+  document.getElementById('f').onsubmit=function(e){e.preventDefault();var t=e.target.elements.text.value.trim();if(!t){document.getElementById('m').textContent='Please write a topic.';return;}
+   post({a:'topic',text:t}).then(function(){done('💡','Thank you!','We’ve noted your idea. If we schedule it, we’ll email you first.',moreLinks());}).catch(function(err){document.getElementById('m').textContent=err.message;});};},
+ talk:function(){var p=CTX.person,w=CTX.webinar,prods=['AI CFO','AI CPO','Fixed Assets','Dua Sarthi','Dua Pramaan','Dua Pragya','Dua Vyapar','Philia','Dua Home','Dua Parivaar','Marriage Companion','Dua Saathi','Dua Legacy'],pre=(w&&w.products||[]).map(function(x){return x.name;});
+  app.innerHTML='<p class="kick">Let’s talk</p><h1>Explore DuaDesk for your organisation</h1><p class="note">Ashish will personally get in touch. No obligation.</p>'+
+  '<form id="f"><div class="f"><div><label>Name</label><input name="name" value="'+esc(p.name||'')+'"></div><div><label>Company</label><input name="company"></div>'+
+  '<div class="full"><label>What are you interested in?</label><select name="interest"><option value="">Choose…</option>'+prods.map(function(x){return '<option'+(pre[0]===x?' selected':'')+'>'+esc(x)+'</option>';}).join('')+'<option>Not sure yet</option></select></div>'+
+  '<div class="full"><fieldset class="fieldset"><legend>How should we reach you?</legend><div class="radios"><label><input type="radio" name="how" value="call"> A phone call</label><label><input type="radio" name="how" value="email" checked> Email</label></div></fieldset></div>'+
+  '<div class="full"><label>Mobile (for a call)</label><input name="phone" type="tel" value="'+esc(p.phone?'+'+p.phone:'')+'"></div>'+
+  '<div class="full"><label>Anything we should know? (optional)</label><textarea name="note" maxlength="1000" placeholder="e.g. 20-person CA firm, mostly statutory audits"></textarea></div></div>'+
+  '<p class="msg err" id="m"></p><button class="btn gold" type="submit">Send</button></form>';
+  document.getElementById('f').onsubmit=function(e){e.preventDefault();var f=e.target,how=(f.querySelector('[name=how]:checked')||{}).value;
+   if(how==='call'&&f.elements.phone.value.replace(/\D/g,'').length<10){document.getElementById('m').textContent='Please add your mobile number for a call.';return;}
+   post({a:'talk',name:f.elements.name.value.trim(),company:f.elements.company.value.trim(),interest:f.elements.interest.value,how:how,phone:f.elements.phone.value.trim(),note:f.elements.note.value.trim()})
+   .then(function(j){done('🤝','Thank you','Ashish will be in touch'+(how==='call'?' by phone':' by email')+' within two working days.',j.bookings_url?'<p><b>Prefer to pick a time now?</b></p><p><a class="btn gold" href="'+esc(j.bookings_url)+'" target="_blank" rel="noopener">Choose a time for a 30-minute call</a></p>':'');})
+   .catch(function(err){document.getElementById('m').textContent=err.message;});};},
+ wa:function(){var p=CTX.person,n=String(CTX.settings.whatsapp_number||'').replace(/\D/g,'');
+  app.innerHTML='<p class="kick">WhatsApp reminders</p><h1>Get reminders on WhatsApp</h1>'+wbox()+'<form id="f"><label class="note">Your WhatsApp number</label><input class="in" name="phone" type="tel" value="'+esc(p.phone?'+'+p.phone:'')+'" placeholder="+91 98xxx xxxxx"><p class="note">By continuing, you agree to receive webinar reminders from DuaDesk on WhatsApp. Reply STOP at any time to stop them.</p><p class="msg err" id="m"></p><button class="btn wa" type="submit">Yes, remind me on WhatsApp</button></form>';
+  document.getElementById('f').onsubmit=function(e){e.preventDefault();post({a:'wa',phone:e.target.elements.phone.value.trim()}).then(function(){
+   done('📱','Done!','One last step: save <b>+'+esc(n)+'</b> in your phone as “DuaDesk Webinars”, so our reminders reach you.','<p><a class="btn wa" href="https://wa.me/'+esc(n)+'?text='+encodeURIComponent('Hi, I’d like DuaDesk webinar reminders on WhatsApp.')+'" target="_blank" rel="noopener">Say hello on WhatsApp</a></p>'+moreLinks());})
+   .catch(function(err){document.getElementById('m').textContent=err.message;});};},
+ prefs:function(){var p=CTX.person,unsub=p.email_status!=='subscribed';
+  app.innerHTML='<p class="kick">Your choices</p><h1>Which invitations would you like?</h1><p class="note">For <b>'+esc(p.email||('+'+p.phone))+'</b></p><form id="f"><div class="opts">'+
+  '<label><input type="radio" name="o" value="all"'+(!unsub&&p.pref_series==='all'?' checked':'')+'> <span><b>All webinars</b><br><span class="note">Business, professional and family topics (at most two invitations a month)</span></span></label>'+
+  '<label><input type="radio" name="o" value="business"'+(!unsub&&p.pref_series==='business'?' checked':'')+'> <span><b>Business &amp; professional only</b><br><span class="note">Finance, tax, audit, CEO and procurement topics</span></span></label>'+
+  '<label><input type="radio" name="o" value="family"'+(!unsub&&p.pref_series==='family'?' checked':'')+'> <span><b>Life &amp; family only</b><br><span class="note">Parenting, elder care, home, community and legacy</span></span></label>'+
+  '<label><input type="radio" name="o" value="pause"> <span><b>Pause for 3 months</b><br><span class="note">Then carry on as before</span></span></label>'+
+  '<label><input type="radio" name="o" value="off"'+(unsub?' checked':'')+'> <span><b>Unsubscribe from all webinar emails</b><br><span class="note">We won’t email you invitations again</span></span></label>'+
+  (p.phone&&!p.wa_stopped?'<label><input type="checkbox" name="wa_stop"> <span><b>Also stop WhatsApp messages</b><br><span class="note">to +'+esc(p.phone)+'</span></span></label>':'')+
+  '</div><p class="msg err" id="m"></p><button class="btn gold" type="submit" style="margin-top:14px">Save my choice</button></form>';
+  document.getElementById('f').onsubmit=function(e){e.preventDefault();var f=e.target,o=(f.querySelector('[name=o]:checked')||{}).value;if(!o){document.getElementById('m').textContent='Please choose an option.';return;}
+   var b={a:'prefs',wa_stop:!!(f.elements.wa_stop&&f.elements.wa_stop.checked)};
+   if(o==='off')b.email_off=true;else if(o==='pause'){b.pause_months=3;b.email_off=false;}else{b.series=o;b.pause_months=0;b.email_off=false;}
+   post(b).then(function(){done('✅','Saved',o==='off'?'You won’t receive webinar invitations from us again. You can still register on our website any time.':o==='pause'?'We’ll pause invitations for 3 months.':'We’ll only send you the invitations you chose.');}).catch(function(err){document.getElementById('m').textContent=err.message;});};},
+ feedback:function(){
+  fetch(API+'?action=act',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({a:'feedback',r:Q.get('r'),t:Q.get('t'),peek:true})}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error);return j;});}).then(function(j){
+   if(j.done)return done('🙏','Thank you','We already have your feedback for <b>'+esc(j.title)+'</b>.');
+   var rating=0;app.innerHTML='<p class="kick">Your feedback</p><h1>How was “'+esc(j.title)+'”?</h1><form id="f"><p class="note">Your rating</p><div class="stars" id="st">'+[1,2,3,4,5].map(function(n){return '<button type="button" data-n="'+n+'" aria-label="'+n+' stars">★</button>';}).join('')+'</div>'+
+   '<p class="note" style="margin-top:16px">What was most useful, or what could be better?</p><textarea class="in" name="text" maxlength="2000"></textarea>'+
+   '<p class="note" style="margin-top:14px">What topic should we cover next?</p><input class="in" name="topic" maxlength="300">'+
+   '<fieldset class="fieldset" style="margin-top:14px"><legend>Would you like to explore DuaDesk for your organisation?</legend><div class="radios"><label><input type="radio" name="how" value="call"> Yes, call me</label><label><input type="radio" name="how" value="email"> Yes, email me</label><label><input type="radio" name="how" value="" checked> Not now</label></div>'+
+   '<input class="in" name="phone" type="tel" placeholder="Mobile (for a call)" style="margin-top:10px"></fieldset>'+
+   '<p class="msg err" id="m"></p><button class="btn gold" type="submit" style="margin-top:14px">Send feedback</button></form>';
+   document.querySelectorAll('#st button').forEach(function(b){b.onclick=function(){rating=+b.dataset.n;document.querySelectorAll('#st button').forEach(function(x){x.classList.toggle('on',+x.dataset.n<=rating);});};});
+   document.getElementById('f').onsubmit=function(e){e.preventDefault();var f=e.target;if(!rating){document.getElementById('m').textContent='Please choose a rating.';return;}
+    var how=(f.querySelector('[name=how]:checked')||{}).value;if(how==='call'&&f.elements.phone.value.replace(/\D/g,'').length<10){document.getElementById('m').textContent='Please add your mobile number for a call.';return;}
+    fetch(API+'?action=act',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({a:'feedback',r:Q.get('r'),t:Q.get('t'),rating:rating,text:f.elements.text.value,topic:f.elements.topic.value,how:how,phone:f.elements.phone.value})})
+    .then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error);return j;});})
+    .then(function(j){done('🙏','Thank you!','Your feedback helps shape the next sessions.',j.bookings_url?'<p><a class="btn gold" href="'+esc(j.bookings_url)+'" target="_blank" rel="noopener">Choose a time for a 30-minute call</a></p>':'');})
+    .catch(function(err){document.getElementById('m').textContent=err.message;});};
+  }).catch(fail);}
+};
+if(A==='feedback')views.feedback();
+else if(!views[A])fail(new Error('This link is not complete.'));
+else post({a:'peek'}).then(function(j){CTX=j;if(A==='register'&&j.webinar&&j.webinar.starts_at&&new Date(j.webinar.starts_at)<new Date())return done('⏱','This session has passed','<a href="webinar-watch.html?w='+encodeURIComponent(j.webinar.slug)+'&p='+Q.get('p')+'&t='+Q.get('t')+'">Watch the recording</a> when it’s available.');views[A]();}).catch(fail);
+})();
+</script>
+</body>
+</html> · <a href="webinar-privacy.html">Privacy notice</a>

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Certificate of Attendance</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&display=swap" rel="stylesheet">
+<style>
+@page{size:A4 landscape;margin:0}
+*{box-sizing:border-box}
+body{margin:0;background:#e9edf3;font-family:Inter,Arial,sans-serif;color:#1e2533}
+.bar{display:flex;justify-content:center;gap:10px;padding:16px;flex-wrap:wrap}
+.bar button,.bar a{background:#0b1424;color:#fff;border:0;border-radius:10px;padding:11px 18px;font:700 15px Inter,sans-serif;cursor:pointer;text-decoration:none}
+.bar a{background:#fff;color:#0b1424;border:1px solid #c9d2e0}
+.sheet{width:297mm;height:210mm;margin:0 auto 30px;background:#fff;position:relative;overflow:hidden;box-shadow:0 10px 40px rgba(11,20,36,.15)}
+.frame{position:absolute;inset:10mm;border:2px solid #d6ae55;border-radius:6px}
+.frame:after{content:"";position:absolute;inset:3mm;border:1px solid rgba(214,174,85,.5);border-radius:4px}
+.in{position:absolute;inset:22mm 28mm;display:flex;flex-direction:column;align-items:center;text-align:center}
+.brand{font-weight:700;letter-spacing:.32em;font-size:12pt;color:#0b1424}.brand span{color:#b8892e}
+.t{font-family:Newsreader,Georgia,serif;font-size:34pt;font-weight:600;color:#0b1424;margin:9mm 0 2mm}
+.k{font-size:11pt;letter-spacing:.2em;text-transform:uppercase;color:#5a6478}
+.name{font-family:Newsreader,Georgia,serif;font-size:36pt;font-style:italic;color:#b8892e;margin:7mm 0 3mm;border-bottom:1px solid #d5dbe5;padding:0 14mm 2mm}
+.w{font-family:Newsreader,Georgia,serif;font-size:20pt;font-weight:600;color:#0b1424;max-width:210mm;line-height:1.25;margin:3mm 0 1mm}
+.s{font-size:12pt;color:#5a6478}
+.foot{margin-top:auto;width:100%;display:flex;justify-content:space-between;align-items:flex-end;font-size:10.5pt;color:#5a6478}
+.sig{text-align:left}.sig b{display:block;font-family:Newsreader,Georgia,serif;font-size:16pt;color:#0b1424;font-style:italic;font-weight:500;border-bottom:1px solid #c9d2e0;padding-bottom:1mm;margin-bottom:1mm;min-width:70mm}
+.id{text-align:right}
+.msg{max-width:520px;margin:12vh auto;background:#fff;border-radius:14px;padding:28px;text-align:center}
+@media print{body{background:#fff}.bar{display:none}.sheet{box-shadow:none;margin:0}}
+@media screen and (max-width:1150px){.sheet{transform:scale(calc((100vw - 20px) / 1123));transform-origin:top left;margin:0 10px calc((210mm) * -1 + (100vw - 20px) * 210 / 297 + 20px)}}
+</style>
+</head>
+<body>
+<div id="app"><p class="msg">Loading your certificate…</p></div>
+<script>
+(function(){
+var Q=new URLSearchParams(location.search),app=document.getElementById('app');
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+fetch('/api/webinars?action=cert&r='+encodeURIComponent(Q.get('r')||'')+'&t='+encodeURIComponent(Q.get('t')||'')).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error);return j;});}).then(function(c){
+ var date=new Date(c.starts_at).toLocaleDateString('en-IN',{timeZone:'Asia/Kolkata',day:'numeric',month:'long',year:'numeric'});
+ document.title='Certificate · '+c.name;
+ app.innerHTML='<div class="bar"><button onclick="window.print()">Download as PDF / Print</button><a href="webinars.html">See upcoming webinars</a></div>'+
+ '<div class="sheet"><div class="frame"></div><div class="in"><div class="brand">DUA <span>DESK</span> · WEBINARS</div>'+
+ '<div class="t">Certificate of Attendance</div><div class="k">This is to certify that</div><div class="name">'+esc(c.name)+'</div>'+
+ '<div class="k">attended the webinar</div><div class="w">'+esc(c.title)+'</div><div class="s">'+esc(c.subtitle||'')+'</div>'+
+ '<div class="s" style="margin-top:4mm">held online on '+esc(date)+(c.minutes?' · '+esc(c.minutes)+' minutes attended':'')+(c.cohost?' · in association with '+esc(c.cohost):'')+'</div>'+
+ '<div class="foot"><div class="sig"><b>'+esc(c.speaker||'CA Ashish Dua')+'</b>Speaker, DuaDesk</div><div class="id">Certificate ID: '+esc(c.id)+'<br>duadesk.com/webinars</div></div></div></div>';
+}).catch(function(e){app.innerHTML='<div class="msg"><h2>Certificate not available</h2><p>'+esc(e.message)+'</p><p>Questions? Write to ashish@ashishduacorporation.com</p></div>';});
+})();
+</script>
+</body>
+</html>
