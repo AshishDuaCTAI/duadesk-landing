@@ -151,13 +151,13 @@ function whenIST(iso, w) {
 }
 function ics(w, withLink) {
   if (!w.starts_at) return null;
-  const s = new Date(w.starts_at), e = new Date(s.getTime() + (w.duration_min || 45) * 60000);
+  const s = new Date(w.starts_at), e = new Date(s.getTime() + ((w.duration_min || 45) + 15) * 60000); // 45-minute session + 15 minutes for questions (e.g. 12:30–1:30)
   const f = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
   const fold = l => l.match(/.{1,70}/g).join('\r\n ');
   const txt = s => String(s).replace(/\\/g, '\\\\').replace(/[,;]/g, m => '\\' + m).replace(/\n/g, '\\n');
   const loc = withLink && w.teams_link ? w.teams_link : 'Microsoft Teams (link in your email)';
   return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//DuaDesk//Webinars//EN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
-    `UID:${w.slug}@duadesk.com`, `DTSTAMP:${f(new Date())}`, `DTSTART:${f(s)}`, `DTEND:${f(e)}`,
+    `UID:${w.slug}@duadesk.com`, `SEQUENCE:${Math.max(0, Math.floor((Date.now() - Date.UTC(2026, 0, 1)) / 60000))}`, `DTSTAMP:${f(new Date())}`, `DTSTART:${f(s)}`, `DTEND:${f(e)}`,
     fold(`SUMMARY:${txt('DuaDesk Webinar: ' + w.title)}`), fold(`LOCATION:${txt(loc)}`),
     fold(`DESCRIPTION:${txt((w.subtitle || '') + '\n' + (withLink && w.teams_link ? 'Join: ' + w.teams_link : 'The joining link will be emailed to you.') + '\n' + webinarUrl(w))}`),
     'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
@@ -205,6 +205,18 @@ ${chips(p.id, w, settings)}
   return { subject: `${rt ? 'Invitation' : 'Free webinar'}: ${w.title} (${w.starts_at ? new Date(w.starts_at).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short' }) : 'date TBA'})`, html, text };
 }
 
+// sent when you move a webinar that people have already registered for
+function rescheduleEmail(w, reg, pid, settings) {
+  const rt = w.format === 'roundtable', link = !rt && w.teams_link;
+  const html = shell(`<p style="margin:0 0 14px">Dear ${esc(first(reg.name))},</p>
+<p style="margin:0 0 14px"><b>The date has changed</b> for the session you registered for:</p>
+${h1(w.title)}<p style="margin:0 0 16px">New date and time: <b>${esc(whenIST(w.starts_at, w))}</b> · Microsoft Teams · 45 minutes, with time for questions</p>
+<p style="margin:0 0 16px">You are still registered; there is nothing you need to do. The attached calendar invite replaces the earlier one.</p>
+${link ? `<p style="margin:0 0 16px">${btn(w.teams_link, 'Join on Microsoft Teams')}</p>` : ''}
+<p style="margin:0 0 14px">If the new time doesn't suit you, just reply to this email.</p>
+<p style="margin:18px 0 0">Warm regards,<br><b>CA Ashish Dua</b></p>`, pid, 'You received this because you registered for this session.');
+  return { subject: `New date: ${w.title}`, html, text: `The date has changed for ${w.title}. New date: ${whenIST(w.starts_at, w)}. You are still registered.${link ? '\nJoin: ' + w.teams_link : ''}\n\nCA Ashish Dua` };
+}
 function confirmEmail(w, reg, pid, settings) {
   const rt = w.format === 'roundtable', link = !rt && w.teams_link;
   const share = waLink('', `I’ve registered for “${w.title}” (${whenIST(w.starts_at, w)}), a free 45-minute DuaDesk webinar. Join me: ${webinarUrl(w)}`).replace('https://wa.me/?', 'https://wa.me/?');
@@ -1251,7 +1263,77 @@ const actions4 = {
     catch (e) { if (/speaker/i.test(e.message)) text = await graph(`${base}/${encodeURIComponent(t.id)}/content`, { raw: true, accept: 'application/vnd.microsoft.graph.transcript+text' }); else throw e; }
     return { transcript: text, created: t.createdDateTime };
   },
+  /* ---------- planning: weekly schedule, move earlier/later, delete, tell registrants about a new date ---------- */
+  async schedule_apply(b) {
+    const items = (b.items || []).slice(0, 200);
+    if (!items.length) throw E('Choose at least one webinar.');
+    const out = { updated: 0, unchanged: 0, affected: [], teams_notes: [] };
+    for (let k = 0; k < items.length; k++) {
+      const it = items[k]; const when = new Date(it.starts_at);
+      if (isNaN(when)) throw E('A date is missing or not valid for ' + clean(it.slug, 80));
+      const before = await getW(it.slug);
+      const patch = { n: k + 1 };
+      const moved = !before.starts_at || new Date(before.starts_at).getTime() !== when.getTime();
+      if (moved) { patch.starts_at = when.toISOString(); if (before.starts_at) patch.rescheduled_at = new Date().toISOString(); }
+      const [after] = await sb(`webinars?slug=eq.${encodeURIComponent(before.slug)}`, { method: 'PATCH', body: { ...patch, updated_at: new Date().toISOString() }, prefer: 'return=representation' });
+      if (!moved) { out.unchanged++; continue; }
+      out.updated++;
+      const note = await teamsSync(before, after); if (note) out.teams_notes.push(before.title + ': ' + note);
+      const regs = await registeredCount(before.slug); if (regs && before.starts_at) out.affected.push({ slug: before.slug, title: before.title, registered: regs, starts_at: after.starts_at });
+    }
+    return out;
+  },
+  async swap_dates(b) {
+    const [a, c] = [await getW(b.a), await getW(b.b)];
+    if (!a.starts_at || !c.starts_at) throw E('Both webinars need a date.');
+    const now = new Date().toISOString();
+    const [a2] = await sb(`webinars?slug=eq.${encodeURIComponent(a.slug)}`, { method: 'PATCH', body: { starts_at: c.starts_at, n: c.n, rescheduled_at: now, updated_at: now }, prefer: 'return=representation' });
+    const [c2] = await sb(`webinars?slug=eq.${encodeURIComponent(c.slug)}`, { method: 'PATCH', body: { starts_at: a.starts_at, n: a.n, rescheduled_at: now, updated_at: now }, prefer: 'return=representation' });
+    const notes = [await teamsSync(a, a2), await teamsSync(c, c2)].filter(Boolean);
+    const affected = [];
+    for (const w of [a2, c2]) { const n = await registeredCount(w.slug); if (n) affected.push({ slug: w.slug, title: w.title, registered: n, starts_at: w.starts_at }); }
+    return { ok: true, affected, teams_notes: notes };
+  },
+  async delete_webinar(b) {
+    const w = await getW(b.slug);
+    const regs = (await sb(`registrations?select=id&webinar_slug=eq.${encodeURIComponent(w.slug)}`, { method: 'HEAD', count: true })).total || 0;
+    if (regs) throw E(`${regs} ${regs === 1 ? 'person has' : 'people have'} registered for this webinar, so it can’t be deleted. Set its status to “cancelled” instead: it disappears from the website and their records stay.`, 409);
+    let note = null;
+    if (w.teams_event_id && teamsReady()) {
+      try { await graph(`/users/${encodeURIComponent(MS().organizer)}/events/${encodeURIComponent(w.teams_event_id)}`, { method: 'DELETE' }); note = 'The Teams meeting was removed from your calendar.'; }
+      catch (e) { note = 'Remove the Teams meeting from your calendar yourself (' + e.message + ').'; }
+    }
+    await sb(`webinars?slug=eq.${encodeURIComponent(w.slug)}`, { method: 'DELETE', prefer: 'return=minimal' });
+    return { ok: true, note };
+  },
+  async notify_reschedule(b) {
+    const w = await getW(b.slug); if (!w.starts_at) throw E('This webinar has no date.');
+    const since = w.rescheduled_at || w.updated_at;
+    const settings = await getSettings();
+    const regs = await sbAll(`registrations?select=id,name,email,person_id,created_at,kind&webinar_slug=eq.${encodeURIComponent(w.slug)}&kind=neq.walk_in&order=id.asc`, 20000);
+    const done = new Set((await sbAll(`email_log?select=email&webinar_slug=eq.${encodeURIComponent(w.slug)}&kind=eq.reschedule&status=eq.sent&created_at=gte.${encodeURIComponent(since)}`, 20000)).map(r => r.email));
+    const todo = regs.filter(r => !done.has(r.email));
+    // never to someone who unsubscribed after registering, or whose address bounced or complained
+    const blocked = new Set();
+    for (let i = 0; i < todo.length; i += 100) {
+      const part = todo.slice(i, i + 100);
+      const sup = await sb(`suppression?select=hash,created_at&channel=eq.email&hash=in.(${part.map(r => sha(normEmail(r.email))).join(',')})`);
+      const bySup = Object.fromEntries(sup.map(x => [x.hash, x.created_at]));
+      part.forEach(r => { const t = bySup[sha(normEmail(r.email))]; if (t && t > r.created_at) blocked.add(r.email); });
+      (await sb(`people?select=email&email_status=in.(bounced,complained)&email=in.(${part.map(r => '"' + r.email + '"').join(',')})`)).forEach(p => blocked.add(p.email));
+    }
+    const cal = ics(w, true); let sent = 0, failed = 0; const t0 = Date.now();
+    const list = todo.filter(r => !blocked.has(r.email));
+    for (const r of list) {
+      if (Date.now() - t0 > 45000) break;
+      const okSent = await sendOne(r.email, rescheduleEmail(w, r, r.person_id, settings), r.person_id, { kind: 'reschedule', slug: w.slug, idem: `resched-${w.slug}-${w.starts_at}-${r.email}` },
+        cal ? { attachments: [{ filename: 'invite.ics', content: Buffer.from(cal).toString('base64') }] } : {});
+      okSent ? sent++ : failed++;
+    }
+    return { sent, failed, skipped: blocked.size, more: sent + failed < list.length };
+  },
 };
+async function registeredCount(slug) { return (await sb(`registrations?select=id&webinar_slug=eq.${encodeURIComponent(slug)}&kind=neq.walk_in`, { method: 'HEAD', count: true })).total || 0; }
 
 // called by the daily schedule: fetch attendance from Teams after each webinar (tries for 3 days)
 async function teamsAutoAttendance() {
@@ -1362,9 +1444,12 @@ const actions = {
     const [before] = await sb(`webinars?select=*&slug=eq.${encodeURIComponent(b.slug || '')}`);
     if (!before) throw E('Webinar not found', 404);
     if ('teams_link' in patch && patch.teams_link !== before.teams_link) { patch.teams_meeting_id = null; patch.teams_event_id = null; patch.teams_attendance_at = null; } // a different meeting
+    const moved = 'starts_at' in patch && before.starts_at && patch.starts_at && new Date(patch.starts_at).getTime() !== new Date(before.starts_at).getTime();
+    if (moved) patch.rescheduled_at = new Date().toISOString();
     const rows = await sb(`webinars?slug=eq.${encodeURIComponent(b.slug || '')}`, { method: 'PATCH', body: patch, prefer: 'return=representation' });
     const teams_note = 'teams_link' in patch && patch.teams_link !== before.teams_link ? null : await teamsSync(before, rows[0]);
-    return { webinar: rows[0], teams_note };
+    const registered = moved ? await registeredCount(before.slug) : 0;
+    return { webinar: rows[0], teams_note, moved: !!moved, registered };
   },
   async create(b) {
     const w = pick(b.webinar || {});
@@ -1374,7 +1459,7 @@ const actions = {
     return { webinar: rows[0] };
   },
   async settings_save(b) {
-    const allowed = ['bookings_url', 'whatsapp_number', 'whatsapp_channel_url', 'invites_per_person_per_30_days', 'warm_mode', 'cold_mode', 'daily_warm_cap', 'daily_cold_cap', 'warm_include_unlabelled', 'rocketreach_daily_limit', 'outreach_signature', 'rocketreach_api_key', 'rocketreach_mode', 'rocketreach_auto_daily'];
+    const allowed = ['bookings_url', 'whatsapp_number', 'whatsapp_channel_url', 'invites_per_person_per_30_days', 'warm_mode', 'cold_mode', 'daily_warm_cap', 'daily_cold_cap', 'warm_include_unlabelled', 'rocketreach_daily_limit', 'outreach_signature', 'rocketreach_api_key', 'rocketreach_mode', 'rocketreach_auto_daily', 'slot_weekday', 'slot_time', 'slot_weeks'];
     if (b.settings && b.settings.rocketreach_api_key && /^••••/.test(b.settings.rocketreach_api_key)) delete b.settings.rocketreach_api_key;
     const rows = Object.entries(b.settings || {}).filter(([k]) => allowed.includes(k)).map(([key, value]) => ({ key, value: key === 'outreach_signature' ? String(value).slice(0, 500) : clean(value, 500) }));
     for (const r of rows) if (/_url$/.test(r.key) && r.value && !/^https:\/\//.test(r.value)) throw E(`${r.key} should start with https://`);

@@ -151,13 +151,13 @@ function whenIST(iso, w) {
 }
 function ics(w, withLink) {
   if (!w.starts_at) return null;
-  const s = new Date(w.starts_at), e = new Date(s.getTime() + (w.duration_min || 45) * 60000);
+  const s = new Date(w.starts_at), e = new Date(s.getTime() + ((w.duration_min || 45) + 15) * 60000); // 45-minute session + 15 minutes for questions (e.g. 12:30–1:30)
   const f = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
   const fold = l => l.match(/.{1,70}/g).join('\r\n ');
   const txt = s => String(s).replace(/\\/g, '\\\\').replace(/[,;]/g, m => '\\' + m).replace(/\n/g, '\\n');
   const loc = withLink && w.teams_link ? w.teams_link : 'Microsoft Teams (link in your email)';
   return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//DuaDesk//Webinars//EN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
-    `UID:${w.slug}@duadesk.com`, `DTSTAMP:${f(new Date())}`, `DTSTART:${f(s)}`, `DTEND:${f(e)}`,
+    `UID:${w.slug}@duadesk.com`, `SEQUENCE:${Math.max(0, Math.floor((Date.now() - Date.UTC(2026, 0, 1)) / 60000))}`, `DTSTAMP:${f(new Date())}`, `DTSTART:${f(s)}`, `DTEND:${f(e)}`,
     fold(`SUMMARY:${txt('DuaDesk Webinar: ' + w.title)}`), fold(`LOCATION:${txt(loc)}`),
     fold(`DESCRIPTION:${txt((w.subtitle || '') + '\n' + (withLink && w.teams_link ? 'Join: ' + w.teams_link : 'The joining link will be emailed to you.') + '\n' + webinarUrl(w))}`),
     'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
@@ -205,6 +205,18 @@ ${chips(p.id, w, settings)}
   return { subject: `${rt ? 'Invitation' : 'Free webinar'}: ${w.title} (${w.starts_at ? new Date(w.starts_at).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short' }) : 'date TBA'})`, html, text };
 }
 
+// sent when you move a webinar that people have already registered for
+function rescheduleEmail(w, reg, pid, settings) {
+  const rt = w.format === 'roundtable', link = !rt && w.teams_link;
+  const html = shell(`<p style="margin:0 0 14px">Dear ${esc(first(reg.name))},</p>
+<p style="margin:0 0 14px"><b>The date has changed</b> for the session you registered for:</p>
+${h1(w.title)}<p style="margin:0 0 16px">New date and time: <b>${esc(whenIST(w.starts_at, w))}</b> · Microsoft Teams · 45 minutes, with time for questions</p>
+<p style="margin:0 0 16px">You are still registered; there is nothing you need to do. The attached calendar invite replaces the earlier one.</p>
+${link ? `<p style="margin:0 0 16px">${btn(w.teams_link, 'Join on Microsoft Teams')}</p>` : ''}
+<p style="margin:0 0 14px">If the new time doesn't suit you, just reply to this email.</p>
+<p style="margin:18px 0 0">Warm regards,<br><b>CA Ashish Dua</b></p>`, pid, 'You received this because you registered for this session.');
+  return { subject: `New date: ${w.title}`, html, text: `The date has changed for ${w.title}. New date: ${whenIST(w.starts_at, w)}. You are still registered.${link ? '\nJoin: ' + w.teams_link : ''}\n\nCA Ashish Dua` };
+}
 function confirmEmail(w, reg, pid, settings) {
   const rt = w.format === 'roundtable', link = !rt && w.teams_link;
   const share = waLink('', `I’ve registered for “${w.title}” (${whenIST(w.starts_at, w)}), a free 45-minute DuaDesk webinar. Join me: ${webinarUrl(w)}`).replace('https://wa.me/?', 'https://wa.me/?');

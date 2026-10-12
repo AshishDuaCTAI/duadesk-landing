@@ -137,7 +137,7 @@ tr.row:hover td{background:#111e35}
 <section class="panel" id="p-plan">
  <h1>Plan &amp; timetable</h1>
  <p class="mut small"><b>published</b> = on the website with registration · <b>later</b> = “coming later” · <b>draft</b> = hidden · <b>done</b> = past (recording shown when published). Co-host and facilitator names show publicly only when ticked “confirmed”. The Teams link is never on the website; it goes only to registrants.</p>
- <div class="row-actions"><button class="btn" id="newW">+ Add a webinar</button><span class="mut small" id="sentToday"></span></div>
+ <div class="row-actions"><button class="btn" id="newW">+ Add a webinar</button><button class="btn gold" id="schedW">🗓 Weekly schedule and order</button><span class="mut small" id="sentToday"></span></div>
  <div class="tbl"><table><thead><tr><th>#</th><th>Date (IST)</th><th>Webinar</th><th>Status</th><th>Co-host</th><th>Facilitator</th><th>Teams</th><th>Invited</th><th>Registered</th><th>Attended</th><th>Leads</th><th></th></tr></thead><tbody id="wRows"></tbody></table></div>
 </section>
 
@@ -322,13 +322,14 @@ function renderPlan(){$('wRows').innerHTML=W.map(function(w){var s=w.stats||{};
  '<td>'+(w.cohost_needed?(w.cohost_name?esc(w.cohost_name)+(w.cohost_confirmed?' <span class="y">✓</span>':' <span class="warn">(unconfirmed)</span>'):'<span class="warn">Needed</span><div class="mut small">'+esc(w.cohost_note||'')+'</div>'):'<span class="n">No</span>')+'</td>'+
  '<td>'+(w.facilitator_name?esc(w.facilitator_name)+(w.facilitator_confirmed?' <span class="y">✓</span>':' <span class="warn">(unconfirmed)</span>'):'<span class="warn">To find</span><div class="mut small">'+esc(w.facilitator_note||'')+'</div>')+'</td>'+
  '<td>'+(w.teams_link?'<span class="y">Added</span>':'<span class="warn">Missing</span>')+'</td><td>'+(s.invited||0)+'</td><td>'+(s.registered||0)+'</td><td>'+(s.attended||0)+'</td><td>'+(s.leads||0)+'</td>'+
- '<td><div class="row-actions" style="margin:0"><button class="btn sm" data-edit="'+esc(w.slug)+'">Edit</button><button class="btn sm" data-promo="'+esc(w.slug)+'">Promote</button></div></td></tr>';}).join('');}
+ '<td><div class="row-actions" style="margin:0;flex-wrap:nowrap">'+mvBtns(w)+'<button class="btn sm" data-edit="'+esc(w.slug)+'">Edit</button><button class="btn sm" data-promo="'+esc(w.slug)+'">Promote</button></div></td></tr>';}).join('');}
 function fillSelects(){var o=W.map(function(w){return '<option value="'+esc(w.slug)+'">'+esc((w.starts_at?ist(w.starts_at,{day:'numeric',month:'short'})+' · ':'')+w.title)+' ['+w.status+']</option>';}).join('');
  document.querySelectorAll('.wsel').forEach(function(s){var v=s.value;s.innerHTML=(s.id==='regSel'?'<option value="">All webinars</option>':'')+o;if(v)s.value=v;});}
 document.addEventListener('click',function(e){var b=e.target.closest('[data-edit]');if(b)edit(W.find(function(w){return w.slug===b.dataset.edit;}));});
 $('newW').onclick=function(){edit(null);};
+var CURW=null;
 function edit(w){
- var isNew=!w;w=w||{title:'',status:'draft',series:'business',format:'webinar',agenda:[{min:5,item:'Welcome'},{min:10,item:'The problem'},{min:15,item:'Live demo'},{min:5,item:'Next steps'},{min:10,item:'Questions and answers'}],products:[],cohost_needed:false,speaker:'CA Ashish Dua',registration_open:true};
+ CURW=w||null;var isNew=!w;w=w||{starts_at:nextSlot(),n:(W.reduce(function(m,x){return Math.max(m,+x.n||0);},0)+1),title:'',status:'draft',series:'business',format:'webinar',agenda:[{min:5,item:'Welcome'},{min:10,item:'The problem'},{min:15,item:'Live demo'},{min:5,item:'Next steps'},{min:10,item:'Questions and answers'}],products:[],cohost_needed:false,speaker:'CA Ashish Dua',registration_open:true};
  var has=function(n){return (w.products||[]).some(function(p){return p.name===n;});};
  $('dbox').innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><h1 style="margin:0">'+(isNew?'Add a webinar':'Edit webinar')+'</h1><button class="btn" id="dClose">Close</button></div>'+
  '<form id="ef"><div class="grid" style="margin-top:14px">'+
@@ -353,7 +354,7 @@ function edit(w){
  '<div class="s4"><h2>Who to invite</h2><p class="mut small">Contacts in any ticked group are invited. Cold outreach only goes to these groups; leave all unticked for family topics (warm contacts only).</p>'+SEGS.map(function(g){return '<label class="chk" style="display:inline-flex;margin:0 14px 6px 0"><input type="checkbox" name="seg" value="'+g[0]+'"'+((w.target_segments||[]).indexOf(g[0])>-1?' checked':'')+'> '+esc(g[1])+'</label>';}).join('')+'</div>'+
  '<div><label class="chk"><input type="checkbox" name="drip_on"'+(w.drip_on!==false?' checked':'')+'> Daily invitations on</label></div><div><label>Start inviting (days before)</label><input type="number" name="drip_start_days" min="3" max="60" value="'+esc(w.drip_start_days||28)+'"></div><div><label>Stop inviting (days before)</label><input type="number" name="drip_end_days" min="0" max="30" value="'+(w.drip_end_days==null?5:esc(w.drip_end_days))+'"></div><div></div>'+
  '<div class="s4"><h2>Agenda <span class="mut small" id="agTot"></span></h2><div id="ag"></div><button type="button" class="btn sm" id="agAdd">+ Add item</button></div>'+
- '</div><p class="err small" id="eErr"></p><div class="row-actions"><button class="btn gold" type="submit">Save</button></div></form>';
+ '</div><p class="err small" id="eErr"></p><div class="row-actions"><button class="btn gold" type="submit">Save</button>'+(isNew?'':'<button class="btn red" type="button" id="eDel" style="margin-left:auto">Delete this webinar</button>')+'</div></form>';
  var ag=$('ag');function agRow(a){var d=document.createElement('div');d.className='agrow';d.innerHTML='<input type="number" min="1" value="'+esc(a.min)+'" aria-label="Minutes"><input value="'+esc(a.item)+'" aria-label="Agenda item"><button type="button" class="btn sm" aria-label="Remove">×</button>';d.querySelector('button').onclick=function(){d.remove();tot();};d.querySelector('input').oninput=tot;ag.appendChild(d);}
  function tot(){var t=[].reduce.call(ag.querySelectorAll('.agrow'),function(s,r){return s+(+r.children[0].value||0);},0);$('agTot').innerHTML='Total: <b class="'+(t===45?'y':'warn')+'">'+t+' min</b>';}
  (w.agenda||[]).forEach(agRow);tot();$('agAdd').onclick=function(){agRow({min:5,item:''});tot();};
@@ -366,7 +367,9 @@ function edit(w){
   o.target_segments=[].filter.call(f.querySelectorAll('[name=seg]'),function(c){return c.checked;}).map(function(c){return c.value;});o.drip_on=f.elements.drip_on.checked;o.drip_start_days=+f.elements.drip_start_days.value||28;o.drip_end_days=f.elements.drip_end_days.value===''?5:+f.elements.drip_end_days.value;
   o.agenda=[].map.call(ag.querySelectorAll('.agrow'),function(r){return {min:+r.children[0].value||0,item:r.children[1].value.trim()};}).filter(function(a){return a.item;});
   if(o.status==='published'&&!o.starts_at){$('eErr').textContent='A published webinar needs a date and time.';return;}
-  (isNew?call('create',{webinar:o}):call('save',{slug:w.slug,webinar:o})).then(function(j){if(j&&j.teams_note)alert(j.teams_note);$('drawer').classList.remove('on');loadPlan();}).catch(function(err){$('eErr').textContent=err.message;});};
+  (isNew?call('create',{webinar:o}):call('save',{slug:w.slug,webinar:o})).then(function(j){if(j&&j.teams_note)alert(j.teams_note);$('drawer').classList.remove('on');
+   if(j&&j.moved&&j.registered&&confirm(j.registered+(j.registered===1?' person is':' people are')+' registered for “'+w.title+'”. Email them the new date with an updated calendar invite?'))notifyLoop(w.slug,function(r){alert(r);});
+   loadPlan();}).catch(function(err){$('eErr').textContent=err.message;});};
  var tc=$('tmCreate');if(tc)tc.onclick=function(){if(!w.starts_at){$('tmMsg').textContent='Save a date and time first.';return;}tc.disabled=true;$('tmMsg').textContent='Creating the meeting in Teams…';
   call('teams_create',{slug:w.slug}).then(function(j){document.querySelector('#dbox [name=teams_link]').value=j.teams_link;w.teams_link=j.teams_link;$('tmMsg').innerHTML='<span class="y">Created and saved.</span> It is in your Outlook calendar.'+(j.notes.length?' <span class="warn">'+esc(j.notes.join(' '))+'</span>':'');tc.remove();})
   .catch(function(e){tc.disabled=false;$('tmMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';});};
@@ -695,6 +698,61 @@ function rrDoReveal(){var ids=rrTicked();if(!ids.length){$('rrRMsg').textContent
  call('rr_reveal',{ids:ids}).then(function(j){btn.disabled=false;$('rrRMsg').innerHTML='<span class="y">'+j.added+' added as cold contacts</span>'+(j.no_email?' · '+j.no_email+' without a good work email':'')+(j.duplicate?' · '+j.duplicate+' already in your data':'')+(j.blocked?' · '+j.blocked+' kept blocked (unsubscribed earlier)':'')+(j.left_for_later?' · '+j.left_for_later+' left for later (limit or time)':'')+' · '+j.remaining_today+' reveals left today'+(j.errors.length?'<div class="err">'+esc(j.errors[0])+'</div>':'');rrList();})
  .catch(function(e){btn.disabled=false;$('rrRMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';});}
 
+
+/* ---------- planning: weekly slot, order, move earlier/later, delete ---------- */
+function slotCfg(){return {wd:+(SET.slot_weekday||4),t:SET.slot_time||'12:30',wk:+(SET.slot_weeks||1)};}
+var DAYN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+function istDay(ms){return new Date(ms+330*60000);} // a Date whose UTC fields show the Indian clock
+function ymd(d){return d.toISOString().slice(0,10);}
+function slotIso(dateStr,t){return dateStr+'T'+t+':00+05:30';}
+function firstSlotFrom(ms,wd){var d=istDay(ms);while(d.getUTCDay()!==wd)d=new Date(d.getTime()+864e5);return ymd(d);}
+// the next free slot after your latest scheduled webinar (for “+ Add a webinar”)
+function nextSlot(){var c=slotCfg(),dated=W.filter(function(w){return w.starts_at&&['published','draft'].indexOf(w.status)>-1;}).map(function(w){return new Date(w.starts_at).getTime();});
+ var base=dated.length?Math.max.apply(null,dated)+c.wk*7*864e5-864e5:Date.now()+7*864e5;return slotIso(firstSlotFrom(Math.max(base,Date.now()+864e5),c.wd),c.t);}
+function mvBtns(w){if(w.status!=='published'||!w.starts_at)return '';var L=W.filter(function(x){return x.status==='published'&&x.starts_at;}),i=L.indexOf(w);
+ return (i>0?'<button class="btn sm" title="Move earlier (swap dates with the one before)" aria-label="Move earlier" data-mv="'+esc(L[i-1].slug)+'" data-me="'+esc(w.slug)+'">↑</button>':'')+(i<L.length-1?'<button class="btn sm" title="Move later (swap dates with the one after)" aria-label="Move later" data-mv="'+esc(L[i+1].slug)+'" data-me="'+esc(w.slug)+'">↓</button>':'');}
+document.addEventListener('click',function(e){var b=e.target.closest('[data-mv]');if(!b)return;b.disabled=true;
+ call('swap_dates',{a:b.dataset.me,b:b.dataset.mv}).then(function(j){afterMove(j);loadPlan();}).catch(function(err){alert(err.message);b.disabled=false;});});
+function afterMove(j){(j.teams_notes||[]).forEach(function(n){console.log(n);});
+ (j.affected||[]).forEach(function(a){if(confirm(a.registered+(a.registered===1?' person is':' people are')+' registered for “'+a.title+'”, now on '+ist(a.starts_at)+'. Email them the new date with an updated calendar invite?'))notifyLoop(a.slug,function(r){alert(r);});});}
+function notifyLoop(slug,done){var tot=0,skip=0;(function go(){call('notify_reschedule',{slug:slug}).then(function(j){tot+=j.sent;skip=j.skipped;if(j.more&&j.sent)go();else done('New-date email sent to '+tot+' registrant'+(tot===1?'':'s')+(skip?' ('+skip+' unsubscribed, not emailed)':'')+(j.failed?'; '+j.failed+' failed (see Resend)':'')+'.');}).catch(function(e){done(e.message);});})();}
+document.addEventListener('click',function(e){var b=e.target.closest('#eDel');if(!b)return;var slug=b.closest('form')&&CURW?CURW.slug:null;if(!slug)return;
+ if(!confirm('Delete “'+CURW.title+'” permanently? This cannot be undone.'))return;
+ call('delete_webinar',{slug:slug}).then(function(j){$('drawer').classList.remove('on');if(j.note)alert(j.note);loadPlan();}).catch(function(err){$('eErr').textContent=err.message;});});
+$('schedW').onclick=function(){
+ var c=slotCfg(),L=W.filter(function(w){return w.status==='published';}).concat(W.filter(function(w){return w.status==='draft';}));
+ var rows=L.map(function(w){return {slug:w.slug,title:w.title,status:w.status,old:w.starts_at,inc:w.status==='published',reg:(w.stats||{}).registered||0};});
+ var first=firstSlotFrom(Date.now()+7*864e5,c.wd);
+ $('dbox').innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h1 style="margin:0">Weekly schedule and order</h1><button class="btn" id="dClose">Close</button></div>'+
+ '<p class="mut">Give the ticked webinars one slot a week, in the order shown. Use ↑ ↓ to change the order, untick to leave a webinar’s date as it is. Nothing changes until you press <b>Apply</b>.</p>'+
+ '<div class="card"><div class="grid"><div><label>First date</label><input type="date" id="scD" value="'+first+'"><div class="small mut" id="scDay"></div></div><div><label>Time (IST)</label><input type="time" id="scT" value="'+esc(c.t)+'"></div>'+
+ '<div><label>Repeat</label><select id="scW"><option value="1"'+(c.wk===1?' selected':'')+'>Every week</option><option value="2"'+(c.wk===2?' selected':'')+'>Every 2 weeks</option></select></div>'+
+ '<div><label>Skip these dates</label><input id="scS" placeholder="e.g. 24-12-2026, 31-12-2026"></div>'+
+ '<div class="s4"><label class="chk"><input type="checkbox" id="scR" checked> Remember this day, time and repeat as my usual slot (used for new webinars)</label><p class="small mut" style="margin:4px 0 0">Calendar invites block 45 minutes plus 15 minutes for questions (for example 12:30–1:30 PM).</p></div></div></div>'+
+ '<div class="tbl" style="max-height:56vh"><table><thead><tr><th></th><th>Order</th><th>Webinar</th><th>Now</th><th>New date</th></tr></thead><tbody id="scRows"></tbody></table></div>'+
+ '<div class="row-actions"><button class="btn gold" id="scGo">Apply this schedule</button><span class="small" id="scMsg"></span></div><div id="scOut"></div>';
+ $('dClose').onclick=function(){$('drawer').classList.remove('on');};$('drawer').classList.add('on');
+ function skips(){return $('scS').value.split(/[,;\s]+/).map(function(x){var m=x.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})$/);if(m)return m[3]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[1]).slice(-2);return /^\d{4}-\d{2}-\d{2}$/.test(x)?x:null;}).filter(Boolean);}
+ function plan(){var d0=$('scD').value;if(!d0)return [];var step=+$('scW').value*7*864e5,sk=skips(),t=$('scT').value||'12:30',cur=Date.parse(d0+'T00:00:00Z'),out={};
+  rows.forEach(function(r){if(!r.inc)return;while(sk.indexOf(new Date(cur).toISOString().slice(0,10))>-1)cur+=step;out[r.slug]=slotIso(new Date(cur).toISOString().slice(0,10),t);cur+=step;});return out;}
+ function draw(){var P=plan(),d0=$('scD').value;$('scDay').textContent=d0?DAYN[new Date(d0+'T00:00:00Z').getUTCDay()]+'s':'';
+  $('scRows').innerHTML=rows.map(function(r,i){return '<tr class="row"><td><input type="checkbox" data-sci="'+i+'"'+(r.inc?' checked':'')+' aria-label="Include"></td><td style="white-space:nowrap"><button class="btn sm" data-scu="'+i+'"'+(i?'':' disabled')+' aria-label="Move up">↑</button><button class="btn sm" data-scd="'+i+'"'+(i<rows.length-1?'':' disabled')+' aria-label="Move down">↓</button></td>'+
+   '<td><b>'+esc(r.title)+'</b> <span class="pill st-'+esc(r.status)+'">'+esc(r.status)+'</span>'+(r.reg?' <span class="warn small">'+r.reg+' registered</span>':'')+'</td><td class="small">'+esc(r.old?ist(r.old,{weekday:'short',day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true}):'—')+'</td><td class="small">'+(P[r.slug]?'<b>'+esc(ist(P[r.slug],{weekday:'short',day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true}))+'</b>':'<span class="mut">unchanged</span>')+'</td></tr>';}).join('');}
+ ['scD','scT','scW','scS'].forEach(function(id){$(id).oninput=draw;$(id).onchange=draw;});
+ $('scRows').onclick=function(e){var u=e.target.closest('[data-scu]'),d=e.target.closest('[data-scd]'),x=e.target.closest('[data-sci]');
+  if(u){var i=+u.dataset.scu;rows.splice(i-1,0,rows.splice(i,1)[0]);draw();}if(d){var k=+d.dataset.scd;rows.splice(k+1,0,rows.splice(k,1)[0]);draw();}if(x){rows[+x.dataset.sci].inc=x.checked;draw();}};
+ draw();
+ $('scGo').onclick=function(){var P=plan(),items=rows.filter(function(r){return r.inc&&P[r.slug];}).map(function(r){return {slug:r.slug,starts_at:P[r.slug]};});
+  if(!items.length){$('scMsg').textContent='Tick at least one webinar.';return;}
+  if(!confirm('Give '+items.length+' webinars their new dates?'))return;var btn=this;btn.disabled=true;$('scMsg').textContent='Saving…';
+  var save=$('scR').checked?call('settings_save',{settings:{slot_weekday:String(new Date($('scD').value+'T00:00:00Z').getUTCDay()),slot_time:$('scT').value||'12:30',slot_weeks:$('scW').value}}):Promise.resolve();
+  save.then(function(j){if(j&&j.settings)SET=j.settings;return call('schedule_apply',{items:items});}).then(function(j){btn.disabled=false;
+   $('scMsg').innerHTML='<span class="y">Done: '+j.updated+' webinar'+(j.updated===1?'':'s')+' moved'+(j.unchanged?', '+j.unchanged+' already on the right date':'')+'.</span> The website and the “Free webinar” bar show the new dates now.';
+   $('scOut').innerHTML=(j.affected.length?'<div class="card"><h3>People already registered</h3><p class="small mut">Send them the new date with an updated calendar invite.</p>'+j.affected.map(function(a){return '<div class="row-actions"><b>'+esc(a.title)+'</b> · '+a.registered+' registered<button class="btn sm gold" data-nf="'+esc(a.slug)+'">Email them the new date</button><span class="small" id="nf-'+esc(a.slug)+'"></span></div>';}).join('')+'</div>':'')+
+    (j.teams_notes.length?'<p class="small mut">'+j.teams_notes.map(esc).join('<br>')+'</p>':'');
+   loadPlan();}).catch(function(e){btn.disabled=false;$('scMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';});};
+ $('scOut').onclick=function(e){var b=e.target.closest('[data-nf]');if(!b)return;b.disabled=true;notifyLoop(b.dataset.nf,function(r){document.getElementById('nf-'+b.dataset.nf).textContent=r;});};
+};
 /* ---------- promote ---------- */
 document.addEventListener('click',function(e){var b=e.target.closest('[data-promo]');if(b)promo(W.find(function(w){return w.slug===b.dataset.promo;}));});
 function promo(w){var base=location.origin,url=base+'/webinars.html#'+w.slug,when=w.starts_at?new Date(w.starts_at).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',weekday:'long',day:'numeric',month:'long',hour:'numeric',minute:'2-digit',hour12:true})+' IST':'';
