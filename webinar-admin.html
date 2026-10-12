@@ -139,7 +139,7 @@ tr.row:hover td{background:#111e35}
 <section class="panel" id="p-plan">
  <h1>Plan &amp; timetable</h1>
  <p class="mut small"><b>published</b> = on the website with registration · <b>later</b> = “coming later” · <b>draft</b> = hidden · <b>done</b> = past (recording shown when published). Co-host and facilitator names show publicly only when ticked “confirmed”. The Teams link is never on the website; it goes only to registrants.</p>
- <div class="row-actions"><button class="btn" id="newW">+ Add a webinar</button><button class="btn gold" id="schedW">🗓 Weekly schedule and order</button><button class="btn" id="posterW">🖼 Schedule poster (PNG / PDF)</button><span class="mut small" id="sentToday"></span></div>
+ <div class="row-actions"><button class="btn" id="newW">+ Add a webinar</button><button class="btn gold" id="schedW">🗓 Weekly schedule and order</button><button class="btn" id="posterW">🖼 Schedule poster (PNG / PDF)</button><button class="btn" id="postersAll">🖼 Posters for each webinar</button><span class="mut small" id="sentToday"></span></div>
  <div class="tbl"><table><thead><tr><th>#</th><th>Date (IST)</th><th>Webinar</th><th>Status</th><th>Co-host</th><th>Facilitator</th><th>Teams</th><th>Invited</th><th>Registered</th><th>Attended</th><th>Leads</th><th></th></tr></thead><tbody id="wRows"></tbody></table></div>
 </section>
 
@@ -319,7 +319,7 @@ document.querySelectorAll('.tab').forEach(function(t){t.onclick=function(){docum
 /* ---------- plan ---------- */
 function loadPlan(){return call('list').then(function(j){W=j.webinars;SET=j.settings||{};$('sentToday').textContent='Emails sent today: '+j.sent_today;renderPlan();fillSelects();});}
 function renderPlan(){$('wRows').innerHTML=W.map(function(w){var s=w.stats||{};
- return '<tr class="row"><td>'+esc(w.n||'')+'</td><td>'+esc(ist(w.starts_at))+'</td><td><b>'+esc(w.title)+'</b><div class="mut small">'+esc((w.products||[]).map(function(p){return p.name;}).join(', '))+(w.recording_published?' · <span class="y">recording live</span>':'')+'</div></td>'+
+ return '<tr class="row"><td>'+esc(w.n||'')+'</td><td>'+esc(ist(w.starts_at))+'</td><td><b>'+esc(w.title)+'</b><div class="mut small">'+esc((w.products||[]).map(function(p){return p.name;}).join(', '))+(w.recording_published?' · <span class="y">recording live</span>':'')+filesLine(w)+'</div></td>'+
  '<td><span class="pill st-'+esc(w.status)+'">'+esc(w.status)+'</span></td>'+
  '<td>'+(w.cohost_needed?(w.cohost_name?esc(w.cohost_name)+(w.cohost_confirmed?' <span class="y">✓</span>':' <span class="warn">(unconfirmed)</span>'):'<span class="warn">Needed</span><div class="mut small">'+esc(w.cohost_note||'')+'</div>'):'<span class="n">No</span>')+'</td>'+
  '<td>'+(w.facilitator_name?esc(w.facilitator_name)+(w.facilitator_confirmed?' <span class="y">✓</span>':' <span class="warn">(unconfirmed)</span>'):'<span class="warn">To find</span><div class="mut small">'+esc(w.facilitator_note||'')+'</div>')+'</td>'+
@@ -341,7 +341,7 @@ function edit(w){
  '<div><label>Series</label><select name="series">'+[['business','Business & Professional'],['family','Life & Family'],['roundtable','Roundtable']].map(function(s){return '<option value="'+s[0]+'"'+(w.series===s[0]?' selected':'')+'>'+s[1]+'</option>';}).join('')+'</select></div>'+
  '<div><label>Format</label><select name="format"><option value="webinar"'+(w.format==='webinar'?' selected':'')+'>Public webinar</option><option value="roundtable"'+(w.format==='roundtable'?' selected':'')+'>Invitation-only roundtable</option></select></div>'+
  '<div><label>Order #</label><input type="number" name="n" value="'+esc(w.n||'')+'"></div><div class="s2"><label class="chk"><input type="checkbox" name="registration_open"'+(w.registration_open!==false?' checked':'')+'> Registration open</label></div>'+
- '<div class="s4"><label>Microsoft Teams link (sent only to registrants)</label><input name="teams_link" placeholder="https://teams.microsoft.com/l/meetup-join/..." value="'+esc(w.teams_link)+'">'+(!isNew&&!w.teams_link?'<div class="row-actions"><button class="btn sm" type="button" id="tmCreate">Create the Teams meeting for me</button><span class="small mut" id="tmMsg">Adds it to your Outlook calendar with webinar settings (guests skip the lobby, join muted, recording and transcript start automatically).</span></div>':'')+'</div>'+
+ '<div class="s4"><label>Microsoft Teams link (sent only to registrants)</label><input name="teams_link" placeholder="https://teams.microsoft.com/l/meetup-join/..." value="'+esc(w.teams_link)+'">'+(!isNew&&!w.teams_link?'<div class="row-actions"><button class="btn sm" type="button" id="tmCreate">Create the Teams meeting for me</button><span class="small mut" id="tmMsg">Adds it to your Outlook calendar with webinar settings (guests skip the lobby, join muted, recording and transcript start automatically).</span></div>':'')+'</div>'+(isNew?'':'<div class="s4" id="fBox"></div>')+
  '<div class="s4"><label>Who it’s for</label><input name="audience" value="'+esc(w.audience)+'"></div><div class="s4"><label>Short description</label><textarea name="summary">'+esc(w.summary)+'</textarea></div>'+
  '<div class="s2"><label>Speaker</label><input name="speaker" value="'+esc(w.speaker||'CA Ashish Dua')+'"></div><div class="s2"><label>Public note (optional)</label><input name="note" value="'+esc(w.note)+'"></div>'+
  '<div class="s4"><h2>Co-host</h2></div><div><label class="chk"><input type="checkbox" name="cohost_needed"'+(w.cohost_needed?' checked':'')+'> Co-host needed</label></div>'+
@@ -373,8 +373,9 @@ function edit(w){
    if(j&&j.moved&&j.registered&&confirm(j.registered+(j.registered===1?' person is':' people are')+' registered for “'+w.title+'”. Email them the new date with an updated calendar invite?'))notifyLoop(w.slug,function(r){alert(r);});
    loadPlan();}).catch(function(err){$('eErr').textContent=err.message;});};
  var tc=$('tmCreate');if(tc)tc.onclick=function(){if(!w.starts_at){$('tmMsg').textContent='Save a date and time first.';return;}tc.disabled=true;$('tmMsg').textContent='Creating the meeting in Teams…';
-  call('teams_create',{slug:w.slug}).then(function(j){document.querySelector('#dbox [name=teams_link]').value=j.teams_link;w.teams_link=j.teams_link;$('tmMsg').innerHTML='<span class="y">Created and saved.</span> It is in your Outlook calendar.'+(j.notes.length?' <span class="warn">'+esc(j.notes.join(' '))+'</span>':'');tc.remove();})
+  call('teams_create',{slug:w.slug}).then(function(j){document.querySelector('#dbox [name=teams_link]').value=j.teams_link;w.teams_link=j.teams_link;$('tmMsg').innerHTML='<span class="y">Created and saved.</span> It is in your Outlook calendar'+(w.files_out&&(w.files_out.deck||w.files_out.poster_png)?', with the slides and poster attached.':'.')+(j.notes.length?' <span class="warn">'+esc(j.notes.join(' '))+'</span>':'');tc.remove();})
   .catch(function(e){tc.disabled=false;$('tmMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';});};
+ if(!isNew)renderFiles(w);
  $('drawer').classList.add('on');}
 $('drawer').addEventListener('click',function(e){if(e.target.id==='drawer')$('drawer').classList.remove('on');});
 
@@ -806,6 +807,82 @@ function drawPoster(c,items,o){var x=c.getContext('2d'),Wd=c.width,Hd=c.height,s
  else{x.fillStyle='#a9b4c7';x.font='500 '+(20*s)+'px Inter, Arial';x.fillText('Register free: duadesk.com/webinars  ·  CA Ashish Dua  ·  +91 98995 73717',pad,Hd-34*s);links.push({x:pad,y:Hd-60*s,w:Wd-pad*2,h:40*s,url:siteBase()+'/webinars.html'});}
  return {shown:shown.length,links:links};}
 function loadJsPDF(){return window.jspdf?Promise.resolve():new Promise(function(res,rej){var sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';sc.onload=res;sc.onerror=function(){rej(new Error('Could not load the PDF tool. Check your internet connection and try again.'));};document.head.appendChild(sc);});}
+/* ---------- files for each webinar: presentation (upload, replace) and poster (PNG + PDF), v3.6 ---------- */
+function fileSize(n){n=+n||0;return n>1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB';}
+function filesLine(w){var f=w.files_out||{},o=[];if(f.deck)o.push('📑 slides');if(f.poster_png)o.push(f.poster_png.current?'🖼 poster':'<span class="warn">🖼 poster out of date</span>');return o.length?' · '+o.join(' · '):'';}
+function setFilesOut(slug,files,share){var x=W.find(function(v){return v.slug===slug;});if(x){x.files_out=files;if(share)x.deck_share=share;}if(CURW&&CURW.slug===slug){CURW.files_out=files;if(share)CURW.deck_share=share;}renderPlan();}
+// upload straight to storage (no size limit from the website), then record it on the webinar
+function uploadFile(slug,kind,blob,name,prog,attach){return call('file_upload_url',{slug:slug,kind:kind,filename:name,size:blob.size}).then(function(j){return new Promise(function(res,rej){
+ var fd=new FormData();fd.append('cacheControl','3600');fd.append('',blob,name);var x=new XMLHttpRequest();x.open('PUT',j.upload_url);x.setRequestHeader('x-upsert','false');
+ if(prog)x.upload.onprogress=function(e){if(e.lengthComputable)prog(e.loaded/e.total);};
+ x.onload=function(){if(x.status>=200&&x.status<300)res(j.path);else rej(new Error('Upload failed ('+x.status+'). '+(x.responseText||'').slice(0,160)));};
+ x.onerror=function(){rej(new Error('Upload failed. Check your connection and try again.'));};x.send(fd);});})
+ .then(function(path){return call('file_save',{slug:slug,kind:kind,path:path,name:name,size:blob.size,attach:attach!==false});});}
+// one poster for one webinar: date, title, what it covers, agenda, speakers and a QR code to register
+function drawWebinarPoster(c,w){var x=c.getContext('2d'),Wd=c.width,Hd=c.height,s=Wd/1080,pad=72*s,links=[],rt=w.format==='roundtable';
+ var g=x.createLinearGradient(0,0,0,Hd);g.addColorStop(0,'#0b1424');g.addColorStop(1,'#060d18');x.fillStyle=g;x.fillRect(0,0,Wd,Hd);
+ var rg=x.createRadialGradient(Wd*0.9,Hd*0.03,10,Wd*0.9,Hd*0.03,Wd*0.62);rg.addColorStop(0,'rgba(214,174,85,.30)');rg.addColorStop(1,'rgba(214,174,85,0)');x.fillStyle=rg;x.fillRect(0,0,Wd,Hd);
+ x.fillStyle='#d6ae55';x.fillRect(0,0,Wd,8*s);x.textBaseline='alphabetic';x.textAlign='left';
+ var footH=214*s,limit=Hd-footH-24*s,y=pad+20*s,cw=Wd-pad*2;
+ x.fillStyle='#d6ae55';x.font='800 '+(22*s)+'px Inter, Arial';x.fillText(rt?'DUA DESK  ·  PRIVATE ROUNDTABLE':'DUA DESK  ·  FREE WEBINAR',pad,y);
+ if(w.starts_at){var st=new Date(w.starts_at),en=new Date(st.getTime()+(((+w.duration_min||45)+15)*60000)),tm=function(d){return istFmt(d.toISOString(),{hour:'numeric',minute:'2-digit',hour12:true}).toUpperCase();};
+  y+=62*s;x.fillStyle='#f0d18a';x.font='800 '+(34*s)+'px Inter, Arial';x.fillText(istFmt(w.starts_at,{weekday:'long',day:'numeric',month:'long',year:'numeric'}).toUpperCase(),pad,y);
+  y+=42*s;x.fillStyle='#c9d4e2';x.font='500 '+(26*s)+'px Inter, Arial';x.fillText(tm(st)+' – '+tm(en)+' IST  ·  Live on Microsoft Teams'+(rt?'':'  ·  Free'),pad,y);}
+ y+=40*s;x.fillStyle='#d6ae55';x.fillRect(pad,y,90*s,4*s);
+ y+=92*s;x.fillStyle='#f8f3e8';x.font='600 '+(78*s)+'px Newsreader, Georgia, serif';wrapLines(x,w.title,cw,3).forEach(function(l){x.fillText(l,pad,y);y+=86*s;});
+ if(w.subtitle){y+=4*s;x.fillStyle='#f0d18a';x.font='italic 500 '+(32*s)+'px Newsreader, Georgia, serif';wrapLines(x,w.subtitle,cw,2).forEach(function(l){x.fillText(l,pad,y);y+=42*s;});}
+ var ag=(w.agenda||[]).filter(function(a){return a.item;}).slice(0,6),agH=ag.length?(70+ag.length*44)*s:0;
+ var ppl=['CA Ashish Dua, Founder, DuaDesk'];if(w.cohost_confirmed&&w.cohost_name)ppl.push('with '+w.cohost_name+(w.facilitator_confirmed&&w.facilitator_name===w.cohost_name?' (co-host and facilitator)':' (co-host)'));
+ if(w.facilitator_confirmed&&w.facilitator_name&&w.facilitator_name!==w.cohost_name)ppl.push('Facilitator: '+w.facilitator_name);
+ var demo=(w.products||[]).length?'Live demo: '+w.products.map(function(p){return p.name;}).join(', '):'';
+ var tailH=(ppl.length*36+(demo?40:0)+30)*s;
+ if(w.summary){y+=24*s;x.font='400 '+(25*s)+'px Inter, Arial';var room=Math.floor((limit-y-agH-tailH-30*s)/(35*s)),sl=room>0?wrapLines(x,w.summary,cw,Math.min(4,room)):[];x.fillStyle='#c9d4e2';sl.forEach(function(l){x.fillText(l,pad,y+8*s);y+=35*s;});}
+ if(ag.length&&y+agH+tailH+30*s<=limit){y+=34*s;rr(x,pad,y,cw,agH-16*s,18*s);x.fillStyle='rgba(19,32,58,.92)';x.fill();x.strokeStyle='rgba(214,174,85,.3)';x.lineWidth=1.5*s;x.stroke();
+  var ay=y+44*s;x.fillStyle='#d6ae55';x.font='800 '+(18*s)+'px Inter, Arial';x.fillText('IN '+((+w.duration_min||45))+' MINUTES, THEN YOUR QUESTIONS',pad+28*s,ay);ay+=44*s;
+  ag.forEach(function(a){x.fillStyle='#d6ae55';x.font='800 '+(21*s)+'px Inter, Arial';x.fillText(a.min+' min',pad+28*s,ay);x.fillStyle='#f8f3e8';x.font='500 '+(23*s)+'px Inter, Arial';wrapLines(x,a.item,cw-170*s,1).forEach(function(l){x.fillText(l,pad+130*s,ay);});ay+=44*s;});y+=agH-16*s;}
+ y+=46*s;ppl.forEach(function(p,i){x.fillStyle=i?'#c9d4e2':'#f8f3e8';x.font=(i?'500 ':'700 ')+(25*s)+'px Inter, Arial';x.fillText(p,pad,y);y+=36*s;});
+ if(demo){x.fillStyle='#f0d18a';x.font='700 '+(23*s)+'px Inter, Arial';wrapLines(x,demo,cw,1).forEach(function(l){x.fillText(l,pad,y+4*s);});}
+ var url=siteBase()+'/webinars.html#'+w.slug,fy=Hd-footH+10*s,q=qrCanvas(url,170*s);
+ x.strokeStyle='rgba(214,174,85,.35)';x.lineWidth=1.5*s;x.beginPath();x.moveTo(pad,fy);x.lineTo(Wd-pad,fy);x.stroke();
+ if(q){x.fillStyle='#fff';rr(x,Wd-pad-176*s,fy+18*s,176*s,176*s,10*s);x.fill();x.drawImage(q,Wd-pad-173*s,fy+21*s,170*s,170*s);}
+ x.fillStyle='#d6ae55';x.font='800 '+(20*s)+'px Inter, Arial';x.fillText(rt?'REQUEST A SEAT':'REGISTER FREE',pad,fy+58*s);
+ x.fillStyle='#f8f3e8';x.font='700 '+(40*s)+'px Inter, Arial';x.fillText('duadesk.com/webinars',pad,fy+108*s);
+ x.fillStyle='#a9b4c7';x.font='500 '+(21*s)+'px Inter, Arial';x.fillText('CA Ashish Dua  ·  +91 98995 73717  ·  ashish@ashishduacorporation.com',pad,fy+148*s);x.fillText('Scan the code or click to register',pad,fy+180*s);
+ links.push({x:0,y:0,w:Wd,h:fy,url:url},{x:pad,y:fy+20*s,w:Wd-pad*2,h:footH-30*s,url:url});return {links:links};}
+function posterFonts(){return document.fonts&&document.fonts.load?Promise.all([document.fonts.load('600 40px Newsreader'),document.fonts.load('italic 500 30px Newsreader'),document.fonts.load('800 20px Inter'),document.fonts.load('500 20px Inter')]).catch(function(){}):Promise.resolve();}
+function makePosters(w,prog){var base=(w.title||'webinar').replace(/[^\w ]+/g,'').trim().replace(/\s+/g,'-').slice(0,60);
+ return Promise.all([posterFonts(),loadJsPDF()]).then(function(){
+  var c=document.createElement('canvas');c.width=1080;c.height=1350;drawWebinarPoster(c,w);
+  var a=document.createElement('canvas');a.width=1240;a.height=1754;var r=drawWebinarPoster(a,w);
+  var pdf=new window.jspdf.jsPDF({unit:'pt',format:'a4',orientation:'portrait'}),pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight(),k=pw/1240;
+  pdf.addImage(a.toDataURL('image/jpeg',0.92),'JPEG',0,0,pw,ph);r.links.forEach(function(l){pdf.link(l.x*k,l.y*k,l.w*k,l.h*k,{url:l.url});});
+  pdf.setProperties({title:w.title,subject:'DuaDesk webinar',author:'CA Ashish Dua'});
+  return new Promise(function(res){c.toBlob(function(png){res({png:png,pdf:pdf.output('blob'),preview:c.toDataURL('image/png')});},'image/png');});})
+ .then(function(b){return uploadFile(w.slug,'poster_png',b.png,base+'.png',prog&&function(p){prog(p/2);},false).then(function(){return uploadFile(w.slug,'poster_pdf',b.pdf,base+'.pdf',prog&&function(p){prog(.5+p/2);},true);});});}
+function renderFiles(w){var box=$('fBox');if(!box)return;var f=w.files_out||{},share=w.deck_share||'after';
+ box.innerHTML='<h2>Presentation and poster</h2>'+
+ '<div class="card" style="margin:0 0 10px"><b>Presentation</b> &nbsp;'+(f.deck?'<a href="'+esc(f.deck.download)+'">'+esc(f.deck.name)+'</a> <span class="mut small">('+fileSize(f.deck.size)+', uploaded '+esc(ist(f.deck.at))+')</span>':'<span class="mut">none yet</span>')+
+ '<div class="row-actions"><label class="btn sm" style="cursor:pointer">'+(f.deck?'⬆ Upload a new version':'⬆ Upload the presentation')+'<input type="file" id="fDeck" accept=".pptx,.ppt,.pdf,.key,.odp" hidden></label>'+(f.deck?'<button class="btn sm" type="button" id="fDeckDel">Remove</button>':'')+
+ '<label class="small" style="display:inline-flex;align-items:center;gap:6px;margin:0 0 0 auto">Share the slides <select id="fShare" style="width:auto"><option value="no">Only me</option><option value="after">After the session (with the recording)</option><option value="before">Also before (confirmation and reminder emails)</option></select></label></div>'+
+ '<div class="bar" style="margin-top:6px"><i id="fProg" style="width:0"></i></div></div>'+
+ '<div class="card" style="margin:0;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">'+(f.poster_png?'<img src="'+esc(f.poster_png.url)+'" alt="Poster" style="width:120px;border-radius:8px;border:1px solid var(--line)">':'')+
+ '<div style="flex:1;min-width:220px"><b>Poster for this webinar</b> &nbsp;'+(f.poster_png?(f.poster_png.current?'<span class="y">up to date</span>':'<span class="warn">out of date: the date or title changed, so it is no longer sent. Make it again.</span>'):'<span class="mut">not made yet</span>')+
+ '<div class="row-actions"><button class="btn sm gold" type="button" id="fPoster">'+(f.poster_png?'🖼 Make the poster again':'🖼 Make the poster (PNG + PDF)')+'</button>'+(f.poster_png?'<a class="btn sm" href="'+esc(f.poster_png.download)+'">Download PNG</a>':'')+(f.poster_pdf?'<a class="btn sm" href="'+esc(f.poster_pdf.download)+'">Download PDF</a>':'')+'</div>'+
+ '<p class="small mut" style="margin:6px 0 0">Made from the saved details (save first if you changed anything). Shared as a link in invitations and confirmations and on the website, for people to forward.</p></div></div>'+
+ '<p class="small mut" id="fMsg">'+(w.teams_link?'The slides and poster are also attached to the Teams meeting in your calendar, for your co-host and facilitator.':'Once the Teams meeting is created, the slides and poster are attached to it too.')+'</p>';
+ $('fShare').value=share;
+ var msg=function(h){$('fMsg').innerHTML=h;},done=function(j,what){setFilesOut(w.slug,j.files,j.deck_share);renderFiles(CURW||w);msg('<span class="y">'+what+'</span>'+(j.notes&&j.notes.length?' <span class="warn">'+esc(j.notes.join(' '))+'</span>':''));},fail=function(e){msg('<span class="err">'+esc(e.message)+'</span>');};
+ $('fShare').onchange=function(){var v=this.value;call('file_share',{slug:w.slug,deck_share:v}).then(function(){var x=W.find(function(o){return o.slug===w.slug;});if(x)x.deck_share=v;w.deck_share=v;msg('<span class="y">Saved.</span> '+({no:'Only you can download the slides.',after:'The slides go out with the recording after the session.',before:'The slides are in the confirmation and reminder emails, and after the session.'})[v]);}).catch(fail);};
+ $('fDeck').onchange=function(){var file=this.files[0];if(!file)return;msg('Uploading '+esc(file.name)+'…');
+  uploadFile(w.slug,'deck',file,file.name,function(p){$('fProg').style.width=(p*100).toFixed(1)+'%';}).then(function(j){done(j,'Presentation saved.');}).catch(fail);};
+ var dl=$('fDeckDel');if(dl)dl.onclick=function(){if(!confirm('Remove the presentation from this webinar?'))return;call('file_delete',{slug:w.slug,kind:'deck'}).then(function(j){done(j,'Presentation removed.');}).catch(fail);};
+ $('fPoster').onclick=function(){var b=this;if(!w.starts_at){msg('<span class="warn">Save a date and time first.</span>');return;}b.disabled=true;msg('Making the poster…');
+  makePosters(w,function(p){$('fProg').style.width=(p*100).toFixed(1)+'%';}).then(function(j){done(j,'Poster made (PNG and PDF).');}).catch(function(e){b.disabled=false;fail(e);});};}
+$('postersAll').onclick=function(){var list=W.filter(function(w){return w.status==='published'&&w.starts_at&&new Date(w.starts_at)>new Date()&&!(w.files_out&&w.files_out.poster_png&&w.files_out.poster_png.current);});
+ if(!list.length){alert('Every upcoming published webinar already has an up-to-date poster.');return;}
+ if(!confirm('Make posters (PNG and PDF) for '+list.length+' upcoming webinar'+(list.length>1?'s':'')+' that do not have an up-to-date one? It takes a few seconds each; keep this page open.'))return;
+ var b=this,i=0,errs=[];b.disabled=true;(function next(){if(i>=list.length){b.disabled=false;b.textContent='🖼 Posters for each webinar';alert('Posters made for '+(list.length-errs.length)+' webinars.'+(errs.length?'\n\nNot made:\n'+errs.join('\n'):''));return;}
+  var w=list[i++];b.textContent='Making poster '+i+' of '+list.length+'…';makePosters(w).then(function(j){setFilesOut(w.slug,j.files);}).catch(function(e){errs.push(w.title+': '+e.message);}).then(next);})();};
 $('posterW').onclick=function(){
  $('dbox').innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h1 style="margin:0">Schedule poster</h1><button class="btn" id="dClose">Close</button></div>'+
  '<p class="mut">An image for WhatsApp, LinkedIn and Instagram, and a PDF for email. Both always show your latest dates. In the PDF every session and the footer are clickable registration links.</p>'+

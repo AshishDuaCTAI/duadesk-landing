@@ -31,18 +31,32 @@ async function sb(path, { method = 'GET', body, prefer, count } = {}) {
   return count ? { data, total: cr ? +cr.split('/')[1] : null } : data;
 }
 
-async function storage(path, body) {
+async function storage(path, body, method = 'POST') {
   const { SB_URL, SB_KEY } = ENV();
   const headers = { apikey: SB_KEY, 'Content-Type': 'application/json' };
   if (!SB_KEY.startsWith('sb_')) headers.Authorization = 'Bearer ' + SB_KEY;
-  const res = await fetch(`${SB_URL}/storage/v1/${path}`, { method: 'POST', headers, body: JSON.stringify(body || {}) });
+  const res = await fetch(`${SB_URL}/storage/v1/${path}`, { method, headers, body: JSON.stringify(body || {}) });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || data.error || `Storage error ${res.status}`);
   return data;
 }
-async function signedUpload(objectPath) {
-  const d = await storage(`object/upload/sign/recordings/${objectPath}`, {});
+async function signedUpload(objectPath, bucket = 'recordings') {
+  const d = await storage(`object/upload/sign/${bucket}/${objectPath}`, {});
   return ENV().SB_URL + '/storage/v1' + (d.url.startsWith('/') ? d.url : '/' + d.url);
+}
+async function storageRemove(bucket, paths) { if (paths.length) await storage(`object/${bucket}`, { prefixes: paths }, 'DELETE'); }
+
+/* ---------- files for each webinar: the presentation and the poster (public bucket, unguessable paths) ---------- */
+const FILES_BUCKET = 'webinar-files';
+const encPath = p => String(p).split('/').map(encodeURIComponent).join('/');
+const fileUrl = (f, download) => f && f.path ? `${ENV().SB_URL}/storage/v1/object/public/${FILES_BUCKET}/${encPath(f.path)}${download ? '?download=' + encodeURIComponent(f.name || '') : ''}` : null;
+const posterKey = w => `${w.starts_at ? new Date(w.starts_at).toISOString() : ''}|${w.title || ''}`;
+// what may be shown or sent: a poster only while it still matches the date and title; the slides only as the share setting allows
+function webinarFiles(w, when) {
+  const f = w.files || {}, cur = k => f[k] && f[k].path && f[k].for === posterKey(w);
+  const share = w.deck_share || 'after';
+  const deckOk = f.deck && f.deck.path && (share === 'before' || (share === 'after' && when === 'after'));
+  return { poster_png: cur('poster_png') ? fileUrl(f.poster_png, true) : null, poster_pdf: cur('poster_pdf') ? fileUrl(f.poster_pdf, true) : null, deck: deckOk ? fileUrl(f.deck, true) : null, deck_name: deckOk ? f.deck.name : null };
 }
 async function signedRead(objectPath, seconds = 6 * 3600) {
   const d = await storage(`object/sign/recordings/${objectPath}`, { expiresIn: seconds });
@@ -181,6 +195,14 @@ const agendaHtml = w => (w.agenda || []).map(a => `<tr><td style="padding:4px 10
 const prodNames = w => (w.products || []).map(p => p.name).join(', ');
 const prodHtml = w => (w.products || []).map(p => `<a href="${esc(p.url)}" style="color:#2563c9">${esc(p.name)}</a>`).join(', ');
 const h1 = t => `<h1 style="font-family:Georgia,serif;font-size:24px;line-height:1.25;margin:0 0 6px;color:#0b1424">${esc(t)}</h1>`;
+// poster and slides links for the emails (nothing is shown when there is no current file)
+const filesHtml = (w, when, posterLead) => {
+  const f = webinarFiles(w, when), out = [];
+  if (posterLead && (f.poster_png || f.poster_pdf)) out.push(`${esc(posterLead)} ${[f.poster_png && `<a href="${esc(f.poster_png)}" style="color:#2563c9;font-weight:bold">poster (image)</a>`, f.poster_pdf && `<a href="${esc(f.poster_pdf)}" style="color:#2563c9;font-weight:bold">poster (PDF)</a>`].filter(Boolean).join(' · ')}`);
+  if (f.deck) out.push(`📑 <a href="${esc(f.deck)}" style="color:#2563c9;font-weight:bold">Download the slides</a>`);
+  return out.length ? `<p style="margin:0 0 14px;font-size:14px;line-height:1.7">${out.join('<br>')}</p>` : '';
+};
+const filesText = (w, when, poster) => { const f = webinarFiles(w, when); return [poster && f.poster_png && 'Poster (image): ' + f.poster_png, poster && f.poster_pdf && 'Poster (PDF): ' + f.poster_pdf, f.deck && 'Slides: ' + f.deck].filter(Boolean).map(s => '\n' + s).join(''); };
 const chips = (pid, w, settings) => {
   const items = [[actUrl(pid, w && w.slug, 'topic'), '💡 Suggest a webinar topic'], [actUrl(pid, w && w.slug, 'talk'), '🤝 Talk to us about using DuaDesk']];
   if (settings && settings.whatsapp_channel_url) items.push([settings.whatsapp_channel_url, '📢 Follow DuaDesk Webinars on WhatsApp']);
@@ -198,10 +220,10 @@ ${h1(w.title)}<p style="margin:0 0 16px;color:#5a6478;font-style:italic">${esc(w
 <p style="margin:0 0 6px;font-weight:bold">Agenda</p><table role="presentation" cellpadding="0" cellspacing="0" style="font-size:14px;line-height:1.5;margin:0 0 18px">${agendaHtml(w)}</table>
 <p style="margin:0 0 4px">${btn(actUrl(p.id, w.slug, 'register'), rt ? 'Request a seat (one click)' : 'Register me (one click)')}${btn(actUrl(p.id, w.slug, 'wa'), 'Remind me on WhatsApp', true)}</p>
 <p style="margin:0 0 18px;font-size:13px"><a href="${esc(actUrl(p.id, w.slug, 'not_this_one'))}" style="color:#5a6478">Not this one, but keep me posted about others</a></p>
-<p style="margin:0 0 4px;font-size:14px;color:#5a6478">Related DuaDesk product: ${prodHtml(w)}</p>
+${filesHtml(w, 'before', '📣 To share with colleagues:')}<p style="margin:0 0 4px;font-size:14px;color:#5a6478">Related DuaDesk product: ${prodHtml(w)}</p>
 ${chips(p.id, w, settings)}
 <p style="margin:18px 0 0">Warm regards,<br><b>CA Ashish Dua</b><br>Founder, DuaDesk</p>`, p.id);
-  const text = `${p.name ? 'Dear ' + first(p.name) + ',' : 'Hello,'}\n\nYou are invited: ${w.title} - ${w.subtitle || ''}\n${whenIST(w.starts_at, w)}, on Microsoft Teams (45 minutes).\n\n${w.summary || ''}\n\nRegister with one click: ${actUrl(p.id, w.slug, 'register')}\nNot this one: ${actUrl(p.id, w.slug, 'not_this_one')}\nSuggest a topic: ${actUrl(p.id, w.slug, 'topic')}\nTalk to us about DuaDesk: ${actUrl(p.id, w.slug, 'talk')}\n\nCA Ashish Dua, DuaDesk\n\nChoose your invitations: ${actUrl(p.id, null, 'prefs')}\nUnsubscribe from all: ${unsubUrl(p.id)}`;
+  const text = `${p.name ? 'Dear ' + first(p.name) + ',' : 'Hello,'}\n\nYou are invited: ${w.title} - ${w.subtitle || ''}\n${whenIST(w.starts_at, w)}, on Microsoft Teams (45 minutes).\n\n${w.summary || ''}\n\nRegister with one click: ${actUrl(p.id, w.slug, 'register')}\nNot this one: ${actUrl(p.id, w.slug, 'not_this_one')}${filesText(w, 'before', true)}\nSuggest a topic: ${actUrl(p.id, w.slug, 'topic')}\nTalk to us about DuaDesk: ${actUrl(p.id, w.slug, 'talk')}\n\nCA Ashish Dua, DuaDesk\n\nChoose your invitations: ${actUrl(p.id, null, 'prefs')}\nUnsubscribe from all: ${unsubUrl(p.id)}`;
   return { subject: `${rt ? 'Invitation' : 'Free webinar'}: ${w.title} (${w.starts_at ? new Date(w.starts_at).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short' }) : 'date TBA'})`, html, text };
 }
 
@@ -229,9 +251,9 @@ ${link ? `<p style="margin:0 0 8px">${btn(w.teams_link, 'Join on Microsoft Teams
 ${waBlock}
 <p style="margin:0 0 6px;font-weight:bold">Agenda</p><table role="presentation" cellpadding="0" cellspacing="0" style="font-size:14px;line-height:1.5;margin:0 0 18px">${agendaHtml(w)}</table>
 <p style="margin:0 0 8px">Know someone who should attend? ${btn(share, 'Share on WhatsApp', true)}</p>
-${chips(pid, w, settings)}
+${filesHtml(w, 'before', '📣 Or forward the')}${chips(pid, w, settings)}
 <p style="margin:18px 0 0">Warm regards,<br><b>CA Ashish Dua</b></p>`, pid, 'You received this because you registered for this session.');
-  return { subject: `${rt ? 'Request received' : 'You’re registered'}: ${w.title}`, html, text: `You are registered for ${w.title}, ${whenIST(w.starts_at, w)}.${link ? '\nJoin: ' + w.teams_link : '\nThe joining link will follow.'}\n\nCA Ashish Dua` };
+  return { subject: `${rt ? 'Request received' : 'You’re registered'}: ${w.title}`, html, text: `You are registered for ${w.title}, ${whenIST(w.starts_at, w)}.${link ? '\nJoin: ' + w.teams_link : '\nThe joining link will follow.'}${filesText(w, 'before', true)}\n\nCA Ashish Dua` };
 }
 
 function reminderEmail(w, reg, pid) {
@@ -241,8 +263,8 @@ ${h1(w.title)}<p style="margin:0 0 20px"><b>${esc(whenIST(w.starts_at, w))}</b> 
 <p style="margin:0 0 20px">${btn(w.teams_link, 'Join on Microsoft Teams')}</p>
 <p style="margin:0 0 14px;font-size:13px;color:#5a6478">If the button does not work, copy this link: ${esc(w.teams_link)}</p>
 <p style="margin:0 0 14px;font-size:13px;color:#5a6478">Please join with the same name you registered with (${esc(reg.name || '')}), so we can send your attendance certificate.</p>
-<p style="margin:18px 0 0">See you there,<br><b>CA Ashish Dua</b></p>`, pid, 'You received this because you registered for this session.');
-  return { subject: `Starting soon: ${w.title}`, html, text: `Starting soon: ${w.title}, ${whenIST(w.starts_at, w)}.\nJoin: ${w.teams_link}\nPlease join with the same name you registered with, so we can send your attendance certificate.\n\nCA Ashish Dua` };
+${filesHtml(w, 'before', null)}<p style="margin:18px 0 0">See you there,<br><b>CA Ashish Dua</b></p>`, pid, 'You received this because you registered for this session.');
+  return { subject: `Starting soon: ${w.title}`, html, text: `Starting soon: ${w.title}, ${whenIST(w.starts_at, w)}.\nJoin: ${w.teams_link}\nPlease join with the same name you registered with, so we can send your attendance certificate.${filesText(w, 'before', false)}\n\nCA Ashish Dua` };
 }
 
 function followupEmail(w, reg, pid, attended, settings) {
@@ -250,10 +272,10 @@ function followupEmail(w, reg, pid, attended, settings) {
 <p style="margin:0 0 14px">${attended ? 'Thank you for joining' : 'We missed you at'} <b>${esc(w.title)}</b>. ${attended ? 'Here is everything from the session:' : 'The good news: the full recording is ready for you.'}</p>
 <p style="margin:0 0 8px">${btn(watchUrl(w.slug, pid), 'Watch the recording')}${attended ? btn(certUrl(reg.id), 'Your attendance certificate', true) : ''}</p>
 ${attended ? `<p style="margin:10px 0 14px">Two minutes of your feedback helps me plan the next sessions: <a href="${esc(feedbackUrl(reg.id))}" style="color:#2563c9;font-weight:bold">Give feedback</a></p>` : ''}
-<p style="margin:14px 0 6px">If you would like to explore ${esc(prodNames(w) || 'DuaDesk')} for your organisation, I would be happy to talk.</p>
+${filesHtml(w, 'after', null)}<p style="margin:14px 0 6px">If you would like to explore ${esc(prodNames(w) || 'DuaDesk')} for your organisation, I would be happy to talk.</p>
 ${chips(pid, w, settings)}
 <p style="margin:18px 0 0">Warm regards,<br><b>CA Ashish Dua</b></p>`, pid, 'You received this because you registered for this session.');
-  return { subject: attended ? `Thank you for joining: ${w.title}` : `Recording ready: ${w.title}`, html, text: `${attended ? 'Thank you for joining' : 'We missed you at'} ${w.title}.\nWatch the recording: ${watchUrl(w.slug, pid)}\n${attended ? 'Feedback: ' + feedbackUrl(reg.id) + '\nCertificate: ' + certUrl(reg.id) : ''}\n\nCA Ashish Dua` };
+  return { subject: attended ? `Thank you for joining: ${w.title}` : `Recording ready: ${w.title}`, html, text: `${attended ? 'Thank you for joining' : 'We missed you at'} ${w.title}.\nWatch the recording: ${watchUrl(w.slug, pid)}\n${attended ? 'Feedback: ' + feedbackUrl(reg.id) + '\nCertificate: ' + certUrl(reg.id) : ''}${filesText(w, 'after', false)}\n\nCA Ashish Dua` };
 }
 
 function scheduledEmail(w, p, topicText, settings) {
@@ -1088,7 +1110,7 @@ async function teamsCreate(w) {
   if (w.teams_link) throw E('This webinar already has a Teams link. Clear it first if you want a new meeting.');
   const end = new Date(new Date(w.starts_at).getTime() + (+w.duration_min || 45) * 60000 + 15 * 60000); // 15 minutes spare for questions
   const ev = await graph(`/users/${encodeURIComponent(m.organizer)}/events`, { method: 'POST', body: {
-    subject: 'DuaDesk webinar: ' + w.title, body: { contentType: 'HTML', content: `<p>${esc(w.subtitle || '')}</p><p>${esc(w.summary || '')}</p><p>Registrations are managed on duadesk.com.</p>` },
+    subject: 'DuaDesk webinar: ' + w.title, body: eventBody(w),
     start: { dateTime: utc(w.starts_at), timeZone: 'UTC' }, end: { dateTime: utc(end), timeZone: 'UTC' },
     attendees: speakers(w), isOnlineMeeting: true, onlineMeetingProvider: 'teamsForBusiness', allowNewTimeProposals: false, isReminderOn: true, reminderMinutesBeforeStart: 30, showAs: 'busy' } });
   const join = ev.onlineMeeting && ev.onlineMeeting.joinUrl;
@@ -1104,6 +1126,8 @@ async function teamsCreate(w) {
       allowMeetingChat: 'enabled', isEntryExitAnnounced: false, recordAutomatically: true, allowTranscription: true } });
   } catch (e) { notes.push('Meeting created, but its options could not be set automatically (' + e.message.replace(/^Microsoft Teams: /, '') + '). Set them in Teams → Meeting options if needed.'); }
   await sb(`webinars?slug=eq.${encodeURIComponent(w.slug)}`, { method: 'PATCH', body: patch, prefer: 'return=minimal' });
+  const f = w.files || {};
+  if (f.deck || f.poster_png || f.poster_pdf) notes.push(...await teamsAttach({ ...w, ...patch })); // the poster and slides go into the meeting too
   return { teams_link: join, notes };
 }
 // keep the calendar event in step when the date, time or title changes
@@ -1348,6 +1372,97 @@ async function teamsAutoAttendance() {
   return out;
 }
 
+/* ---- version 3.6 admin: files for each webinar (the presentation and the poster), shared in emails and attached to the Teams meeting ---- */
+const FILE_KINDS = { deck: /\.(pptx|ppt|pdf|key|odp)$/i, poster_png: /\.png$/i, poster_pdf: /\.pdf$/i };
+const FILE_TYPES = { png: 'image/png', pdf: 'application/pdf', pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', ppt: 'application/vnd.ms-powerpoint', key: 'application/vnd.apple.keynote', odp: 'application/vnd.oasis.opendocument.presentation' };
+const MAX_ATTACH = 2200000; // Microsoft accepts up to 3 MB per attachment request (the file travels base64-encoded)
+const safeName = n => String(n || 'file').normalize('NFKD').replace(/[^\w.\- ]+/g, '').trim().replace(/\s+/g, '-').slice(-90) || 'file';
+const posterName = (w, ext) => `Poster - ${safeName(w.title).replace(/-/g, ' ').slice(0, 80)}.${ext}`;
+function filesOut(w) { // what the admin page shows
+  const f = w.files || {}, o = {};
+  for (const k of Object.keys(FILE_KINDS)) if (f[k] && f[k].path) o[k] = { ...f[k], url: fileUrl(f[k]), download: fileUrl(f[k], true), current: k === 'deck' || f[k].for === posterKey(w) };
+  return o;
+}
+// the meeting text in Outlook/Teams, with links to the poster and slides for the co-host and facilitator
+function eventBody(w) {
+  const f = w.files || {}, links = [];
+  if (f.poster_png && f.poster_png.for === posterKey(w)) links.push(`<a href="${esc(fileUrl(f.poster_png, true))}">Poster (image)</a>`);
+  if (f.poster_pdf && f.poster_pdf.for === posterKey(w)) links.push(`<a href="${esc(fileUrl(f.poster_pdf, true))}">Poster (PDF)</a>`);
+  if (f.deck && f.deck.path) links.push(`<a href="${esc(fileUrl(f.deck, true))}">Slides: ${esc(f.deck.name)}</a>`);
+  return { contentType: 'HTML', content: `<p>${esc(w.subtitle || '')}</p><p>${esc(w.summary || '')}</p>${links.length ? `<p>${links.join(' · ')}</p>` : ''}<p>Registrations are managed on duadesk.com.</p>` };
+}
+// keep the Teams calendar event's attachments in step with the files (replaces the ones this app added earlier)
+async function teamsAttach(w) {
+  if (!teamsReady() || !w.teams_event_id) return [];
+  const m = MS(), ev = `/users/${encodeURIComponent(m.organizer)}/events/${encodeURIComponent(w.teams_event_id)}`, notes = [];
+  const f = w.files || {}, want = [];
+  if (f.deck && f.deck.path) want.push({ name: 'Slides - ' + f.deck.name, file: f.deck });
+  if (f.poster_png && f.poster_png.for === posterKey(w)) want.push({ name: posterName(w, 'png'), file: f.poster_png });
+  if (f.poster_pdf && f.poster_pdf.for === posterKey(w)) want.push({ name: posterName(w, 'pdf'), file: f.poster_pdf });
+  try {
+    await graph(ev, { method: 'PATCH', body: { body: eventBody(w) } });
+    const have = (await graph(`${ev}/attachments?$select=id,name`)).value || [];
+    for (const a of have) if (/^(Poster|Slides) - /.test(a.name || '')) await graph(`${ev}/attachments/${encodeURIComponent(a.id)}`, { method: 'DELETE' });
+    for (const a of want) {
+      if ((a.file.size || 0) > MAX_ATTACH) { notes.push(`“${a.file.name}” is too large to attach in Teams (over 2 MB), so the meeting has a download link to it instead.`); continue; }
+      const res = await fetch(fileUrl(a.file), { signal: AbortSignal.timeout(20000) });
+      if (!res.ok) { notes.push(`Could not read “${a.file.name}” to attach it in Teams.`); continue; }
+      const buf = Buffer.from(await res.arrayBuffer());
+      if (buf.length > MAX_ATTACH) { notes.push(`“${a.file.name}” is too large to attach in Teams, so the meeting has a download link to it instead.`); continue; }
+      const ext = (a.file.path.match(/\.(\w+)$/) || [, ''])[1].toLowerCase();
+      await graph(`${ev}/attachments`, { method: 'POST', body: { '@odata.type': '#microsoft.graph.fileAttachment', name: a.name, contentType: FILE_TYPES[ext] || 'application/octet-stream', contentBytes: buf.toString('base64') } });
+    }
+  } catch (e) { notes.push('Saved, but the Teams meeting could not be updated (' + e.message.replace(/^Microsoft Teams: /, '') + ').'); }
+  return notes;
+}
+async function setFiles(w, files) {
+  const rows = await sb(`webinars?slug=eq.${encodeURIComponent(w.slug)}`, { method: 'PATCH', body: { files, updated_at: new Date().toISOString() }, prefer: 'return=representation' });
+  return rows[0];
+}
+
+const actions5 = {
+  async file_upload_url(b) {
+    const w = await getW(b.slug), kind = String(b.kind || '');
+    if (!FILE_KINDS[kind]) throw E('Unknown file type.');
+    const name = safeName(b.filename);
+    if (!FILE_KINDS[kind].test(name)) throw E(kind === 'deck' ? 'Please choose a PowerPoint (.pptx or .ppt), Keynote or PDF file.' : 'Unexpected poster file.');
+    if (+b.size > 50 * 1024 * 1024) throw E('That file is over 50 MB. Please make it smaller (for example, compress the pictures in PowerPoint).');
+    const path = `${w.slug}/${kind}/${crypto.randomBytes(9).toString('hex')}/${name}`;
+    return { upload_url: await signedUpload(path, FILES_BUCKET), path };
+  },
+  async file_save(b) {
+    const w = await getW(b.slug), kind = String(b.kind || ''), path = String(b.path || '');
+    if (!FILE_KINDS[kind]) throw E('Unknown file type.');
+    if (!path.startsWith(`${w.slug}/${kind}/`) || path.includes('..') || !FILE_KINDS[kind].test(path)) throw E('That upload does not belong to this webinar.');
+    const head = await fetch(fileUrl({ path }), { method: 'HEAD', signal: AbortSignal.timeout(15000) }).catch(() => null);
+    if (!head || !head.ok) throw E('The upload did not arrive. Please try again.');
+    const files = { ...(w.files || {}) }, old = files[kind];
+    files[kind] = { path, name: kind === 'deck' ? clean(b.name, 150) || path.split('/').pop() : posterName(w, kind === 'poster_png' ? 'png' : 'pdf'), size: +head.headers.get('content-length') || +b.size || 0, at: new Date().toISOString(), ...(kind === 'deck' ? {} : { for: posterKey(w) }) };
+    const nw = await setFiles(w, files);
+    if (old && old.path && old.path !== path) await storageRemove(FILES_BUCKET, [old.path]).catch(() => {});
+    const notes = b.attach === false ? [] : await teamsAttach(nw);
+    return { files: filesOut(nw), deck_share: nw.deck_share || 'after', notes };
+  },
+  async teams_attach_files(b) { const w = await getW(b.slug); if (!w.teams_event_id) return { notes: [] }; return { notes: await teamsAttach(w) }; },
+  async file_delete(b) {
+    const w = await getW(b.slug), kind = String(b.kind || '');
+    const files = { ...(w.files || {}) }, old = files[kind];
+    if (!old) return { files: filesOut(w) };
+    delete files[kind];
+    const nw = await setFiles(w, files);
+    await storageRemove(FILES_BUCKET, [old.path]).catch(() => {});
+    return { files: filesOut(nw), notes: await teamsAttach(nw) };
+  },
+  async file_share(b) {
+    const v = String(b.deck_share || '');
+    if (!['no', 'after', 'before'].includes(v)) throw E('Unknown choice.');
+    const rows = await sb(`webinars?slug=eq.${encodeURIComponent(b.slug || '')}`, { method: 'PATCH', body: { deck_share: v }, prefer: 'return=representation' });
+    if (!rows[0]) throw E('Webinar not found', 404);
+    return { deck_share: v };
+  },
+  async files(b) { const w = await getW(b.slug); return { files: filesOut(w), deck_share: w.deck_share || 'after', has_teams: !!w.teams_event_id }; },
+};
+
 /* DuaDesk Webinars: admin endpoint  →  /api/webinar-admin   (POST only, header x-admin-key) */
 export const config = { maxDuration: 60 };
 
@@ -1437,7 +1552,7 @@ const actions = {
   async list() {
     const [webinars, stats, settings] = await Promise.all([sb('webinars?select=*&order=starts_at.asc.nullslast,n.asc'), sb('rpc/webinar_stats', { method: 'POST', body: {} }), settingsSafe()]);
     const by = Object.fromEntries(stats.map(s => [s.slug, s]));
-    return { webinars: webinars.map(w => ({ ...w, stats: by[w.slug] || {} })), settings, sent_today: await sentToday() };
+    return { webinars: webinars.map(w => ({ ...w, files_out: filesOut(w), stats: by[w.slug] || {} })), settings, sent_today: await sentToday() };
   },
   async save(b) {
     const patch = { ...pick(b.webinar || {}), updated_at: new Date().toISOString() };
@@ -1447,9 +1562,10 @@ const actions = {
     const moved = 'starts_at' in patch && before.starts_at && patch.starts_at && new Date(patch.starts_at).getTime() !== new Date(before.starts_at).getTime();
     if (moved) patch.rescheduled_at = new Date().toISOString();
     const rows = await sb(`webinars?slug=eq.${encodeURIComponent(b.slug || '')}`, { method: 'PATCH', body: patch, prefer: 'return=representation' });
-    const teams_note = 'teams_link' in patch && patch.teams_link !== before.teams_link ? null : await teamsSync(before, rows[0]);
+    let teams_note = 'teams_link' in patch && patch.teams_link !== before.teams_link ? null : await teamsSync(before, rows[0]);
+    if (rows[0].teams_event_id && posterKey(before) !== posterKey(rows[0]) && (before.files || {}).poster_png) { const n = await teamsAttach(rows[0]); if (n.length) teams_note = [teams_note, ...n].filter(Boolean).join(' '); } // an out-of-date poster comes off the meeting
     const registered = moved ? await registeredCount(before.slug) : 0;
-    return { webinar: rows[0], teams_note, moved: !!moved, registered };
+    return { webinar: { ...rows[0], files_out: filesOut(rows[0]) }, teams_note, moved: !!moved, registered };
   },
   async create(b) {
     const w = pick(b.webinar || {});
@@ -1633,7 +1749,7 @@ const actions = {
   },
 };
 
-Object.assign(actions, actions3, actions4);
+Object.assign(actions, actions3, actions4, actions5);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return send(res, 405, { error: 'POST only' });

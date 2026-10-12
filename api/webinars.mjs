@@ -31,18 +31,32 @@ async function sb(path, { method = 'GET', body, prefer, count } = {}) {
   return count ? { data, total: cr ? +cr.split('/')[1] : null } : data;
 }
 
-async function storage(path, body) {
+async function storage(path, body, method = 'POST') {
   const { SB_URL, SB_KEY } = ENV();
   const headers = { apikey: SB_KEY, 'Content-Type': 'application/json' };
   if (!SB_KEY.startsWith('sb_')) headers.Authorization = 'Bearer ' + SB_KEY;
-  const res = await fetch(`${SB_URL}/storage/v1/${path}`, { method: 'POST', headers, body: JSON.stringify(body || {}) });
+  const res = await fetch(`${SB_URL}/storage/v1/${path}`, { method, headers, body: JSON.stringify(body || {}) });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || data.error || `Storage error ${res.status}`);
   return data;
 }
-async function signedUpload(objectPath) {
-  const d = await storage(`object/upload/sign/recordings/${objectPath}`, {});
+async function signedUpload(objectPath, bucket = 'recordings') {
+  const d = await storage(`object/upload/sign/${bucket}/${objectPath}`, {});
   return ENV().SB_URL + '/storage/v1' + (d.url.startsWith('/') ? d.url : '/' + d.url);
+}
+async function storageRemove(bucket, paths) { if (paths.length) await storage(`object/${bucket}`, { prefixes: paths }, 'DELETE'); }
+
+/* ---------- files for each webinar: the presentation and the poster (public bucket, unguessable paths) ---------- */
+const FILES_BUCKET = 'webinar-files';
+const encPath = p => String(p).split('/').map(encodeURIComponent).join('/');
+const fileUrl = (f, download) => f && f.path ? `${ENV().SB_URL}/storage/v1/object/public/${FILES_BUCKET}/${encPath(f.path)}${download ? '?download=' + encodeURIComponent(f.name || '') : ''}` : null;
+const posterKey = w => `${w.starts_at ? new Date(w.starts_at).toISOString() : ''}|${w.title || ''}`;
+// what may be shown or sent: a poster only while it still matches the date and title; the slides only as the share setting allows
+function webinarFiles(w, when) {
+  const f = w.files || {}, cur = k => f[k] && f[k].path && f[k].for === posterKey(w);
+  const share = w.deck_share || 'after';
+  const deckOk = f.deck && f.deck.path && (share === 'before' || (share === 'after' && when === 'after'));
+  return { poster_png: cur('poster_png') ? fileUrl(f.poster_png, true) : null, poster_pdf: cur('poster_pdf') ? fileUrl(f.poster_pdf, true) : null, deck: deckOk ? fileUrl(f.deck, true) : null, deck_name: deckOk ? f.deck.name : null };
 }
 async function signedRead(objectPath, seconds = 6 * 3600) {
   const d = await storage(`object/sign/recordings/${objectPath}`, { expiresIn: seconds });
@@ -181,6 +195,14 @@ const agendaHtml = w => (w.agenda || []).map(a => `<tr><td style="padding:4px 10
 const prodNames = w => (w.products || []).map(p => p.name).join(', ');
 const prodHtml = w => (w.products || []).map(p => `<a href="${esc(p.url)}" style="color:#2563c9">${esc(p.name)}</a>`).join(', ');
 const h1 = t => `<h1 style="font-family:Georgia,serif;font-size:24px;line-height:1.25;margin:0 0 6px;color:#0b1424">${esc(t)}</h1>`;
+// poster and slides links for the emails (nothing is shown when there is no current file)
+const filesHtml = (w, when, posterLead) => {
+  const f = webinarFiles(w, when), out = [];
+  if (posterLead && (f.poster_png || f.poster_pdf)) out.push(`${esc(posterLead)} ${[f.poster_png && `<a href="${esc(f.poster_png)}" style="color:#2563c9;font-weight:bold">poster (image)</a>`, f.poster_pdf && `<a href="${esc(f.poster_pdf)}" style="color:#2563c9;font-weight:bold">poster (PDF)</a>`].filter(Boolean).join(' · ')}`);
+  if (f.deck) out.push(`📑 <a href="${esc(f.deck)}" style="color:#2563c9;font-weight:bold">Download the slides</a>`);
+  return out.length ? `<p style="margin:0 0 14px;font-size:14px;line-height:1.7">${out.join('<br>')}</p>` : '';
+};
+const filesText = (w, when, poster) => { const f = webinarFiles(w, when); return [poster && f.poster_png && 'Poster (image): ' + f.poster_png, poster && f.poster_pdf && 'Poster (PDF): ' + f.poster_pdf, f.deck && 'Slides: ' + f.deck].filter(Boolean).map(s => '\n' + s).join(''); };
 const chips = (pid, w, settings) => {
   const items = [[actUrl(pid, w && w.slug, 'topic'), '💡 Suggest a webinar topic'], [actUrl(pid, w && w.slug, 'talk'), '🤝 Talk to us about using DuaDesk']];
   if (settings && settings.whatsapp_channel_url) items.push([settings.whatsapp_channel_url, '📢 Follow DuaDesk Webinars on WhatsApp']);
@@ -198,10 +220,10 @@ ${h1(w.title)}<p style="margin:0 0 16px;color:#5a6478;font-style:italic">${esc(w
 <p style="margin:0 0 6px;font-weight:bold">Agenda</p><table role="presentation" cellpadding="0" cellspacing="0" style="font-size:14px;line-height:1.5;margin:0 0 18px">${agendaHtml(w)}</table>
 <p style="margin:0 0 4px">${btn(actUrl(p.id, w.slug, 'register'), rt ? 'Request a seat (one click)' : 'Register me (one click)')}${btn(actUrl(p.id, w.slug, 'wa'), 'Remind me on WhatsApp', true)}</p>
 <p style="margin:0 0 18px;font-size:13px"><a href="${esc(actUrl(p.id, w.slug, 'not_this_one'))}" style="color:#5a6478">Not this one, but keep me posted about others</a></p>
-<p style="margin:0 0 4px;font-size:14px;color:#5a6478">Related DuaDesk product: ${prodHtml(w)}</p>
+${filesHtml(w, 'before', '📣 To share with colleagues:')}<p style="margin:0 0 4px;font-size:14px;color:#5a6478">Related DuaDesk product: ${prodHtml(w)}</p>
 ${chips(p.id, w, settings)}
 <p style="margin:18px 0 0">Warm regards,<br><b>CA Ashish Dua</b><br>Founder, DuaDesk</p>`, p.id);
-  const text = `${p.name ? 'Dear ' + first(p.name) + ',' : 'Hello,'}\n\nYou are invited: ${w.title} - ${w.subtitle || ''}\n${whenIST(w.starts_at, w)}, on Microsoft Teams (45 minutes).\n\n${w.summary || ''}\n\nRegister with one click: ${actUrl(p.id, w.slug, 'register')}\nNot this one: ${actUrl(p.id, w.slug, 'not_this_one')}\nSuggest a topic: ${actUrl(p.id, w.slug, 'topic')}\nTalk to us about DuaDesk: ${actUrl(p.id, w.slug, 'talk')}\n\nCA Ashish Dua, DuaDesk\n\nChoose your invitations: ${actUrl(p.id, null, 'prefs')}\nUnsubscribe from all: ${unsubUrl(p.id)}`;
+  const text = `${p.name ? 'Dear ' + first(p.name) + ',' : 'Hello,'}\n\nYou are invited: ${w.title} - ${w.subtitle || ''}\n${whenIST(w.starts_at, w)}, on Microsoft Teams (45 minutes).\n\n${w.summary || ''}\n\nRegister with one click: ${actUrl(p.id, w.slug, 'register')}\nNot this one: ${actUrl(p.id, w.slug, 'not_this_one')}${filesText(w, 'before', true)}\nSuggest a topic: ${actUrl(p.id, w.slug, 'topic')}\nTalk to us about DuaDesk: ${actUrl(p.id, w.slug, 'talk')}\n\nCA Ashish Dua, DuaDesk\n\nChoose your invitations: ${actUrl(p.id, null, 'prefs')}\nUnsubscribe from all: ${unsubUrl(p.id)}`;
   return { subject: `${rt ? 'Invitation' : 'Free webinar'}: ${w.title} (${w.starts_at ? new Date(w.starts_at).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short' }) : 'date TBA'})`, html, text };
 }
 
@@ -229,9 +251,9 @@ ${link ? `<p style="margin:0 0 8px">${btn(w.teams_link, 'Join on Microsoft Teams
 ${waBlock}
 <p style="margin:0 0 6px;font-weight:bold">Agenda</p><table role="presentation" cellpadding="0" cellspacing="0" style="font-size:14px;line-height:1.5;margin:0 0 18px">${agendaHtml(w)}</table>
 <p style="margin:0 0 8px">Know someone who should attend? ${btn(share, 'Share on WhatsApp', true)}</p>
-${chips(pid, w, settings)}
+${filesHtml(w, 'before', '📣 Or forward the')}${chips(pid, w, settings)}
 <p style="margin:18px 0 0">Warm regards,<br><b>CA Ashish Dua</b></p>`, pid, 'You received this because you registered for this session.');
-  return { subject: `${rt ? 'Request received' : 'You’re registered'}: ${w.title}`, html, text: `You are registered for ${w.title}, ${whenIST(w.starts_at, w)}.${link ? '\nJoin: ' + w.teams_link : '\nThe joining link will follow.'}\n\nCA Ashish Dua` };
+  return { subject: `${rt ? 'Request received' : 'You’re registered'}: ${w.title}`, html, text: `You are registered for ${w.title}, ${whenIST(w.starts_at, w)}.${link ? '\nJoin: ' + w.teams_link : '\nThe joining link will follow.'}${filesText(w, 'before', true)}\n\nCA Ashish Dua` };
 }
 
 function reminderEmail(w, reg, pid) {
@@ -241,8 +263,8 @@ ${h1(w.title)}<p style="margin:0 0 20px"><b>${esc(whenIST(w.starts_at, w))}</b> 
 <p style="margin:0 0 20px">${btn(w.teams_link, 'Join on Microsoft Teams')}</p>
 <p style="margin:0 0 14px;font-size:13px;color:#5a6478">If the button does not work, copy this link: ${esc(w.teams_link)}</p>
 <p style="margin:0 0 14px;font-size:13px;color:#5a6478">Please join with the same name you registered with (${esc(reg.name || '')}), so we can send your attendance certificate.</p>
-<p style="margin:18px 0 0">See you there,<br><b>CA Ashish Dua</b></p>`, pid, 'You received this because you registered for this session.');
-  return { subject: `Starting soon: ${w.title}`, html, text: `Starting soon: ${w.title}, ${whenIST(w.starts_at, w)}.\nJoin: ${w.teams_link}\nPlease join with the same name you registered with, so we can send your attendance certificate.\n\nCA Ashish Dua` };
+${filesHtml(w, 'before', null)}<p style="margin:18px 0 0">See you there,<br><b>CA Ashish Dua</b></p>`, pid, 'You received this because you registered for this session.');
+  return { subject: `Starting soon: ${w.title}`, html, text: `Starting soon: ${w.title}, ${whenIST(w.starts_at, w)}.\nJoin: ${w.teams_link}\nPlease join with the same name you registered with, so we can send your attendance certificate.${filesText(w, 'before', false)}\n\nCA Ashish Dua` };
 }
 
 function followupEmail(w, reg, pid, attended, settings) {
@@ -250,10 +272,10 @@ function followupEmail(w, reg, pid, attended, settings) {
 <p style="margin:0 0 14px">${attended ? 'Thank you for joining' : 'We missed you at'} <b>${esc(w.title)}</b>. ${attended ? 'Here is everything from the session:' : 'The good news: the full recording is ready for you.'}</p>
 <p style="margin:0 0 8px">${btn(watchUrl(w.slug, pid), 'Watch the recording')}${attended ? btn(certUrl(reg.id), 'Your attendance certificate', true) : ''}</p>
 ${attended ? `<p style="margin:10px 0 14px">Two minutes of your feedback helps me plan the next sessions: <a href="${esc(feedbackUrl(reg.id))}" style="color:#2563c9;font-weight:bold">Give feedback</a></p>` : ''}
-<p style="margin:14px 0 6px">If you would like to explore ${esc(prodNames(w) || 'DuaDesk')} for your organisation, I would be happy to talk.</p>
+${filesHtml(w, 'after', null)}<p style="margin:14px 0 6px">If you would like to explore ${esc(prodNames(w) || 'DuaDesk')} for your organisation, I would be happy to talk.</p>
 ${chips(pid, w, settings)}
 <p style="margin:18px 0 0">Warm regards,<br><b>CA Ashish Dua</b></p>`, pid, 'You received this because you registered for this session.');
-  return { subject: attended ? `Thank you for joining: ${w.title}` : `Recording ready: ${w.title}`, html, text: `${attended ? 'Thank you for joining' : 'We missed you at'} ${w.title}.\nWatch the recording: ${watchUrl(w.slug, pid)}\n${attended ? 'Feedback: ' + feedbackUrl(reg.id) + '\nCertificate: ' + certUrl(reg.id) : ''}\n\nCA Ashish Dua` };
+  return { subject: attended ? `Thank you for joining: ${w.title}` : `Recording ready: ${w.title}`, html, text: `${attended ? 'Thank you for joining' : 'We missed you at'} ${w.title}.\nWatch the recording: ${watchUrl(w.slug, pid)}\n${attended ? 'Feedback: ' + feedbackUrl(reg.id) + '\nCertificate: ' + certUrl(reg.id) : ''}${filesText(w, 'after', false)}\n\nCA Ashish Dua` };
 }
 
 function scheduledEmail(w, p, topicText, settings) {
@@ -667,13 +689,14 @@ People: ${JSON.stringify(list)}`;
    POST ?action=register | act | watch
    GET/POST ?action=unsubscribe&p=&t=                                                                   */
 
-const PUBLIC_FIELDS = 'slug,n,series,format,status,title,subtitle,starts_at,duration_min,products,audience,summary,agenda,speaker,cohost_name,cohost_confirmed,facilitator_name,facilitator_confirmed,note,registration_open,recording_published,recording_summary';
+const PUBLIC_FIELDS = 'slug,n,series,format,status,title,subtitle,starts_at,duration_min,products,audience,summary,agenda,speaker,cohost_name,cohost_confirmed,facilitator_name,facilitator_confirmed,note,registration_open,recording_published,recording_summary,files,deck_share';
 const ok = (res, o) => send(res, 200, { ok: true, ...o });
 const bad = (res, msg, code = 400) => send(res, code, { error: msg });
 
 function toPublic(w) {
-  const { cohost_name, cohost_confirmed, facilitator_name, facilitator_confirmed, recording_published, recording_summary, ...rest } = w;
-  return { ...rest, cohost: cohost_confirmed && cohost_name ? cohost_name : null, facilitator: facilitator_confirmed && facilitator_name ? facilitator_name : null,
+  const { cohost_name, cohost_confirmed, facilitator_name, facilitator_confirmed, recording_published, recording_summary, files, deck_share, ...rest } = w;
+  const f = webinarFiles(w, 'before'); // posters only while they match the date and title; slides only if shared before the session
+  return { ...rest, poster_png: f.poster_png, poster_pdf: f.poster_pdf, slides: f.deck, cohost: cohost_confirmed && cohost_name ? cohost_name : null, facilitator: facilitator_confirmed && facilitator_name ? facilitator_name : null,
     has_recording: !!recording_published, recording_teaser: recording_published ? (recording_summary || '').slice(0, 260) : null };
 }
 async function publicSettings() { const s = await getSettings(); return { whatsapp_number: s.whatsapp_number || '', whatsapp_channel_url: s.whatsapp_channel_url || '' }; }
@@ -858,7 +881,7 @@ async function watch(req, res) {
   else if (w.recording_kind === 'storage') video = { type: 'file', url: await signedRead(w.recording_ref) };
   else video = { type: 'link', url: w.recording_ref };
   return ok(res, { title: w.title, subtitle: w.subtitle, starts_at: w.starts_at, products: w.products, summary: w.recording_summary, takeaways: w.recording_takeaways, chapters: w.recording_chapters,
-    slides_url: w.slides_url, video, p: person.id, t: full ? tok('p', person.id) : tok('w', person.id), name: person.name }); // a typed email never gets a full personal token
+    slides_url: w.slides_url || webinarFiles(w, 'after').deck, video, p: person.id, t: full ? tok('p', person.id) : tok('w', person.id), name: person.name }); // a typed email never gets a full personal token
 }
 
 async function cert(res, q) {
