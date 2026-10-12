@@ -50,7 +50,8 @@ async function storageRemove(bucket, paths) { if (paths.length) await storage(`o
 const FILES_BUCKET = 'webinar-files';
 const encPath = p => String(p).split('/').map(encodeURIComponent).join('/');
 const fileUrl = (f, download) => f && f.path ? `${ENV().SB_URL}/storage/v1/object/public/${FILES_BUCKET}/${encPath(f.path)}${download ? '?download=' + encodeURIComponent(f.name || '') : ''}` : null;
-const posterKey = w => `${w.starts_at ? new Date(w.starts_at).toISOString() : ''}|${w.title || ''}`;
+// a poster is current while everything printed on it is unchanged: date, title, subtitle, description, agenda, speakers, demo
+const posterKey = w => `${w.starts_at ? new Date(w.starts_at).toISOString() : ''}|${w.title || ''}|` + crypto.createHash('sha1').update(JSON.stringify([w.subtitle || '', w.summary || '', (w.agenda || []).map(a => [a.min, a.item]), (w.products || []).map(p => p.name), w.cohost_confirmed ? w.cohost_name || '' : '', w.facilitator_confirmed ? w.facilitator_name || '' : '', w.format || '', +w.duration_min || 45])).digest('hex').slice(0, 12);
 // what may be shown or sent: a poster only while it still matches the date and title; the slides only as the share setting allows
 function webinarFiles(w, when) {
   const f = w.files || {}, cur = k => f[k] && f[k].path && f[k].for === posterKey(w);
@@ -1463,8 +1464,232 @@ const actions5 = {
   async files(b) { const w = await getW(b.slug); return { files: filesOut(w), deck_share: w.deck_share || 'after', has_teams: !!w.teams_event_id }; },
 };
 
+/* ---- version 3.7 admin: Webinar Studio — the presentation is kept as slides in the database, changed by instruction, and every version is kept ---- */
+const STUDIO_ICONS = ['FaBuilding', 'FaGraduationCap', 'FaTools', 'FaEye', 'FaCompass', 'FaRocket', 'FaHourglassHalf', 'FaSun', 'FaComments', 'FaBalanceScale', 'FaFileAlt', 'FaChartLine', 'FaShieldAlt', 'FaLightbulb', 'FaCheckCircle', 'FaExclamationTriangle', 'FaUsers', 'FaUserTie', 'FaHome', 'FaHeart', 'FaHandshake', 'FaBolt', 'FaDatabase', 'FaSearch', 'FaQuestion', 'FaUserShield', 'FaServer', 'FaGift', 'FaCheck', 'FaDesktop', 'FaClock', 'FaRupeeSign', 'FaGlobe', 'FaLock', 'FaBell', 'FaCalendarAlt', 'FaClipboardCheck', 'FaCogs', 'FaMobileAlt', 'FaWhatsapp', 'FaLeaf', 'FaStore', 'FaFileInvoice', 'FaGavel', 'FaChild', 'FaUserFriends', 'FaRing', 'FaHospital', 'FaMoneyBillWave', 'FaBullseye', 'FaRoad', 'FaTrophy', 'FaSeedling', 'FaIndustry', 'FaTruck', 'FaBoxes', 'FaPercent', 'FaCalculator', 'FaBook', 'FaMicrophone', 'FaPlay'];
+// what the AI may say about each product (from duadesk.com); anything else needs your input
+const PRODUCT_FACTS = {
+  'Dua Sarthi': 'sarthi.duadesk.com. The CEO’s AI operating system: what needs you, am I protected, where the company is heading; ranked every morning, explained with evidence, acted on with a single yes; on screen, phone or voice. 17 pillars of the business (weakest first), 33 daily lines the CEO switches on or off, 11 industry packs, 70+ measures with thresholds. Every legal duty by law, site and owner, with a Personal Exposure Index for directors. Open decisions with options, “Challenge me” tests assumptions on live data, premortems. Meeting notes become owned commitments; agents chase what slips, within limits. Strategy, annual plan, growth compass, valuation and capital allocation; possibility portfolio, scenarios and risks; draft board packs. Instructions by voice are read back before the CEO says yes. Connected to AI CFO, AI CPO, Pramaan and Pragya, and to regulators, news and markets. Deadlines and amounts are computed by code, never by AI. P³: Present = the whole company in one ranked view with legal duties and exposure; Purpose = goals and limits passed down to every desk; Possibility = next bets weighed with evidence before the Board.',
+  'AI CFO': 'cfo.duadesk.com. 18 finance desks including GST and input credit, MSME, TDS, close, MIS, consolidation, treasury and planning; Your Scorecard ranks issues by rupees at stake; every figure traceable to source; nothing posts without human approval; six Indian languages; read-only over the ERP (Tally, SAP, Oracle, Dynamics, Zoho).',
+  'AI CFO UAE edition': 'uae.duadesk.com. 12 desks: VAT, corporate tax, close, treasury, and PINT AE and Peppol e-invoicing.',
+  'AI CFO Saudi edition': 'sa.duadesk.com. 13 CFO desks; a ZATCA Fatoora e-invoicing centre (clearance and reporting, UBL 2.1, CSID, QR codes); VAT at 15%, Zakat and corporate tax; Arabic and English.',
+  'AI CFO Germany edition': 'de.duadesk.com. 16 desks for the Mittelstand: HGB and IFRS, ELSTER, GoBD, e-invoicing, the e-balance sheet and Pillar Two; read-only over the ERP.',
+  'AI CFO Netherlands edition': 'nl.duadesk.com. 17 desks: SBR, e-invoicing and ViDA, Peppol, VAT reconciliation and Pillar Two.',
+  'AI CFO Japan edition': 'jp.duadesk.com. 16 desks: consumption tax, the invoice transitional credit, e-Book Preservation, e-Tax and eLTAX, JP PINT and Pillar Two.',
+  'AI CPO': 'cpo.duadesk.com. 16 procurement and trade desks: should-cost, three-way match, spend analytics, supplier risk, payments and audit; the Ask Aria co-pilot; 100% population audit. Global Trade & Customs: bills of entry and shipping bills tracked, duty-rate changes checked, licences, bonds and SVB, eight reconciliations, nothing filed on its own. AI RFQ & e-Sourcing: a request, stock-out or photo becomes a full RFQ with landed cost, suppliers found, live reverse e-auction; every award signed by a buyer.',
+  'Fixed Assets': 'fassets.duadesk.com. 16 desks and 6 AI agents from acquisition to disposal; GPS, QR tags and phone verification; Schedule II, Income-tax blocks, Ind AS 16, 36 and 116, CARO 2020 and GST section 18(6); maker and checker; Tally export; data in Mumbai.',
+  'Dua Pramaan': 'audit.duadesk.com. AI-assisted audit across 20 audit types aligned to the Standards on Auditing; 100% population testing (Benford, duplicates); external corroboration (GSTN, MCA, 26AS/AIS); evidence for every finding; ready for engagement quality review and NFRA. The CA forms the opinion.',
+  'Dua Pragya': 'consulting.duadesk.com. 47 agents across six practices and 90 scenarios, working under a partner; every recommendation framed as Floor, Base and Stretch value; every claim source-stamped on a hash-chained Trust Ledger.',
+  'Dua Vyapar': 'retail.duadesk.com. An AI partner for 12 kinds of shop, from jewellers and kirana stores to garments, restaurants and salons; WhatsApp-first; Hindi, Hinglish, English and 11 more languages; one screen for cash, stock, who owes and what needs the owner today; the first 90 days free.',
+  'Philia': 'philia.duadesk.com. The AI office for resident welfare associations, wards and housing societies; WhatsApp-first; every complaint becomes a tracked case with an owner, an SLA clock and proof of the fix; nine AI agents with clear limits; eight modules; residents pay nothing; no face recognition, ever.',
+  'Dua Home': 'home.duadesk.com. Twelve AI helpers for the Indian household across 14 areas, from water tanks and power cuts to staff, bills and care for parents; a 7 am briefing; works with existing cameras; no AI in the safety path; doors open only for people; video stays at home.',
+  'Dua Parivaar': 'parenting.duadesk.com. By invitation. A child’s story from 5 to 18, kept privately and handed to them at 18; a Family Circle for grandparents and teachers; one childhood across two homes for separated parents; data in India; no ads, selling or scoring.',
+  'Marriage Companion': 'marriage.duadesk.com. Private beta. Seven stages from getting to know each other to parenthood; 18 areas of married life with no scores, ever; 12 guided conversations; five guides including Dua Humsafar and Dua Pandit Ji; all 39 rites in customary order; marrying across borders in nine countries; ten languages; both partners confirm every step.',
+  'Dua Saathi': 'saathi.duadesk.com. Elder care at home in Gurugram and Delhi NCR: SOS answered by a person within 2 minutes and the family told within 5; one care coordinator; nurse-checked medicines; fall detection; a Hindi companion; no AI in the emergency path.',
+  'Dua Legacy': 'legacy.duadesk.com. By invitation. Stories, values and wishes in the person’s own words, never invented; letters delivered on the days that matter; a passing confirmed by several family members, where one voice of doubt pauses everything; hosted in Mumbai.',
+};
+const P3_GUIDE = `THE DUADESK METHOD, P³ (Present · Purpose · Possibility). Every DuaDesk presentation follows the same three questions, in this order:
+- Present: what is? The situation seen clearly, with sources. AI does most of the seeing; a person confirms what is true.
+- Purpose: what should be? Goals, values and limits. Only a person owns them; AI clarifies, tests assumptions and shows the gap, and never sets them.
+- Possibility: what could be? Better, safer, kinder ways forward. AI widens the view; the person chooses what to try and approves.
+One rule above all: AI prepares, people decide.
+
+WEBINAR SHAPE (45 minutes, then up to 15 minutes of questions):
+title → agenda → poll → about the speaker (one slide, short) → a slide that sets out the three P³ questions for THIS audience → optional evidence slide (only sourced figures) →
+section 01 Present → section 02 Purpose → section 03 Possibility. In each section: a "section" slide; a "twocol" slide contrasting the participant’s job TODAY with their job WITH the product (left = today, red-ish; right = with the product, green); and a "demo" slide of 4–5 concrete steps on sample data. The Possibility section also shows how to measure the value (steps or table).
+Then: a P³ summary table (step | what you bring | what the product does | what you get) → "your next 90 days" as three steps (Present, then Purpose, then Possibility) → quote → qa → cta → end.
+Agenda (5 rows, 45 minutes): welcome and poll (facilitator, 5) · Present (10) · Purpose (10) · Possibility (10) · questions (facilitator, 10).
+
+VOICE: the product is shown as the participant’s own tool: how THEIR job becomes easier and more effective. Speak to the audience as “you”. Plain, warm, specific English; short lines; no hype, no exclamation marks, no “It’s not X, it’s Y”. Indian business context (rupees, Indian law) unless the webinar is for another country.
+FACTS: never invent statistics, client names, results or quotes. Use only the product facts given, figures already in the deck (keep their sources), or figures in the instruction. If a number would help but is not given, write [figure to check]. Demos always use sample data.
+SPEAKER NOTES: every slide has notes: who speaks (the facilitator by name, or Ashish), rough timing (e.g. “Ashish (about 2 min)”), and what to say or ask.`;
+const SLIDE_SPEC = `SLIDE TYPES (JSON). Keep to the character limits so text fits the slide. Every slide may have "notes" (speaker notes, up to 1,500 characters).
+- {"type":"title","sub": subtitle ≤ 70} (title, date and co-host are filled in from the webinar automatically)
+- {"type":"agenda","items":[[minutes, item ≤ 60, who ≤ 12], …5 rows]}
+- {"type":"poll","q": ≤ 60,"options":[4 options, each ≤ 28]}
+- {"type":"section","num":"01","title": ≤ 40,"sub": ≤ 90,"min":"10 MINUTES"}
+- {"type":"cards","kicker": ≤ 30 UPPERCASE,"title": ≤ 60,"cols":3,"cards":[{"icon":ICON,"h": ≤ 36,"t": ≤ 140}, … 3 or 6 cards]}
+- {"type":"stats","kicker","title": ≤ 60,"stats":[{"v": ≤ 7,"l": ≤ 90}, … 3],"takeaway": ≤ 160,"source": required if any figure}
+- {"type":"twocol","kicker","title": ≤ 60,"left":{"h": ≤ 28,"icon":ICON,"color":"FF8A7A","items":[5 items, each ≤ 70]},"right":{"h","icon","color":"1FC47D","items":[5 × ≤ 70]}}
+- {"type":"table","kicker","title": ≤ 60,"head":[3–4 headings],"rows":[3–5 rows of cells ≤ 80],"colW":[widths in inches summing to 12.1],"fs":17}
+- {"type":"steps","kicker","title": ≤ 60,"steps":[{"k": ≤ 12,"h": ≤ 30,"t": ≤ 170}, … 3 or 4]}
+- {"type":"flow","kicker","title","nodes":[{"h": ≤ 20,"t": ≤ 60}, … 4],"under": ≤ 120}
+- {"type":"demo","title": ≤ 45,"product": name,"url": web address,"icon":ICON,"what": ≤ 120,"steps":[4–5 steps, each ≤ 60]}
+- {"type":"quote","text": ≤ 110,"by": ≤ 90}
+- {"type":"qa","prompts":[4 likely questions, each ≤ 70]}
+- {"type":"cta","icon":ICON,"title":"Take the next step","offer": ≤ 70,"offerText": ≤ 200,"next":[]} ("next" is filled from the schedule automatically)
+- {"type":"end"}
+ICON is one of: ${STUDIO_ICONS.join(', ')}.`;
+
+const SPEC = { // fields kept for each slide type: s = text, a = list of text, o = object, n = number
+  title: { sub: 120 }, agenda: { title: 60, items: 'agenda' }, poll: { q: 120, options: ['a', 4, 60], how: 120 },
+  section: { num: 4, title: 80, sub: 160, min: 30 }, cards: { kicker: 50, title: 110, sub: 160, cols: 'n', cards: 'cards', source: 200 },
+  stats: { kicker: 50, title: 110, stats: 'stats', takeaway: 260, source: 260 }, twocol: { kicker: 50, title: 110, left: 'col', right: 'col', foot: 200 },
+  table: { kicker: 50, title: 110, sub: 160, head: ['a', 5, 60], rows: 'rows', colW: 'nums', rowH: 'nums', fs: 'n', source: 260 },
+  steps: { kicker: 50, title: 110, sub: 160, steps: 'steps' }, flow: { kicker: 50, title: 110, nodes: 'nodes', under: 200, foot: 200 },
+  demo: { title: 90, product: 60, url: 80, icon: 'icon', what: 220, steps: ['a', 6, 110] }, quote: { text: 200, by: 160 },
+  qa: { title: 80, lead: 160, prompts: ['a', 6, 120] }, cta: { title: 80, icon: 'icon', offer: 120, offerText: 320, next: 'next' }, end: { line: 120 },
+};
+const txt = (s, n) => String(s ?? '').replace(/[\u0000-\u0008\u000b-\u001f]/g, ' ').trim().slice(0, n);
+const icn = v => STUDIO_ICONS.includes(v) ? v : undefined;
+const hex = v => /^[0-9A-Fa-f]{6}$/.test(String(v || '')) ? String(v).toUpperCase() : undefined;
+function cleanSlide(sl) {
+  const spec = SPEC[sl && sl.type]; if (!spec) return null;
+  const o = { type: sl.type }, L = v => Array.isArray(v) ? v : [];
+  for (const [k, t] of Object.entries(spec)) {
+    const v = sl[k]; if (v === undefined || v === null) continue;
+    if (typeof t === 'number') { const s = txt(v, t); if (s) o[k] = s; }
+    else if (Array.isArray(t)) o[k] = L(v).slice(0, t[1]).map(x => txt(x, t[2])).filter(Boolean);
+    else if (t === 'n') { const n = +v; if (isFinite(n) && n > 0 && n < 100) o[k] = n; }
+    else if (t === 'icon') { if (icn(v)) o[k] = v; }
+    else if (t === 'nums') o[k] = L(v).map(Number).filter(n => isFinite(n) && n > 0 && n < 14).slice(0, 8);
+    else if (t === 'agenda') o[k] = L(v).slice(0, 8).map(r => [Math.max(1, Math.min(60, +L(r)[0] || 5)), txt(L(r)[1], 90), txt(L(r)[2], 20)]).filter(r => r[1]);
+    else if (t === 'cards') o[k] = L(v).slice(0, 6).map(c => ({ icon: icn(c && c.icon), h: txt(c && c.h, 60), t: txt(c && c.t, 240), color: hex(c && c.color) })).filter(c => c.h || c.t);
+    else if (t === 'stats') o[k] = L(v).slice(0, 4).map(c => ({ v: txt(c && c.v, 12), l: txt(c && c.l, 140) })).filter(c => c.v);
+    else if (t === 'col') o[k] = { h: txt(v.h, 50), icon: icn(v.icon), color: hex(v.color), items: L(v.items).slice(0, 6).map(x => txt(x, 120)).filter(Boolean) };
+    else if (t === 'rows') o[k] = L(v).slice(0, 7).map(r => L(r).slice(0, 5).map(c => txt(c, 140)));
+    else if (t === 'steps') o[k] = L(v).slice(0, 5).map(c => ({ k: txt(c && c.k, 20), h: txt(c && c.h, 50), t: txt(c && c.t, 260) })).filter(c => c.h || c.t);
+    else if (t === 'nodes') o[k] = L(v).slice(0, 5).map(c => ({ h: txt(c && c.h, 40), t: txt(c && c.t, 110) })).filter(c => c.h);
+    else if (t === 'next') o[k] = L(v).slice(0, 4).map(r => [txt(L(r)[0], 20), txt(L(r)[1], 90)]);
+  }
+  if (o.type === 'table') { // widths must match the columns, or PowerPoint gets confused
+    const cols = (o.head || []).length;
+    if (!cols || !(o.rows || []).length) return null;
+    o.rows = o.rows.map(r => { const x = r.slice(0, cols); while (x.length < cols) x.push(''); return x; });
+    if (!o.colW || o.colW.length !== cols) delete o.colW; else { const sum = o.colW.reduce((a, b) => a + b, 0); o.colW = o.colW.map(w => +(w * 12.1 / sum).toFixed(2)); }
+    if (!o.rowH || o.rowH.length !== o.rows.length + 1) delete o.rowH;
+  }
+  if (o.type === 'twocol' && !(o.left && o.right)) return null;
+  for (const [k, need] of Object.entries({ agenda: 'items', poll: 'options', cards: 'cards', stats: 'stats', steps: 'steps', flow: 'nodes', demo: 'steps', qa: 'prompts' })) if (o.type === k && !(o[need] || []).length) return null;
+  if (sl.notes) o.notes = txt(sl.notes, 4000);
+  return o;
+}
+function cleanDeck(d) {
+  const slides = (Array.isArray(d && d.slides) ? d.slides : []).slice(0, 40).map(cleanSlide).filter(Boolean);
+  if (slides.length < 3) throw E('The deck needs at least three slides.');
+  return { short: txt(d.short, 80), slides };
+}
+function cleanMeta(m) {
+  if (!m || typeof m !== 'object') return null;
+  const o = {};
+  if (m.subtitle) o.subtitle = txt(m.subtitle, 160);
+  if (m.summary) o.summary = txt(m.summary, 600);
+  if (Array.isArray(m.agenda)) { const a = m.agenda.slice(0, 8).map(x => ({ min: Math.max(1, Math.min(60, +(x && x.min) || 5)), item: txt(x && x.item, 120) })).filter(x => x.item); if (a.length) o.agenda = a; }
+  return Object.keys(o).length ? o : null;
+}
+const topicOf = w => w.topic_key || w.slug;
+async function nextVersion(slug) { const [r] = await sb(`webinar_decks?select=version&webinar_slug=eq.${encodeURIComponent(slug)}&order=version.desc&limit=1`); return (r ? r.version : 0) + 1; }
+async function addVersion(w, deck, o) {
+  const row = { webinar_slug: w.slug, topic_key: topicOf(w), version: await nextVersion(w.slug), deck, meta: o.meta || null, note: txt(o.note, 600) || null, instruction: txt(o.instruction, 2000) || null, source: o.source, status: 'draft' };
+  try { return (await sb('webinar_decks', { method: 'POST', body: row, prefer: 'return=representation' }))[0]; }
+  catch (e) { if (e.code === '23505') { row.version = await nextVersion(w.slug); return (await sb('webinar_decks', { method: 'POST', body: row, prefer: 'return=representation' }))[0]; } throw e; }
+}
+// what earlier sessions on the same topic taught us (grows with every webinar)
+async function topicMemory(w) {
+  const topic = topicOf(w);
+  const past = await sb(`webinars?select=slug,title,starts_at,recording_summary,recording_takeaways,topic_key&or=(topic_key.eq.${encodeURIComponent(topic)},slug.eq.${encodeURIComponent(topic)})&slug=neq.${encodeURIComponent(w.slug)}&order=starts_at.desc&limit=5`).catch(() => []);
+  const own = w.recording_summary ? [w] : [];
+  const lines = [];
+  for (const p of [...own, ...past]) {
+    if (p.recording_summary) lines.push(`Earlier session “${p.title}”${p.starts_at ? ' (' + new Date(p.starts_at).toISOString().slice(0, 10) + ')' : ''}: ${p.recording_summary}${(p.recording_takeaways || []).length ? ' Takeaways: ' + p.recording_takeaways.join('; ') : ''}`);
+    const fb = await sb(`registrations?select=feedback_rating,feedback_text&webinar_slug=eq.${encodeURIComponent(p.slug)}&feedback_text=not.is.null&order=feedback_at.desc&limit=15`).catch(() => []);
+    if (fb.length) lines.push(`Feedback from that session: ${fb.map(f => `(${f.feedback_rating || '-'}/5) ${txt(f.feedback_text, 200)}`).join(' | ')}`);
+  }
+  const notes = await sb(`webinar_decks?select=webinar_slug,version,note,instruction&topic_key=eq.${encodeURIComponent(topic)}&order=created_at.desc&limit=12`).catch(() => []);
+  if (notes.length) lines.push('Earlier changes to decks on this topic (newest first): ' + notes.map(n => `v${n.version}: ${n.instruction ? 'asked “' + txt(n.instruction, 160) + '” → ' : ''}${txt(n.note, 200)}`).join(' | '));
+  return lines.join('\n').slice(0, 12000);
+}
+async function claude(system, user, maxTokens) {
+  const { AI_KEY, AI_MODEL } = ENV();
+  if (!AI_KEY) throw E('AI is not set up yet: add WEBINAR_ANTHROPIC_KEY in Vercel (Settings → Environment Variables), then redeploy.', 503);
+  const res = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'x-api-key': AI_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+    body: JSON.stringify({ model: AI_MODEL, max_tokens: maxTokens, system, messages: [{ role: 'user', content: user }] }), signal: AbortSignal.timeout(280000) });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw E('AI error: ' + ((data.error && data.error.message) || res.status), 502);
+  if (data.stop_reason === 'max_tokens') throw E('The AI answer was too long and got cut off. Try a smaller change, or name the slides to change.', 502);
+  const text = (data.content || []).map(c => c.text || '').join('');
+  const a = text.indexOf('{'), z = text.lastIndexOf('}');
+  if (a < 0 || z < a) throw E('The AI returned an unexpected answer. Please try again.', 502);
+  try { return JSON.parse(text.slice(a, z + 1)); } catch { throw E('The AI returned an unexpected answer. Please try again.', 502); }
+}
+async function studioAI(w, base, instruction) {
+  const settings = await getSettings();
+  const facts = (w.products || []).map(p => `- ${p.name}: ${PRODUCT_FACTS[p.name] || p.url || ''}`).join('\n') || '- (no product linked to this webinar)';
+  const memory = await topicMemory(w);
+  const who = [w.cohost_name && `co-host: ${w.cohost_name}${w.cohost_confirmed ? '' : ' (not yet confirmed)'}`, w.facilitator_name && `facilitator: ${w.facilitator_name}${w.facilitator_confirmed ? '' : ' (not yet confirmed)'}`].filter(Boolean).join('; ') || 'co-host and facilitator not yet chosen (write “the facilitator” in notes)';
+  const system = `You are the presentation writer for DuaDesk webinars, presented by CA Ashish Dua (Chartered Accountant, founder of DuaDesk, 30+ years in enterprise systems; Microsoft India, Genpact, KPMG, Honeywell Middle East; Executive PG in Generative AI and ML from IIT Roorkee; 13 live AI products).
+${P3_GUIDE}
+${settings.studio_guide ? '\nHOUSE NOTES FROM ASHISH (follow these):\n' + txt(settings.studio_guide, 4000) + '\n' : ''}
+${SLIDE_SPEC}
+
+Answer with ONE JSON object and nothing else:
+{"note": "1–3 sentences on what you changed and why", "meta": {"subtitle": "…", "summary": "two short sentences, at most 150 characters, for the website and poster", "agenda": [{"min": 5, "item": "… (≤ 55 characters)"}, …]} or null if the subtitle, summary and agenda should stay as they are, "deck": {"short": "short deck name", "slides": [ … every slide, in order … ]}}
+Return the WHOLE deck every time, including slides you did not change (copy them exactly).`;
+  const user = `WEBINAR
+Title: ${w.title}
+Subtitle: ${w.subtitle || ''}
+When: ${w.starts_at ? whenIST(w.starts_at, w) : 'date to be set'} · ${(+w.duration_min || 45)} minutes + 15 minutes of questions · ${w.format === 'roundtable' ? 'private roundtable' : 'free public webinar'} on Microsoft Teams
+Who it’s for: ${w.audience || ''}
+Description: ${w.summary || ''}
+Current agenda: ${(w.agenda || []).map(a => a.min + ' min ' + a.item).join(' · ')}
+People: ${who}
+
+PRODUCT FACTS (the only product claims you may make)
+${facts}
+${memory ? '\nWHAT EARLIER SESSIONS ON THIS TOPIC TAUGHT US (use it to improve the deck)\n' + memory + '\n' : ''}
+${base ? 'CURRENT DECK (JSON)\n' + JSON.stringify(base) : 'There is no deck yet: write the first one, following the method and shape above.'}
+
+INSTRUCTION FROM ASHISH
+${instruction || (base ? 'Improve the deck so it follows the method closely.' : 'Write the first deck.')}`;
+  const j = await claude(system, user, 20000);
+  return { deck: cleanDeck(j.deck || {}), meta: cleanMeta(j.meta), note: txt(j.note, 600) || 'Changed as asked.' };
+}
+const versionRow = v => ({ version: v.version, note: v.note, instruction: v.instruction, source: v.source, status: v.status, created_at: v.created_at, slides: ((v.deck || {}).slides || []).length, meta: v.meta });
+
+const actions6 = {
+  async studio(b) {
+    const w = await getW(b.slug);
+    const rows = await sb(`webinar_decks?select=*&webinar_slug=eq.${encodeURIComponent(w.slug)}&order=version.desc&limit=60`);
+    const pickV = +b.version || w.deck_version || (rows[0] && rows[0].version);
+    const cur = rows.find(r => r.version === pickV) || null;
+    return { versions: rows.map(versionRow), current: w.deck_version || null, version: cur && cur.version, deck: cur && cur.deck, meta: cur && cur.meta, has_ai: !!ENV().AI_KEY, topic_key: topicOf(w) };
+  },
+  async studio_save(b) { // a prepared deck, or one you changed by hand
+    const w = await getW(b.slug);
+    const source = ['prepared', 'you'].includes(b.source) ? b.source : 'you';
+    const v = await addVersion(w, cleanDeck(b.deck || {}), { note: b.note || (source === 'prepared' ? 'Prepared deck' : 'Changed by hand'), source, meta: cleanMeta(b.meta) });
+    return { version: versionRow(v), deck: v.deck };
+  },
+  async studio_ai(b) {
+    const w = await getW(b.slug);
+    const instruction = txt(b.instruction, 2000);
+    let base = null;
+    if (b.version) { const [r] = await sb(`webinar_decks?select=deck&webinar_slug=eq.${encodeURIComponent(w.slug)}&version=eq.${+b.version}`); if (!r) throw E('That version was not found.', 404); base = r.deck; }
+    if (base && !instruction) throw E('Type what you would like changed.');
+    const r = await studioAI(w, base, instruction);
+    const v = await addVersion(w, r.deck, { note: r.note, instruction: instruction || (base ? '' : 'First draft'), source: 'ai', meta: r.meta });
+    return { version: versionRow(v), deck: v.deck, meta: v.meta };
+  },
+  async studio_use(b) { // make a version the one in use; optionally take its subtitle, description and agenda onto the website
+    const w = await getW(b.slug);
+    const [v] = await sb(`webinar_decks?select=*&webinar_slug=eq.${encodeURIComponent(w.slug)}&version=eq.${+b.version}`);
+    if (!v) throw E('That version was not found.', 404);
+    await sb(`webinar_decks?webinar_slug=eq.${encodeURIComponent(w.slug)}&status=eq.current`, { method: 'PATCH', body: { status: 'old' }, prefer: 'return=minimal' });
+    await sb(`webinar_decks?id=eq.${v.id}`, { method: 'PATCH', body: { status: 'current' }, prefer: 'return=minimal' });
+    const patch = { deck_version: v.version, updated_at: new Date().toISOString() };
+    if (b.apply_meta && v.meta) for (const k of ['subtitle', 'summary', 'agenda']) if (v.meta[k]) patch[k] = v.meta[k];
+    const rows = await sb(`webinars?slug=eq.${encodeURIComponent(w.slug)}`, { method: 'PATCH', body: patch, prefer: 'return=representation' });
+    return { webinar: { ...rows[0], files_out: filesOut(rows[0]) }, deck: v.deck, applied: !!(b.apply_meta && v.meta) };
+  },
+  async studio_topic(b) { // webinars that repeat a topic share one memory
+    const key = txt(b.topic_key, 120).toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-|-$/g, '') || null;
+    const rows = await sb(`webinars?slug=eq.${encodeURIComponent(b.slug || '')}`, { method: 'PATCH', body: { topic_key: key }, prefer: 'return=representation' });
+    if (!rows[0]) throw E('Webinar not found', 404);
+    return { topic_key: rows[0].topic_key || rows[0].slug };
+  },
+};
+
 /* DuaDesk Webinars: admin endpoint  →  /api/webinar-admin   (POST only, header x-admin-key) */
-export const config = { maxDuration: 60 };
+export const config = { maxDuration: 300 }; // the Studio's AI may take a couple of minutes
 
 const EDITABLE = ['n', 'series', 'format', 'status', 'title', 'subtitle', 'starts_at', 'duration_min', 'products', 'audience', 'summary', 'agenda', 'speaker',
   'cohost_needed', 'cohost_name', 'cohost_confirmed', 'cohost_note', 'facilitator_name', 'facilitator_confirmed', 'facilitator_note', 'teams_link', 'note', 'registration_open',
@@ -1575,9 +1800,9 @@ const actions = {
     return { webinar: rows[0] };
   },
   async settings_save(b) {
-    const allowed = ['bookings_url', 'whatsapp_number', 'whatsapp_channel_url', 'invites_per_person_per_30_days', 'warm_mode', 'cold_mode', 'daily_warm_cap', 'daily_cold_cap', 'warm_include_unlabelled', 'rocketreach_daily_limit', 'outreach_signature', 'rocketreach_api_key', 'rocketreach_mode', 'rocketreach_auto_daily', 'slot_weekday', 'slot_time', 'slot_weeks'];
+    const allowed = ['bookings_url', 'whatsapp_number', 'whatsapp_channel_url', 'invites_per_person_per_30_days', 'warm_mode', 'cold_mode', 'daily_warm_cap', 'daily_cold_cap', 'warm_include_unlabelled', 'rocketreach_daily_limit', 'outreach_signature', 'rocketreach_api_key', 'rocketreach_mode', 'rocketreach_auto_daily', 'slot_weekday', 'slot_time', 'slot_weeks', 'studio_guide'];
     if (b.settings && b.settings.rocketreach_api_key && /^••••/.test(b.settings.rocketreach_api_key)) delete b.settings.rocketreach_api_key;
-    const rows = Object.entries(b.settings || {}).filter(([k]) => allowed.includes(k)).map(([key, value]) => ({ key, value: key === 'outreach_signature' ? String(value).slice(0, 500) : clean(value, 500) }));
+    const rows = Object.entries(b.settings || {}).filter(([k]) => allowed.includes(k)).map(([key, value]) => ({ key, value: key === 'outreach_signature' ? String(value).slice(0, 500) : key === 'studio_guide' ? String(value).slice(0, 4000) : clean(value, 500) }));
     for (const r of rows) if (/_url$/.test(r.key) && r.value && !/^https:\/\//.test(r.value)) throw E(`${r.key} should start with https://`);
     if (rows.length) await sb('settings?on_conflict=key', { method: 'POST', body: rows, prefer: 'resolution=merge-duplicates,return=minimal' });
     return { settings: await settingsSafe() };
@@ -1749,7 +1974,7 @@ const actions = {
   },
 };
 
-Object.assign(actions, actions3, actions4, actions5);
+Object.assign(actions, actions3, actions4, actions5, actions6);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return send(res, 405, { error: 'POST only' });

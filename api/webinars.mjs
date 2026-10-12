@@ -50,7 +50,8 @@ async function storageRemove(bucket, paths) { if (paths.length) await storage(`o
 const FILES_BUCKET = 'webinar-files';
 const encPath = p => String(p).split('/').map(encodeURIComponent).join('/');
 const fileUrl = (f, download) => f && f.path ? `${ENV().SB_URL}/storage/v1/object/public/${FILES_BUCKET}/${encPath(f.path)}${download ? '?download=' + encodeURIComponent(f.name || '') : ''}` : null;
-const posterKey = w => `${w.starts_at ? new Date(w.starts_at).toISOString() : ''}|${w.title || ''}`;
+// a poster is current while everything printed on it is unchanged: date, title, subtitle, description, agenda, speakers, demo
+const posterKey = w => `${w.starts_at ? new Date(w.starts_at).toISOString() : ''}|${w.title || ''}|` + crypto.createHash('sha1').update(JSON.stringify([w.subtitle || '', w.summary || '', (w.agenda || []).map(a => [a.min, a.item]), (w.products || []).map(p => p.name), w.cohost_confirmed ? w.cohost_name || '' : '', w.facilitator_confirmed ? w.facilitator_name || '' : '', w.format || '', +w.duration_min || 45])).digest('hex').slice(0, 12);
 // what may be shown or sent: a poster only while it still matches the date and title; the slides only as the share setting allows
 function webinarFiles(w, when) {
   const f = w.files || {}, cur = k => f[k] && f[k].path && f[k].for === posterKey(w);

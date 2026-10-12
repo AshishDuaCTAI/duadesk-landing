@@ -273,6 +273,8 @@ tr.row:hover td{background:#111e35}
   <div class="s2"><label>Finding new contacts</label><select name="rocketreach_mode"><option value="approve">I choose who to reveal (recommended)</option><option value="auto">Automatically, for webinars that need more people</option></select></div>
   <div><label>Automatic reveals per day (max)</label><input name="rocketreach_auto_daily" type="number" min="0" max="50"></div>
   <div class="small mut" style="align-self:end">Automatic mode runs once a day, only for webinars being invited now whose cold list is running low, and never goes above the daily limit.</div>
+  <div class="s4"><h3>Studio (presentations)</h3></div>
+  <div class="s4"><label>Your house notes for the AI (optional)</label><textarea name="studio_guide" style="min-height:90px" placeholder="For example: always end the Present section with a question to the audience · prefer Indian manufacturing examples · keep demos to 4 steps"></textarea><p class="small mut">Every presentation already follows Present · Purpose · Possibility. Anything you add here is followed on top, for every webinar.</p></div>
   <div class="s4"><button class="btn gold" type="submit">Save settings</button> <span class="small" id="setMsg"></span></div>
  </form>
  <div class="card"><h3>Microsoft Teams</h3><p class="mut small">When connected, the app creates each Teams meeting in your Outlook calendar, fetches attendance automatically after each webinar, and can fetch the transcript for the AI summary. Connection details go in Vercel (see the setup guide).</p><div class="row-actions"><button class="btn" id="tmCheck">Check Teams connection</button><span class="small" id="tmState"></span></div></div>
@@ -370,6 +372,7 @@ function edit(w){
   o.agenda=[].map.call(ag.querySelectorAll('.agrow'),function(r){return {min:+r.children[0].value||0,item:r.children[1].value.trim()};}).filter(function(a){return a.item;});
   if(o.status==='published'&&!o.starts_at){$('eErr').textContent='A published webinar needs a date and time.';return;}
   (isNew?call('create',{webinar:o}):call('save',{slug:w.slug,webinar:o})).then(function(j){if(j&&j.teams_note)alert(j.teams_note);$('drawer').classList.remove('on');
+   var fo=j&&j.webinar&&j.webinar.files_out;if(fo&&fo.poster_png&&!fo.poster_png.current)makePosters(j.webinar).then(function(r){setFilesOut(j.webinar.slug,r.files);}).catch(function(e){alert('The details are saved, but the poster could not be made again: '+e.message);});
    if(j&&j.moved&&j.registered&&confirm(j.registered+(j.registered===1?' person is':' people are')+' registered for “'+w.title+'”. Email them the new date with an updated calendar invite?'))notifyLoop(w.slug,function(r){alert(r);});
    loadPlan();}).catch(function(err){$('eErr').textContent=err.message;});};
  var tc=$('tmCreate');if(tc)tc.onclick=function(){if(!w.starts_at){$('tmMsg').textContent='Save a date and time first.';return;}tc.disabled=true;$('tmMsg').textContent='Creating the meeting in Teams…';
@@ -559,11 +562,11 @@ document.addEventListener('click',function(e){var n=e.target.closest('[data-tn]'
 
 /* ---------- settings ---------- */
 /* ---------- settings ---------- */
-var SKEYS=['bookings_url','whatsapp_number','whatsapp_channel_url','invites_per_person_per_30_days','warm_mode','cold_mode','daily_warm_cap','daily_cold_cap','warm_include_unlabelled','rocketreach_api_key','rocketreach_daily_limit','outreach_signature','rocketreach_mode','rocketreach_auto_daily'];
+var SKEYS=['bookings_url','whatsapp_number','whatsapp_channel_url','invites_per_person_per_30_days','warm_mode','cold_mode','daily_warm_cap','daily_cold_cap','warm_include_unlabelled','rocketreach_api_key','rocketreach_daily_limit','outreach_signature','rocketreach_mode','rocketreach_auto_daily','studio_guide'];
 function fillSettings(){var f=$('setF');SKEYS.forEach(function(k){if(f.elements[k])f.elements[k].value=SET[k]||'';});
  call('today').then(function(j){$('smtpState').innerHTML=j.smtp?'<span class="y">Outreach mailbox connected.</span> Cold emails go from it, a few at a time between 9:30 AM and 2:30 PM.':'<span class="warn">Outreach mailbox not connected yet</span> (add the OUTREACH_SMTP settings in Vercel, see the setup guide). Until then cold emails are prepared but not sent.';}).catch(function(){});
  call('push_stats').then(function(j){$('pushCount').textContent=j.subscribers;}).catch(function(){});}
-$('setF').onsubmit=function(e){e.preventDefault();var f=e.target,s={};SKEYS.forEach(function(k){if(f.elements[k])s[k]=f.elements[k].value.trim();});
+$('setF').onsubmit=function(e){e.preventDefault();var f=e.target,s={};SKEYS.forEach(function(k){if(f.elements[k])s[k]=k==='studio_guide'?f.elements[k].value:f.elements[k].value.trim();});
  call('settings_save',{settings:s}).then(function(j){SET=j.settings;fillSettings();$('setMsg').innerHTML='<span class="y">Saved.</span>';}).catch(function(err){$('setMsg').innerHTML='<span class="err">'+esc(err.message)+'</span>';});};
 $('tmCheck').onclick=function(){$('tmState').textContent='Checking…';call('teams_status').then(function(j){var y=function(ok,t){return ok?'<span class="y">✓ '+t+'</span>':'<span class="err">✗ '+t+'</span>';};
  if(!j.connected){$('tmState').innerHTML='Not connected yet: add MS_TENANT_ID, MS_CLIENT_ID, MS_CLIENT_SECRET and MS_ORGANIZER_ID in Vercel.';return;}
@@ -859,8 +862,65 @@ function makePosters(w,prog){var base=(w.title||'webinar').replace(/[^\w ]+/g,''
   pdf.setProperties({title:w.title,subject:'DuaDesk webinar',author:'CA Ashish Dua'});
   return new Promise(function(res){c.toBlob(function(png){res({png:png,pdf:pdf.output('blob'),preview:c.toDataURL('image/png')});},'image/png');});})
  .then(function(b){return uploadFile(w.slug,'poster_png',b.png,base+'.png',prog&&function(p){prog(p/2);},false).then(function(){return uploadFile(w.slug,'poster_pdf',b.pdf,base+'.pdf',prog&&function(p){prog(.5+p/2);},true);});});}
+/* ---------- Webinar Studio (v3.7): the presentation kept as slides, changed by instruction, every version kept ---------- */
+function loadScript(src,test){return test()?Promise.resolve():new Promise(function(res,rej){var s=document.createElement('script');s.src=src;s.onload=function(){test()?res():rej(new Error('Could not load '+src));};s.onerror=function(){rej(new Error('Could not load a tool from the internet. Check your connection and try again.'));};document.head.appendChild(s);});}
+function studioTools(){return Promise.all([loadScript('https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js',function(){return typeof PptxGenJS!=='undefined';}),loadScript('webinar-deck-engine.js?v=37',function(){return !!window.DDDeck;})]);}
+function upcomingAfter(w){return W.filter(function(x){return x.slug!==w.slug&&x.status==='published'&&x.starts_at&&(!w.starts_at||new Date(x.starts_at)>new Date(w.starts_at));}).sort(function(a,b){return new Date(a.starts_at)-new Date(b.starts_at);}).slice(0,4);}
+function deckFileName(w,v){return ((w.n?String(w.n).padStart(2,'0')+'_':'')+(w.title||'webinar')).replace(/[^\w -]+/g,'').trim().replace(/\s+/g,'_').slice(0,70)+'_v'+v+'.pptx';}
+function buildDeck(w,deck){return studioTools().then(function(){return DDDeck.build(deck,{webinar:w,upcoming:upcomingAfter(w)});});}
+var ST_TYPES={title:'Title',agenda:'Agenda',poll:'Poll',section:'Section',cards:'Cards',stats:'Figures',twocol:'Today vs with',table:'Table',steps:'Steps',flow:'Flow',demo:'Live demo',quote:'Quote',qa:'Questions',cta:'Next step',end:'Thank you'};
+function stTitle(sl,w){return sl.type==='title'?(w.title+(sl.sub?' — '+sl.sub:'')):sl.type==='agenda'?(sl.title||'Our 45 minutes together'):sl.type==='section'?(sl.num+'  '+sl.title):sl.type==='poll'?sl.q:sl.type==='quote'?'“'+sl.text+'”':sl.type==='qa'?(sl.title||'Questions and answers'):sl.type==='end'?'Thank you':(sl.title||'');}
+function stBody(sl){var L=function(a){return (a||[]).map(function(x){return '<li>'+esc(x)+'</li>';}).join('');};
+ switch(sl.type){case 'agenda':return '<ul>'+L((sl.items||[]).map(function(i){return i[0]+' min · '+i[1]+(i[2]?' ('+i[2]+')':'');}))+'</ul>';
+  case 'poll':return '<ul>'+L(sl.options)+'</ul>';case 'section':return esc(sl.sub||'');
+  case 'cards':return '<ul>'+L((sl.cards||[]).map(function(c){return c.h+': '+c.t;}))+'</ul>';
+  case 'stats':return '<ul>'+L((sl.stats||[]).map(function(c){return c.v+' '+c.l;}))+'</ul>'+(sl.takeaway?'<i>'+esc(sl.takeaway)+'</i>':'')+(sl.source?'<div class="small mut">Source: '+esc(sl.source)+'</div>':'');
+  case 'twocol':return '<div class="grid" style="gap:10px"><div class="s2"><b>'+esc(sl.left.h)+'</b><ul>'+L(sl.left.items)+'</ul></div><div class="s2"><b>'+esc(sl.right.h)+'</b><ul>'+L(sl.right.items)+'</ul></div></div>';
+  case 'table':return '<div class="tbl"><table><tr>'+(sl.head||[]).map(function(h){return '<th>'+esc(h)+'</th>';}).join('')+'</tr>'+(sl.rows||[]).map(function(r){return '<tr>'+r.map(function(c){return '<td>'+esc(c)+'</td>';}).join('')+'</tr>';}).join('')+'</table></div>';
+  case 'steps':return '<ul>'+L((sl.steps||[]).map(function(c){return (c.k?c.k+' · ':'')+c.h+': '+c.t;}))+'</ul>';
+  case 'flow':return '<ul>'+L((sl.nodes||[]).map(function(c){return c.h+': '+c.t;}))+'</ul>'+esc(sl.under||'');
+  case 'demo':return '<b>'+esc(sl.product||'')+'</b> '+esc(sl.what||'')+'<ol>'+L(sl.steps)+'</ol>';
+  case 'quote':return esc(sl.by||'');case 'qa':return '<ul>'+L(sl.prompts)+'</ul>';case 'cta':return '<b>'+esc(sl.offer||'')+'</b> '+esc(sl.offerText||'');default:return '';}}
+function studio(w){
+ var ST={versions:[],version:null,deck:null,meta:null,has_ai:false,busy:false};
+ $('dbox').innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h1 style="margin:0">🎨 Studio: '+esc(w.title)+'</h1><button class="btn" id="dClose">Close</button></div>'+
+ '<p class="mut small">Your presentation is kept here as slides, following Present · Purpose · Possibility. Ask for a change in plain words; every version is kept. Nothing reaches participants, Teams or the website until you press <b>Use this version</b>.</p>'+
+ '<div id="stTop"></div><div id="stAsk"></div><div id="stMeta"></div><p class="small" id="stMsg"></p><div id="stOut"></div>';
+ $('dClose').onclick=function(){$('drawer').classList.remove('on');};$('drawer').classList.add('on');
+ var msg=function(h){$('stMsg').innerHTML=h;},fail=function(e){ST.busy=false;msg('<span class="err">'+esc(e.message)+'</span>');render();};
+ function load(v){msg('Loading…');return call('studio',{slug:w.slug,version:v}).then(function(j){Object.assign(ST,j);msg('');render();}).catch(fail);}
+ function render(){
+  var cur=ST.versions.find(function(v){return v.version===ST.version;});
+  if(!ST.versions.length){var st=window.DD_STARTERS&&DD_STARTERS[w.slug];
+   $('stTop').innerHTML='<div class="card"><b>No presentation here yet.</b><div class="row-actions">'+(st?'<button class="btn gold" id="stStarter">📥 Load the prepared deck ('+st.slides.length+' slides)</button>':'')+'<button class="btn'+(st?'':' gold')+'" id="stFirst">✨ Draft the first deck with AI</button></div><p class="small mut">The AI follows Present · Purpose · Possibility and uses only the facts about the products linked to this webinar. It takes a minute or two.</p></div>';
+   $('stAsk').innerHTML='';$('stMeta').innerHTML='';$('stOut').innerHTML='';
+   if(st)$('stStarter').onclick=function(){this.disabled=true;call('studio_save',{slug:w.slug,deck:{short:st.short,slides:st.slides},source:'prepared',note:st.note}).then(function(j){return load(j.version.version);}).catch(fail);};
+   $('stFirst').onclick=function(){ask('');};return;}
+  $('stTop').innerHTML='<div class="card"><div class="grid"><div class="s2"><label>Version</label><select id="stV">'+ST.versions.map(function(v){return '<option value="'+v.version+'"'+(v.version===ST.version?' selected':'')+'>v'+v.version+(v.version===ST.current?' · in use':'')+' · '+({ai:'AI',you:'you',prepared:'prepared'})[v.source]+' · '+esc(ist(v.created_at))+' · '+v.slides+' slides</option>';}).join('')+'</select></div>'+
+   '<div class="s2" style="align-self:end"><div class="row-actions" style="margin:0"><button class="btn" id="stDl">⬇ Download PowerPoint</button>'+(ST.version===ST.current?'<span class="y small">This version is in use.</span>':'<button class="btn gold" id="stUse">✓ Use this version</button>')+'</div></div></div>'+
+   (cur&&(cur.note||cur.instruction)?'<p class="small" style="margin:8px 0 0">'+(cur.instruction?'<b>You asked:</b> '+esc(cur.instruction)+'<br>':'')+(cur.note?'<b>What changed:</b> '+esc(cur.note):'')+'</p>':'')+'</div>';
+  $('stAsk').innerHTML='<div class="card"><label>What would you like changed?</label><textarea id="stIn" rows="3" placeholder="For example: make the Purpose section about a CFO’s month-end close · shorten the speaker slide · add a demo step on legal duties · use more examples from manufacturing"></textarea>'+
+   '<div class="row-actions"><button class="btn gold" id="stGo"'+(ST.busy?' disabled':'')+'>✨ Ask AI to change v'+ST.version+'</button><span class="small mut">'+(ST.has_ai?'Makes a new version; v'+ST.version+' stays as it is. Takes a minute or two.':'<span class="warn">AI is not set up: add WEBINAR_ANTHROPIC_KEY in Vercel.</span>')+'</span></div></div>';
+  var m=ST.meta;$('stMeta').innerHTML=m&&ST.version!==ST.current?'<div class="card"><b>This version also suggests new website text</b>'+(m.subtitle?'<div class="small"><b>Subtitle:</b> '+esc(m.subtitle)+'</div>':'')+(m.summary?'<div class="small"><b>Description:</b> '+esc(m.summary)+'</div>':'')+(m.agenda?'<div class="small"><b>Agenda:</b> '+m.agenda.map(function(a){return a.min+' min '+esc(a.item);}).join(' · ')+'</div>':'')+'<label class="chk" style="margin-top:6px"><input type="checkbox" id="stApply" checked> When I press “Use this version”, also update the website, emails and poster with this text</label></div>':'';
+  var d=ST.deck||{slides:[]};
+  $('stOut').innerHTML=d.slides.map(function(sl,i){return '<div class="card" style="margin:8px 0;padding:12px 14px"><div class="small mut">'+(i+1)+' · '+(ST_TYPES[sl.type]||sl.type)+'</div><b>'+esc(stTitle(sl,w))+'</b><div class="small" style="margin-top:4px">'+stBody(sl)+'</div>'+(sl.notes?'<details class="small mut"><summary>Speaker notes</summary>'+esc(sl.notes)+'</details>':'')+'</div>';}).join('');
+  $('stV').onchange=function(){load(+this.value);};
+  $('stDl').onclick=function(){var b=this;b.disabled=true;msg('Building the PowerPoint…');buildDeck(w,ST.deck).then(function(blob){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=deckFileName(w,ST.version);a.click();b.disabled=false;msg('<span class="y">Downloaded.</span>');}).catch(function(e){b.disabled=false;fail(e);});};
+  var u=$('stUse');if(u)u.onclick=function(){useIt(u);};
+  $('stGo').onclick=function(){var t=$('stIn').value.trim();if(!t){msg('<span class="warn">Type what you would like changed.</span>');return;}ask(t);};}
+ function ask(t){ST.busy=true;render();var s=Date.now(),tm=setInterval(function(){msg('✨ The AI is rewriting the deck… '+Math.round((Date.now()-s)/1000)+' s (usually one to two minutes; keep this open)');},1000);
+  call('studio_ai',{slug:w.slug,instruction:t,version:ST.versions.length?ST.version:null}).then(function(j){clearInterval(tm);ST.busy=false;return load(j.version.version).then(function(){msg('<span class="y">New version v'+j.version.version+' ready.</span> Look through it below, download it to check, then press “Use this version”.');});}).catch(function(e){clearInterval(tm);fail(e);});}
+ function useIt(b){b.disabled=true;var apply=!!($('stApply')&&$('stApply').checked);msg('Putting v'+ST.version+' in use…');
+  call('studio_use',{slug:w.slug,version:ST.version,apply_meta:apply}).then(function(j){var nw=Object.assign({},w,j.webinar);var x=W.find(function(o){return o.slug===w.slug;});if(x)Object.assign(x,j.webinar);Object.assign(w,j.webinar);
+   msg('Building the PowerPoint and attaching it…');
+   return buildDeck(nw,j.deck).then(function(blob){return uploadFile(w.slug,'deck',blob,deckFileName(nw,ST.version),null);}).then(function(r){setFilesOut(w.slug,r.files,r.deck_share);
+    var p=(r.files.poster_png&&!r.files.poster_png.current)||(j.applied&&!r.files.poster_png);if(!p)return r;msg('Making the poster again…');return makePosters(nw).then(function(r2){setFilesOut(w.slug,r2.files);r2.poster=true;return r2;});})
+   .then(function(r){ST.current=ST.version;return load(ST.version).then(function(){msg('<span class="y">v'+ST.version+' is now in use.</span> '+['The slides',j.applied&&'the website text',r.poster&&'the poster'].filter(Boolean).join(', ').replace(/, ([^,]*)$/,' and $1')+(r.poster||j.applied?' are':' are')+' updated'+(w.teams_link?', and the Teams meeting has the new files':'')+'.'+(r.notes&&r.notes.length?' <span class="warn">'+esc(r.notes.join(' '))+'</span>':''));renderPlan();});});})
+  .catch(function(e){b.disabled=false;fail(e);});}
+ loadScript('webinar-starter-decks.js?v=37',function(){return !!window.DD_STARTERS;}).catch(function(){}).then(function(){return load();});}
+
 function renderFiles(w){var box=$('fBox');if(!box)return;var f=w.files_out||{},share=w.deck_share||'after';
- box.innerHTML='<h2>Presentation and poster</h2>'+
+ box.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2>Presentation and poster</h2><button class="btn gold sm" type="button" id="fStudio">🎨 Open the Studio</button></div>'+
  '<div class="card" style="margin:0 0 10px"><b>Presentation</b> &nbsp;'+(f.deck?'<a href="'+esc(f.deck.download)+'">'+esc(f.deck.name)+'</a> <span class="mut small">('+fileSize(f.deck.size)+', uploaded '+esc(ist(f.deck.at))+')</span>':'<span class="mut">none yet</span>')+
  '<div class="row-actions"><label class="btn sm" style="cursor:pointer">'+(f.deck?'⬆ Upload a new version':'⬆ Upload the presentation')+'<input type="file" id="fDeck" accept=".pptx,.ppt,.pdf,.key,.odp" hidden></label>'+(f.deck?'<button class="btn sm" type="button" id="fDeckDel">Remove</button>':'')+
  '<label class="small" style="display:inline-flex;align-items:center;gap:6px;margin:0 0 0 auto">Share the slides <select id="fShare" style="width:auto"><option value="no">Only me</option><option value="after">After the session (with the recording)</option><option value="before">Also before (confirmation and reminder emails)</option></select></label></div>'+
@@ -871,6 +931,7 @@ function renderFiles(w){var box=$('fBox');if(!box)return;var f=w.files_out||{},s
  '<p class="small mut" style="margin:6px 0 0">Made from the saved details (save first if you changed anything). Shared as a link in invitations and confirmations and on the website, for people to forward.</p></div></div>'+
  '<p class="small mut" id="fMsg">'+(w.teams_link?'The slides and poster are also attached to the Teams meeting in your calendar, for your co-host and facilitator.':'Once the Teams meeting is created, the slides and poster are attached to it too.')+'</p>';
  $('fShare').value=share;
+ $('fStudio').onclick=function(){studio(CURW||w);};
  var msg=function(h){$('fMsg').innerHTML=h;},done=function(j,what){setFilesOut(w.slug,j.files,j.deck_share);renderFiles(CURW||w);msg('<span class="y">'+what+'</span>'+(j.notes&&j.notes.length?' <span class="warn">'+esc(j.notes.join(' '))+'</span>':''));},fail=function(e){msg('<span class="err">'+esc(e.message)+'</span>');};
  $('fShare').onchange=function(){var v=this.value;call('file_share',{slug:w.slug,deck_share:v}).then(function(){var x=W.find(function(o){return o.slug===w.slug;});if(x)x.deck_share=v;w.deck_share=v;msg('<span class="y">Saved.</span> '+({no:'Only you can download the slides.',after:'The slides go out with the recording after the session.',before:'The slides are in the confirmation and reminder emails, and after the session.'})[v]);}).catch(fail);};
  $('fDeck').onchange=function(){var file=this.files[0];if(!file)return;msg('Uploading '+esc(file.name)+'…');
