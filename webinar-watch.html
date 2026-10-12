@@ -55,6 +55,7 @@ function show(j){DATA=j;try{localStorage.setItem('dd-watch',JSON.stringify({p:j.
  media+'<div class="grid"><div>'+
  (j.summary?'<h3>About this session</h3><p>'+esc(j.summary)+'</p>':'')+
  ((j.takeaways||[]).length?'<h3 style="margin-top:22px">Key takeaways</h3><ul class="tk">'+j.takeaways.map(function(t){return '<li>'+esc(t)+'</li>';}).join('')+'</ul>':'')+
+ ((j.faq||[]).length?'<h3 style="margin-top:22px">Questions from the session</h3>'+j.faq.map(function(f){return '<details class="ag"><summary>'+esc(f.q)+'</summary><p>'+esc(f.a||'')+'</p></details>';}).join(''):'')+
  '<div class="card" style="margin-top:24px"><h3>Would '+(prods?prods:'DuaDesk')+' help your organisation?</h3><p class="note">Ashish will personally walk you through it, on your own questions.</p><div style="display:flex;flex-wrap:wrap;gap:10px"><a class="btn gold" href="webinar-respond.html'+act+'&a=talk">🤝 Talk to us</a><a class="btn ghost" href="webinar-respond.html'+act+'&a=topic">💡 Suggest the next topic</a>'+(j.slides_url?'<a class="btn ghost" href="'+esc(j.slides_url)+'" target="_blank" rel="noopener">Download the slides</a>':'')+'</div></div>'+
  '</div><aside>'+((j.chapters||[]).length?'<div class="card"><h3>Chapters</h3><ul class="chap">'+j.chapters.map(function(c){return '<li><button type="button" data-t="'+esc(c.t)+'"><span>'+esc(c.t)+'</span>'+esc(c.title)+'</button></li>';}).join('')+'</ul></div>':'')+
  '<p style="margin-top:16px"><a class="btn ghost sm" href="webinars.html">See upcoming webinars</a></p></aside></div>';

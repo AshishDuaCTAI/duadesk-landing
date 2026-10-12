@@ -177,6 +177,7 @@ function card(w){
   '<h3>'+esc(w.title)+'</h3><p class="sub">'+esc(w.subtitle||'')+'</p><p class="sum">'+esc(w.summary||'')+'</p>'+
   '<div class="meta"><span><b>For:</b> '+esc(w.audience||'')+'</span>'+people+'<span class="prod"><b>DuaDesk product:</b> '+prods+'</span>'+(w.note?'<span>'+esc(w.note)+'</span>':'')+'</div>'+
   '<details class="ag"><summary>45-minute agenda</summary>'+bar(w)+'<ol>'+(w.agenda||[]).map(function(a){return '<li><span>'+esc(a.min)+' min</span>'+esc(a.item)+'</li>';}).join('')+'</ol></details>'+
+  ((w.faq||[]).length?'<details class="ag"><summary>Questions people ask ('+w.faq.length+')</summary><dl class="faq">'+w.faq.map(function(f){return '<dt>'+esc(f.q)+'</dt><dd>'+esc(f.a||'')+'</dd>';}).join('')+'</dl></details>':'')+
   '<div class="act">'+act+share+'</div></div></article>';}
 
 function render(){

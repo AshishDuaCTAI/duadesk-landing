@@ -76,6 +76,7 @@ tr.row:hover td{background:#111e35}
   <button class="tab" data-p="send" aria-selected="false">Invite &amp; remind</button>
   <button class="tab" data-p="regs" aria-selected="false">Registrations</button>
   <button class="tab" data-p="after" aria-selected="false">After the webinar</button>
+  <button class="tab" data-p="know" aria-selected="false">Knowledge</button>
   <button class="tab" data-p="people" aria-selected="false">People &amp; WhatsApp</button>
   <button class="tab" data-p="leads" aria-selected="false">Leads</button>
   <button class="tab" data-p="topics" aria-selected="false">Topic ideas</button>
@@ -199,6 +200,18 @@ tr.row:hover td{background:#111e35}
 </section>
 
 <!-- PEOPLE -->
+<section class="panel" id="p-know">
+ <h1>Knowledge</h1>
+ <p class="mut small">What every session teaches, kept by topic: the questions people asked and the answers that worked, doubts raised, what landed, lessons and promises. After each webinar the transcript is fetched from Teams and the AI drafts these for you to review. Approved and suggested items (never hidden ones) are used by the Studio for the next deck on the topic; questions you put “on the website” appear on the webinar page, the recording page and in the thank-you email. Participants’ names are never kept.</p>
+ <div class="row-actions"><select id="kSel" class="wsel" style="max-width:520px"></select></div>
+ <div class="card"><p class="small" id="kTopic" style="margin:0 0 8px"></p>
+  <div class="row-actions"><button class="btn" id="kFetch">Get transcript from Teams</button><label class="btn" style="cursor:pointer">Upload transcript (.vtt or .txt)<input type="file" id="kFile" accept=".vtt,.txt" hidden></label><button class="btn gold" id="kExtract">✨ Draft knowledge with AI</button><button class="btn" id="kBrief">🖨 Brief for the next session</button></div>
+  <p class="small" id="kMsg"></p></div>
+ <div class="card"><div class="grid"><div><label>Add your own</label><select id="kKind"><option value="qa">Question and answer</option><option value="objection">Doubt raised</option><option value="landed">What landed well</option><option value="lesson">Lesson for next time</option><option value="promise">Promise made</option></select></div>
+  <div class="s3"><label>Question, or the text</label><input id="kQ"></div><div class="s3"><label>Answer (for questions and doubts)</label><input id="kA"></div><div style="align-self:end"><button class="btn" id="kAdd">+ Add</button></div></div></div>
+ <div class="row-actions" id="kFilters"></div>
+ <div id="kList"></div>
+</section>
 <section class="panel" id="p-people">
  <h1>People &amp; WhatsApp</h1>
  <div class="stats" id="pStats"></div>
@@ -314,7 +327,7 @@ $('lf').onsubmit=function(e){e.preventDefault();KEY=$('pw').value;$('lerr').text
 $('logout').onclick=function(e){e.preventDefault();signOut();};
 try{var k=sessionStorage.getItem('wa');if(k){KEY=k;call('login').then(start).catch(function(){});}}catch(e){}
 function start(){$('loginView').hidden=true;$('app').hidden=false;loadPlan().then(loadToday);}
-var LOADERS={today:function(){loadToday();},dash:function(){loadDash();},insights:function(){loadInsights();},plan:function(){loadPlan();},regs:function(){loadRegs();},after:function(){loadAfter();},people:function(){loadPeople();},leads:function(){loadLeads();},topics:function(){loadTopics();},settings:function(){fillSettings();}};
+var LOADERS={today:function(){loadToday();},dash:function(){loadDash();},insights:function(){loadInsights();},plan:function(){loadPlan();},regs:function(){loadRegs();},after:function(){loadAfter();},know:function(){(W.length?Promise.resolve():loadPlan()).then(function(){if(!$('kSel').value&&W[0])$('kSel').value=W[0].slug;loadKnowledge();});},people:function(){loadPeople();},leads:function(){loadLeads();},topics:function(){loadTopics();},settings:function(){fillSettings();}};
 document.querySelectorAll('.tab').forEach(function(t){t.onclick=function(){document.querySelectorAll('.tab').forEach(function(x){x.setAttribute('aria-selected',x===t?'true':'false');});
  document.querySelectorAll('.panel').forEach(function(p){p.classList.toggle('on',p.id==='p-'+t.dataset.p);});if(LOADERS[t.dataset.p])LOADERS[t.dataset.p]();};});
 
@@ -862,6 +875,51 @@ function makePosters(w,prog){var base=(w.title||'webinar').replace(/[^\w ]+/g,''
   pdf.setProperties({title:w.title,subject:'DuaDesk webinar',author:'CA Ashish Dua'});
   return new Promise(function(res){c.toBlob(function(png){res({png:png,pdf:pdf.output('blob'),preview:c.toDataURL('image/png')});},'image/png');});})
  .then(function(b){return uploadFile(w.slug,'poster_png',b.png,base+'.png',prog&&function(p){prog(p/2);},false).then(function(){return uploadFile(w.slug,'poster_pdf',b.pdf,base+'.pdf',prog&&function(p){prog(.5+p/2);},true);});});}
+/* ---------- Knowledge (v3.8): what every session teaches, by topic ---------- */
+var KN={topic:null,items:[],webinars:[],transcripts:[],has_ai:false,filter:'all'};
+var K_LABEL={qa:'Questions and answers',objection:'Doubts raised',landed:'What landed well',lesson:'Lessons for next time',promise:'Promises made'};
+function loadKnowledge(keep){var w=W.find(function(x){return x.slug===$('kSel').value;})||W[0];if(!w)return;
+ if(keep!==true)$('kMsg').textContent='Loading…';return call('knowledge',{slug:w.slug}).then(function(j){Object.assign(KN,j);if(keep!==true)$('kMsg').textContent='';renderKnowledge(w);}).catch(function(e){$('kMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';});}
+function renderKnowledge(w){
+ var tr=KN.transcripts.find(function(t){return t.webinar_slug===w.slug;}),others=KN.webinars.filter(function(x){return x.slug!==w.slug;});
+ $('kTopic').innerHTML='<b>Topic:</b> '+esc(KN.topic_key)+(others.length?' · shared with '+others.map(function(x){return esc(x.title)+(x.starts_at?' ('+esc(ist(x.starts_at,{day:'numeric',month:'short',year:'numeric'}))+')':'');}).join(', '):'')+
+  ' · <a href="#" id="kTopicEdit">change</a><br><b>Transcript of this session:</b> '+(tr?'kept ('+Math.round(tr.chars/1000)+'k characters, '+(tr.source==='teams'?'from Teams':'uploaded')+', '+esc(ist(tr.fetched_at))+')':'<span class="warn">not yet</span>')+
+  (w.knowledge_at?' · knowledge drafted '+esc(ist(w.knowledge_at)):'');
+ $('kTopicEdit').onclick=function(e){e.preventDefault();var v=prompt('Webinars that repeat a topic share one memory. Type the topic name to join (for example the first webinar’s web name, “'+KN.topic_key+'”), or leave empty for its own:',w.topic_key||'');if(v===null)return;call('studio_topic',{slug:w.slug,topic_key:v}).then(function(j){w.topic_key=j.topic_key===w.slug?null:j.topic_key;loadKnowledge();});};
+ var list=KN.items.filter(function(i){return KN.filter==='all'?i.status!=='hidden':KN.filter==='hidden'?i.status==='hidden':KN.filter==='suggested'?i.status==='suggested':i.kind===KN.filter&&i.status!=='hidden';});
+ var counts=function(f){return KN.items.filter(f).length;};
+ $('kFilters').innerHTML=[['all','All ('+counts(function(i){return i.status!=='hidden';})+')'],['suggested','To review ('+counts(function(i){return i.status==='suggested';})+')'],['qa','Questions'],['objection','Doubts'],['landed','What landed'],['lesson','Lessons'],['promise','Promises'],['hidden','Hidden ('+counts(function(i){return i.status==='hidden';})+')']].map(function(f){return '<button class="btn sm'+(KN.filter===f[0]?' gold':'')+'" data-kf="'+f[0]+'">'+f[1]+'</button>';}).join('');
+ $('kList').innerHTML=list.length?Object.keys(K_LABEL).map(function(k){var its=list.filter(function(i){return i.kind===k;});if(!its.length)return '';
+  return '<h3 style="margin:16px 0 6px">'+K_LABEL[k]+'</h3>'+its.map(function(i){var src=KN.webinars.find(function(x){return x.slug===i.webinar_slug;});
+   return '<div class="card" style="margin:6px 0;padding:12px 14px" data-kid="'+i.id+'">'+(i.kind==='qa'?'<div><b>Q:</b> <span contenteditable="true" data-f="question">'+esc(i.question||'')+'</span></div><div class="small" style="margin-top:4px"><b>A:</b> <span contenteditable="true" data-f="answer">'+esc(i.answer||'')+'</span></div>':
+    '<div contenteditable="true" data-f="body">'+esc(i.body||'')+'</div>'+(i.kind==='objection'?'<div class="small" style="margin-top:4px"><b>Answer:</b> <span contenteditable="true" data-f="answer">'+esc(i.answer||'')+'</span></div>':''))+
+    '<div class="row-actions" style="margin:8px 0 0;align-items:center"><span class="small '+(i.status==='approved'?'y':i.status==='hidden'?'n':'warn')+'">'+({suggested:'AI suggestion, to review',approved:'Approved',hidden:'Hidden'})[i.status]+'</span>'+
+    '<span class="small mut">'+(i.at_time?'at '+esc(i.at_time)+' · ':'')+(src?esc(src.title):'')+(i.source==='you'?' · edited by you':'')+'</span>'+
+    '<span style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">'+(i.status!=='approved'?'<button class="btn sm gold" data-ka="approve">✓ Approve</button>':'')+(i.kind==='qa'?'<label class="chk small" style="margin:0"><input type="checkbox" data-ka="public"'+(i.public?' checked':'')+'> On the website</label>':'')+
+    '<button class="btn sm" data-ka="save">Save edit</button>'+(i.status!=='hidden'?'<button class="btn sm" data-ka="hide">Hide</button>':'<button class="btn sm" data-ka="delete">Delete</button>')+'</span></div></div>';}).join('');}).join(''):'<p class="mut">'+(KN.items.length?'Nothing in this view.':'Nothing yet. After a session, the transcript is fetched from Teams and the AI drafts the knowledge here for you to review (or use the buttons above).')+'</p>';}
+document.addEventListener('click',function(e){var f=e.target.closest('[data-kf]');if(f){KN.filter=f.dataset.kf;renderKnowledge(W.find(function(x){return x.slug===$('kSel').value;}));return;}
+ var b=e.target.closest('[data-ka]');if(!b||b.tagName==='INPUT')return;var card=b.closest('[data-kid]'),id=+card.dataset.kid,a=b.dataset.ka,item={id:id};
+ if(a==='delete'){if(!confirm('Delete this item for good?'))return;call('knowledge_delete',{id:id}).then(loadKnowledge);return;}
+ if(a==='approve')item.status='approved';if(a==='hide')item.status='hidden';
+ if(a==='save'||a==='approve')card.querySelectorAll('[data-f]').forEach(function(x){item[x.dataset.f]=x.textContent.trim();});
+ b.disabled=true;call('knowledge_save',{item:item}).then(loadKnowledge).catch(function(err){b.disabled=false;alert(err.message);});});
+document.addEventListener('change',function(e){var c=e.target.closest('[data-ka="public"]');if(!c)return;var card=c.closest('[data-kid]'),item={id:+card.dataset.kid,public:c.checked};
+ card.querySelectorAll('[data-f]').forEach(function(x){item[x.dataset.f]=x.textContent.trim();});call('knowledge_save',{item:item}).then(loadKnowledge).catch(function(err){c.checked=!c.checked;alert(err.message);});});
+$('kSel').onchange=function(){KN.filter='all';loadKnowledge();};
+$('kFetch').onclick=function(){var b=this;b.disabled=true;$('kMsg').textContent='Fetching the transcript from Teams…';call('knowledge_fetch',{slug:$('kSel').value}).then(function(j){b.disabled=false;$('kMsg').innerHTML='<span class="y">Transcript kept ('+Math.round(j.chars/1000)+'k characters).</span> Now press “Draft knowledge with AI”.';loadKnowledge(true);}).catch(function(e){b.disabled=false;$('kMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';});};
+$('kFile').onchange=function(){var file=this.files[0];if(!file)return;$('kMsg').textContent='Reading '+file.name+'…';
+ readText(file,function(t){call('knowledge_upload',{slug:$('kSel').value,text:t}).then(function(j){$('kMsg').innerHTML='<span class="y">Transcript kept ('+Math.round(j.chars/1000)+'k characters).</span> Now press “Draft knowledge with AI”.';loadKnowledge(true);}).catch(function(e){$('kMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';});});};
+$('kExtract').onclick=function(){var b=this;b.disabled=true;var s=Date.now(),tm=setInterval(function(){$('kMsg').textContent='The AI is reading the transcript… '+Math.round((Date.now()-s)/1000)+' s (up to two minutes)';},1000);
+ call('knowledge_extract',{slug:$('kSel').value}).then(function(j){clearInterval(tm);b.disabled=false;KN.filter='suggested';$('kMsg').innerHTML='<span class="y">Drafted '+j.items+' items</span> ('+j.qa+' questions, '+j.objection+' doubts, '+j.landed+' moments that landed, '+j.lesson+' lessons, '+j.promise+' promises). Review them below.';loadKnowledge(true);}).catch(function(e){clearInterval(tm);b.disabled=false;$('kMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';});};
+$('kAdd').onclick=function(){var k=$('kKind').value,q=$('kQ').value.trim(),a=$('kA').value.trim();if(!q){$('kMsg').innerHTML='<span class="warn">Type the question or the text first.</span>';return;}
+ var item=k==='qa'?{kind:k,question:q,answer:a}:{kind:k,body:q,answer:k==='objection'?a:undefined};call('knowledge_save',{slug:$('kSel').value,item:item}).then(function(){$('kQ').value='';$('kA').value='';loadKnowledge();}).catch(function(e){$('kMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>';});};
+// a one-page brief for you and the facilitator before the next session on this topic
+$('kBrief').onclick=function(){var w=W.find(function(x){return x.slug===$('kSel').value;}),its=KN.items.filter(function(i){return i.status!=='hidden';}),pick=function(k){return its.filter(function(i){return i.kind===k;});};
+ var h='<!doctype html><meta charset="utf-8"><title>Brief: '+esc(w.title)+'</title><style>body{font:15px/1.55 Arial,sans-serif;max-width:760px;margin:30px auto;color:#1e2533}h1{font:600 26px Georgia,serif}h2{font:600 18px Georgia,serif;margin-top:22px;color:#8a6416}li{margin:0 0 8px}</style>'+
+  '<h1>Brief: '+esc(w.title)+'</h1><p>'+esc(w.starts_at?ist(w.starts_at):'')+' · from '+KN.webinars.length+' session(s) on this topic</p>'+
+  [['qa','Questions people are likely to ask'],['objection','Doubts to be ready for'],['landed','What landed well before'],['lesson','Lessons from last time'],['promise','Promises made before (check they were kept)']].map(function(s){var l=pick(s[0]);return l.length?'<h2>'+s[1]+'</h2><ol>'+l.map(function(i){return '<li>'+(i.kind==='qa'?'<b>'+esc(i.question)+'</b><br>'+esc(i.answer||''):esc(i.body)+(i.answer?'<br><i>'+esc(i.answer)+'</i>':''))+'</li>';}).join('')+'</ol>':'';}).join('')+'<script>print()<\/script>';
+ var win=window.open('','_blank');if(!win){alert('Allow pop-ups for this page to open the brief.');return;}win.document.write(h);win.document.close();};
+
 /* ---------- Webinar Studio (v3.7): the presentation kept as slides, changed by instruction, every version kept ---------- */
 function loadScript(src,test){return test()?Promise.resolve():new Promise(function(res,rej){var s=document.createElement('script');s.src=src;s.onload=function(){test()?res():rej(new Error('Could not load '+src));};s.onerror=function(){rej(new Error('Could not load a tool from the internet. Check your connection and try again.'));};document.head.appendChild(s);});}
 function studioTools(){return Promise.all([loadScript('https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js',function(){return typeof PptxGenJS!=='undefined';}),loadScript('webinar-deck-engine.js?v=37',function(){return !!window.DDDeck;})]);}

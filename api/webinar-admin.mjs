@@ -273,7 +273,7 @@ function followupEmail(w, reg, pid, attended, settings) {
 <p style="margin:0 0 14px">${attended ? 'Thank you for joining' : 'We missed you at'} <b>${esc(w.title)}</b>. ${attended ? 'Here is everything from the session:' : 'The good news: the full recording is ready for you.'}</p>
 <p style="margin:0 0 8px">${btn(watchUrl(w.slug, pid), 'Watch the recording')}${attended ? btn(certUrl(reg.id), 'Your attendance certificate', true) : ''}</p>
 ${attended ? `<p style="margin:10px 0 14px">Two minutes of your feedback helps me plan the next sessions: <a href="${esc(feedbackUrl(reg.id))}" style="color:#2563c9;font-weight:bold">Give feedback</a></p>` : ''}
-${filesHtml(w, 'after', null)}<p style="margin:14px 0 6px">If you would like to explore ${esc(prodNames(w) || 'DuaDesk')} for your organisation, I would be happy to talk.</p>
+${filesHtml(w, 'after', null)}${(w.faq || []).length ? `<p style="margin:14px 0 6px;font-weight:bold">Questions from the session</p>${w.faq.map(f => `<p style="margin:0 0 10px;font-size:14px"><b>${esc(f.q)}</b><br>${esc(f.a || '')}</p>`).join('')}` : ''}<p style="margin:14px 0 6px">If you would like to explore ${esc(prodNames(w) || 'DuaDesk')} for your organisation, I would be happy to talk.</p>
 ${chips(pid, w, settings)}
 <p style="margin:18px 0 0">Warm regards,<br><b>CA Ashish Dua</b></p>`, pid, 'You received this because you registered for this session.');
   return { subject: attended ? `Thank you for joining: ${w.title}` : `Recording ready: ${w.title}`, html, text: `${attended ? 'Thank you for joining' : 'We missed you at'} ${w.title}.\nWatch the recording: ${watchUrl(w.slug, pid)}\n${attended ? 'Feedback: ' + feedbackUrl(reg.id) + '\nCertificate: ' + certUrl(reg.id) : ''}${filesText(w, 'after', false)}\n\nCA Ashish Dua` };
@@ -1056,6 +1056,7 @@ async function cronRun() {
   }
   out.cold = await sendColdFew(3);
   try { const t = await teamsAutoAttendance(); if (t && t.length) out.teams = t; } catch (e) { out.teams = { error: e.message }; }
+  try { const k = await knowledgeAuto(); if (k) out.knowledge = k; } catch (e) { out.knowledge = { error: e.message }; }
   out.verify = await verifyEmails(300);
   return out;
 }
@@ -1278,15 +1279,9 @@ const actions4 = {
     return { reports, people: rows.length, ...(await applyAttendance(w, rows, 'teams')) };
   },
   async teams_transcript(b) {
-    const w = await getW(b.slug); const m = MS(); const mid = await meetingIdFor(w);
-    const base = `/users/${encodeURIComponent(m.organizer)}/onlineMeetings/${encodeURIComponent(mid)}/transcripts`;
-    const list = (await graph(base)).value || [];
-    if (!list.length) throw E('No transcript found. Transcription must be on during the meeting (it is on by default for meetings the app creates).', 404);
-    const t = list.sort((a, b) => String(b.createdDateTime).localeCompare(String(a.createdDateTime)))[0];
-    let text;
-    try { text = await graph(`${base}/${encodeURIComponent(t.id)}/content?$format=text/vtt`, { raw: true, accept: 'text/vtt' }); }
-    catch (e) { if (/speaker/i.test(e.message)) text = await graph(`${base}/${encodeURIComponent(t.id)}/content`, { raw: true, accept: 'application/vnd.microsoft.graph.transcript+text' }); else throw e; }
-    return { transcript: text, created: t.createdDateTime };
+    const w = await getW(b.slug); const t = await teamsTranscriptText(w);
+    await saveTranscript(w, t.text, 'teams').catch(() => {}); // kept in the knowledge pool too
+    return { transcript: t.text, created: t.created };
   },
   /* ---------- planning: weekly schedule, move earlier/later, delete, tell registrants about a new date ---------- */
   async schedule_apply(b) {
@@ -1594,6 +1589,7 @@ async function topicMemory(w) {
     const fb = await sb(`registrations?select=feedback_rating,feedback_text&webinar_slug=eq.${encodeURIComponent(p.slug)}&feedback_text=not.is.null&order=feedback_at.desc&limit=15`).catch(() => []);
     if (fb.length) lines.push(`Feedback from that session: ${fb.map(f => `(${f.feedback_rating || '-'}/5) ${txt(f.feedback_text, 200)}`).join(' | ')}`);
   }
+  const known = await topicKnowledge(topic); if (known) lines.push(known);
   const notes = await sb(`webinar_decks?select=webinar_slug,version,note,instruction&topic_key=eq.${encodeURIComponent(topic)}&order=created_at.desc&limit=12`).catch(() => []);
   if (notes.length) lines.push('Earlier changes to decks on this topic (newest first): ' + notes.map(n => `v${n.version}: ${n.instruction ? 'asked “' + txt(n.instruction, 160) + '” → ' : ''}${txt(n.note, 200)}`).join(' | '));
   return lines.join('\n').slice(0, 12000);
@@ -1686,6 +1682,127 @@ const actions6 = {
     if (!rows[0]) throw E('Webinar not found', 404);
     return { topic_key: rows[0].topic_key || rows[0].slug };
   },
+};
+
+/* ---- version 3.8 admin: the knowledge pool — transcripts kept, and the questions, answers and lessons from every session, by topic ---- */
+const K_KINDS = ['qa', 'landed', 'objection', 'promise', 'lesson'];
+const K_STATUS = ['suggested', 'approved', 'hidden'];
+async function saveTranscript(w, raw, source) {
+  const text = compactTranscript(raw).slice(0, 200000);
+  if (text.length < 20) throw E('That transcript looks empty.');
+  await sb('webinar_transcripts?on_conflict=webinar_slug', { method: 'POST', body: { webinar_slug: w.slug, topic_key: topicOf(w), text, source, chars: text.length, fetched_at: new Date().toISOString() }, prefer: 'resolution=merge-duplicates,return=minimal' });
+  return text.length;
+}
+async function teamsTranscriptText(w) {
+  const m = MS(); const mid = await meetingIdFor(w);
+  const base = `/users/${encodeURIComponent(m.organizer)}/onlineMeetings/${encodeURIComponent(mid)}/transcripts`;
+  const list = (await graph(base)).value || [];
+  if (!list.length) throw E('No transcript found. Transcription must be on during the meeting (it is on by default for meetings the app creates).', 404);
+  const t = list.sort((a, b) => String(b.createdDateTime).localeCompare(String(a.createdDateTime)))[0];
+  let text;
+  try { text = await graph(`${base}/${encodeURIComponent(t.id)}/content?$format=text/vtt`, { raw: true, accept: 'text/vtt' }); }
+  catch (e) { if (/speaker/i.test(e.message)) text = await graph(`${base}/${encodeURIComponent(t.id)}/content`, { raw: true, accept: 'application/vnd.microsoft.graph.transcript+text' }); else throw e; }
+  return { text, created: t.createdDateTime };
+}
+// the AI reads the transcript and suggests knowledge items; you approve, edit or hide them
+async function extractKnowledge(w) {
+  const [tr] = await sb(`webinar_transcripts?select=text&webinar_slug=eq.${encodeURIComponent(w.slug)}`);
+  if (!tr) throw E('There is no transcript for this webinar yet. Fetch it from Teams or upload it first.', 404);
+  const people = [w.speaker || 'CA Ashish Dua', w.cohost_name, w.facilitator_name].filter(Boolean).join(', ');
+  const system = `You build the knowledge pool for DuaDesk webinars. From a webinar transcript, pull out what will help the next session on the same topic. Speakers: ${people}; everyone else is a participant.
+Rules: never include a participant’s name, company, email, phone or any personal detail; write “a participant”. Answers summarise what the speakers actually said; never invent facts, figures or promises. Keep each item short and useful. Use the transcript’s timestamps (m:ss or h:mm:ss) where you can.
+Answer with ONE JSON object and nothing else:
+{"qa": [{"q": "the question as asked, cleaned up (≤ 200 characters)", "a": "the gist of the answer given (≤ 400 characters)", "t": "timestamp"}],
+ "landed": [{"text": "a moment, example or demo step that clearly interested people, and why (≤ 250)", "t": "timestamp"}],
+ "objection": [{"text": "a doubt or concern raised (≤ 200)", "a": "how it was answered, or “not answered” (≤ 300)"}],
+ "promise": [{"text": "something a speaker promised to send or do (≤ 200)"}],
+ "lesson": [{"text": "one improvement for the next session on this topic: what to add, cut, explain better or demo differently (≤ 250)"}]}
+Up to 15 questions, 6 of each other kind. Use empty lists when there is nothing.`;
+  const user = `WEBINAR: ${w.title}${w.subtitle ? ' — ' + w.subtitle : ''}\nDate: ${w.starts_at ? whenIST(w.starts_at, w) : ''}\nAgenda: ${(w.agenda || []).map(a => a.min + ' min ' + a.item).join(' · ')}\n\nTRANSCRIPT\n${tr.text.slice(0, 150000)}`;
+  const j = await claude(system, user, 8000);
+  const L = v => Array.isArray(v) ? v : [];
+  const rows = [];
+  for (const x of L(j.qa).slice(0, 20)) if (x && x.q) rows.push({ kind: 'qa', question: txt(x.q, 300), answer: txt(x.a, 800) || null, body: null, at_time: txt(x.t, 12) || null });
+  for (const k of ['landed', 'objection', 'promise', 'lesson']) for (const x of L(j[k]).slice(0, 8)) if (x && x.text) rows.push({ kind: k, question: null, body: txt(x.text, 500), answer: k === 'objection' ? txt(x.a, 600) : null, at_time: txt(x.t, 12) || null });
+  // never suggest again what you already approved, edited or hid
+  const norm = v => String(v || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const kept = new Set((await sb(`webinar_knowledge?select=question,body&topic_key=eq.${encodeURIComponent(topicOf(w))}&or=(status.neq.suggested,source.eq.you)`)).map(r => norm(r.question || r.body)));
+  for (let i = rows.length - 1; i >= 0; i--) if (kept.has(norm(rows[i].question || rows[i].body))) rows.splice(i, 1);
+  await sb(`webinar_knowledge?webinar_slug=eq.${encodeURIComponent(w.slug)}&status=eq.suggested&source=eq.ai`, { method: 'DELETE', prefer: 'return=minimal' }); // a fresh run replaces earlier suggestions, never what you approved or edited
+  if (rows.length) await sb('webinar_knowledge', { method: 'POST', body: rows.map(r => ({ webinar_slug: w.slug, topic_key: topicOf(w), status: 'suggested', source: 'ai', ...r })), prefer: 'return=minimal' });
+  await sb(`webinars?slug=eq.${encodeURIComponent(w.slug)}`, { method: 'PATCH', body: { knowledge_at: new Date().toISOString() }, prefer: 'return=minimal' });
+  const by = k => rows.filter(r => r.kind === k).length;
+  return { items: rows.length, qa: by('qa'), landed: by('landed'), objection: by('objection'), promise: by('promise'), lesson: by('lesson') };
+}
+// for the Studio: what the pool knows about this topic
+async function topicKnowledge(topic) {
+  const rows = await sb(`webinar_knowledge?select=kind,question,answer,body,status&topic_key=eq.${encodeURIComponent(topic)}&status=neq.hidden&order=status.asc,created_at.desc&limit=80`).catch(() => []);
+  if (!rows.length) return '';
+  const pick = k => rows.filter(r => r.kind === k);
+  const out = [];
+  if (pick('qa').length) out.push('Questions participants asked before (and the answers given): ' + pick('qa').slice(0, 20).map(r => `Q: ${txt(r.question, 200)} A: ${txt(r.answer, 250)}`).join(' | '));
+  if (pick('objection').length) out.push('Doubts raised: ' + pick('objection').slice(0, 8).map(r => `${txt(r.body, 160)}${r.answer ? ' → ' + txt(r.answer, 160) : ''}`).join(' | '));
+  if (pick('landed').length) out.push('What landed well: ' + pick('landed').slice(0, 8).map(r => txt(r.body, 200)).join(' | '));
+  if (pick('lesson').length) out.push('Lessons for next time: ' + pick('lesson').slice(0, 8).map(r => txt(r.body, 200)).join(' | '));
+  if (pick('promise').length) out.push('Promises made in earlier sessions: ' + pick('promise').slice(0, 6).map(r => txt(r.body, 160)).join(' | '));
+  return out.join('\n');
+}
+// called by the daily schedule: after each webinar, keep the transcript and draft the knowledge (one webinar per run)
+async function knowledgeAuto() {
+  if (!teamsReady()) return null;
+  const from = new Date(Date.now() - 5 * 864e5).toISOString(), to = new Date(Date.now() - 90 * 60000).toISOString();
+  const ws = await sb(`webinars?select=*&teams_link=not.is.null&knowledge_at=is.null&starts_at=gte.${from}&starts_at=lte.${to}&order=starts_at.asc&limit=3`);
+  for (const w of ws) {
+    try {
+      const [have] = await sb(`webinar_transcripts?select=webinar_slug&webinar_slug=eq.${encodeURIComponent(w.slug)}`);
+      if (!have) await saveTranscript(w, (await teamsTranscriptText(w)).text, 'teams');
+      if (!ENV().AI_KEY) return { slug: w.slug, transcript: true };
+      return { slug: w.slug, ...(await extractKnowledge(w)) };
+    } catch (e) { if (e.status !== 404) return { slug: w.slug, error: e.message }; } // 404 = no transcript yet; try the next one
+  }
+  return null;
+}
+const kRow = r => ({ id: r.id, webinar_slug: r.webinar_slug, kind: r.kind, question: r.question, answer: r.answer, body: r.body, at_time: r.at_time, status: r.status, public: r.public, source: r.source, created_at: r.created_at });
+
+const actions7 = {
+  async knowledge(b) {
+    const w = b.slug ? await getW(b.slug) : null;
+    const topic = txt(b.topic_key, 120) || (w && topicOf(w));
+    if (!topic) throw E('Choose a webinar or a topic.');
+    const [items, trs, ws] = await Promise.all([
+      sb(`webinar_knowledge?select=*&topic_key=eq.${encodeURIComponent(topic)}&order=kind.asc,status.asc,created_at.desc&limit=500`),
+      sb(`webinar_transcripts?select=webinar_slug,chars,source,fetched_at&topic_key=eq.${encodeURIComponent(topic)}`),
+      sb(`webinars?select=slug,title,starts_at,knowledge_at,teams_link,topic_key&or=(topic_key.eq.${encodeURIComponent(topic)},slug.eq.${encodeURIComponent(topic)})&order=starts_at.desc`)]);
+    return { topic_key: topic, items: items.map(kRow), transcripts: trs, webinars: ws.filter(x => topicOf(x) === topic), has_ai: !!ENV().AI_KEY };
+  },
+  async knowledge_fetch(b) { // transcript from Teams
+    const w = await getW(b.slug);
+    const t = await teamsTranscriptText(w);
+    return { chars: await saveTranscript(w, t.text, 'teams'), created: t.created };
+  },
+  async knowledge_upload(b) { const w = await getW(b.slug); return { chars: await saveTranscript(w, String(b.text || '').slice(0, 600000), 'upload') }; },
+  async knowledge_extract(b) { return extractKnowledge(await getW(b.slug)); },
+  async knowledge_save(b) { // add or correct an item; approve, hide, or show a question on the website
+    const it = b.item || {};
+    const patch = {};
+    if ('kind' in it) { if (!K_KINDS.includes(it.kind)) throw E('Unknown kind.'); patch.kind = it.kind; }
+    if ('status' in it) { if (!K_STATUS.includes(it.status)) throw E('Unknown status.'); patch.status = it.status; }
+    for (const [k, n] of [['question', 300], ['answer', 800], ['body', 500], ['at_time', 12]]) if (k in it) patch[k] = txt(it[k], n) || null;
+    if ('public' in it) patch.public = !!it.public;
+    if (patch.public) { const kind = patch.kind || (it.id ? (await sb(`webinar_knowledge?select=kind&id=eq.${+it.id}`))[0]?.kind : null); if (kind !== 'qa') throw E('Only questions and answers can be shown on the website.'); patch.status = 'approved'; }
+    if (it.id) {
+      patch.updated_at = new Date().toISOString(); if (!('source' in patch) && (patch.question || patch.answer || patch.body)) patch.source = 'you';
+      const rows = await sb(`webinar_knowledge?id=eq.${+it.id}`, { method: 'PATCH', body: patch, prefer: 'return=representation' });
+      if (!rows[0]) throw E('Item not found', 404);
+      return { item: kRow(rows[0]) };
+    }
+    const w = await getW(b.slug);
+    if (!patch.kind) throw E('Choose what kind of item this is.');
+    if (!(patch.question || patch.body)) throw E('Type the question or the text.');
+    const rows = await sb('webinar_knowledge', { method: 'POST', body: { webinar_slug: w.slug, topic_key: topicOf(w), source: 'you', status: 'approved', ...patch }, prefer: 'return=representation' });
+    return { item: kRow(rows[0]) };
+  },
+  async knowledge_delete(b) { await sb(`webinar_knowledge?id=eq.${+b.id}`, { method: 'DELETE', prefer: 'return=minimal' }); return { ok: true }; },
 };
 
 /* DuaDesk Webinars: admin endpoint  →  /api/webinar-admin   (POST only, header x-admin-key) */
@@ -1916,6 +2033,7 @@ const actions = {
   async send_followups(b) {
     const w = await getW(b.slug); const settings = await getSettings();
     if (!w.recording_published) throw E('Publish the recording first, so the emails can link to it.');
+    w.faq = (await sb(`webinar_knowledge?select=question,answer&webinar_slug=eq.${encodeURIComponent(w.slug)}&kind=eq.qa&status=eq.approved&public=eq.true&order=created_at.asc&limit=3`).catch(() => [])).map(r => ({ q: r.question, a: r.answer }));
     let sent = 0, failed = 0;
     for (const kind of ['followup', 'noshow']) {
       const regs = await sb('rpc/next_followup_batch', { method: 'POST', body: { p_slug: w.slug, p_kind: kind, p_limit: 100 } });
@@ -1936,7 +2054,7 @@ const actions = {
     const path = `${w.slug}/${Date.now()}.${ext}`;
     return { upload_url: await signedUpload(path), path };
   },
-  async ai_summary(b) { const w = await getW(b.slug); if (!clean(b.transcript, 50)) throw E('Paste or upload the transcript first.'); return await aiSummary(w, b.transcript); },
+  async ai_summary(b) { const w = await getW(b.slug); if (!clean(b.transcript, 50)) throw E('Paste or upload the transcript first.'); await saveTranscript(w, String(b.transcript), 'upload').catch(() => {}); return await aiSummary(w, b.transcript); },
 
   /* ---------- topics ---------- */
   async topics() {
@@ -1974,7 +2092,7 @@ const actions = {
   },
 };
 
-Object.assign(actions, actions3, actions4, actions5, actions6);
+Object.assign(actions, actions3, actions4, actions5, actions6, actions7);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return send(res, 405, { error: 'POST only' });

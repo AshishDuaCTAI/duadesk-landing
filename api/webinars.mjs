@@ -273,7 +273,7 @@ function followupEmail(w, reg, pid, attended, settings) {
 <p style="margin:0 0 14px">${attended ? 'Thank you for joining' : 'We missed you at'} <b>${esc(w.title)}</b>. ${attended ? 'Here is everything from the session:' : 'The good news: the full recording is ready for you.'}</p>
 <p style="margin:0 0 8px">${btn(watchUrl(w.slug, pid), 'Watch the recording')}${attended ? btn(certUrl(reg.id), 'Your attendance certificate', true) : ''}</p>
 ${attended ? `<p style="margin:10px 0 14px">Two minutes of your feedback helps me plan the next sessions: <a href="${esc(feedbackUrl(reg.id))}" style="color:#2563c9;font-weight:bold">Give feedback</a></p>` : ''}
-${filesHtml(w, 'after', null)}<p style="margin:14px 0 6px">If you would like to explore ${esc(prodNames(w) || 'DuaDesk')} for your organisation, I would be happy to talk.</p>
+${filesHtml(w, 'after', null)}${(w.faq || []).length ? `<p style="margin:14px 0 6px;font-weight:bold">Questions from the session</p>${w.faq.map(f => `<p style="margin:0 0 10px;font-size:14px"><b>${esc(f.q)}</b><br>${esc(f.a || '')}</p>`).join('')}` : ''}<p style="margin:14px 0 6px">If you would like to explore ${esc(prodNames(w) || 'DuaDesk')} for your organisation, I would be happy to talk.</p>
 ${chips(pid, w, settings)}
 <p style="margin:18px 0 0">Warm regards,<br><b>CA Ashish Dua</b></p>`, pid, 'You received this because you registered for this session.');
   return { subject: attended ? `Thank you for joining: ${w.title}` : `Recording ready: ${w.title}`, html, text: `${attended ? 'Thank you for joining' : 'We missed you at'} ${w.title}.\nWatch the recording: ${watchUrl(w.slug, pid)}\n${attended ? 'Feedback: ' + feedbackUrl(reg.id) + '\nCertificate: ' + certUrl(reg.id) : ''}${filesText(w, 'after', false)}\n\nCA Ashish Dua` };
@@ -690,16 +690,18 @@ People: ${JSON.stringify(list)}`;
    POST ?action=register | act | watch
    GET/POST ?action=unsubscribe&p=&t=                                                                   */
 
-const PUBLIC_FIELDS = 'slug,n,series,format,status,title,subtitle,starts_at,duration_min,products,audience,summary,agenda,speaker,cohost_name,cohost_confirmed,facilitator_name,facilitator_confirmed,note,registration_open,recording_published,recording_summary,files,deck_share';
+const PUBLIC_FIELDS = 'slug,n,series,format,status,title,subtitle,starts_at,duration_min,products,audience,summary,agenda,speaker,cohost_name,cohost_confirmed,facilitator_name,facilitator_confirmed,note,registration_open,recording_published,recording_summary,files,deck_share,topic_key';
 const ok = (res, o) => send(res, 200, { ok: true, ...o });
 const bad = (res, msg, code = 400) => send(res, code, { error: msg });
 
 function toPublic(w) {
-  const { cohost_name, cohost_confirmed, facilitator_name, facilitator_confirmed, recording_published, recording_summary, files, deck_share, ...rest } = w;
+  const { cohost_name, cohost_confirmed, facilitator_name, facilitator_confirmed, recording_published, recording_summary, files, deck_share, topic_key, faq, ...rest } = w;
   const f = webinarFiles(w, 'before'); // posters only while they match the date and title; slides only if shared before the session
-  return { ...rest, poster_png: f.poster_png, poster_pdf: f.poster_pdf, slides: f.deck, cohost: cohost_confirmed && cohost_name ? cohost_name : null, facilitator: facilitator_confirmed && facilitator_name ? facilitator_name : null,
+  return { ...rest, faq: faq || [], poster_png: f.poster_png, poster_pdf: f.poster_pdf, slides: f.deck, cohost: cohost_confirmed && cohost_name ? cohost_name : null, facilitator: facilitator_confirmed && facilitator_name ? facilitator_name : null,
     has_recording: !!recording_published, recording_teaser: recording_published ? (recording_summary || '').slice(0, 260) : null };
 }
+// questions from past sessions that you approved for the website, by topic
+async function publicFaq() { const rows = await sb('webinar_knowledge?select=topic_key,question,answer&kind=eq.qa&status=eq.approved&public=eq.true&order=created_at.asc&limit=1000').catch(() => []); const by = {}; for (const r of rows) (by[r.topic_key] = by[r.topic_key] || []).push({ q: r.question, a: r.answer }); return by; }
 async function publicSettings() { const s = await getSettings(); return { whatsapp_number: s.whatsapp_number || '', whatsapp_channel_url: s.whatsapp_channel_url || '' }; }
 async function getW(slug) { const [w] = await sb(`webinars?select=*&slug=eq.${encodeURIComponent(slug)}`); return w; }
 
@@ -707,6 +709,7 @@ async function list(res) {
   const [rows, settings] = await Promise.all([sb(`webinars?select=${PUBLIC_FIELDS}&status=in.(published,later,done)&order=starts_at.asc.nullslast,n.asc`), publicSettings()]);
   res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
   res.statusCode = 200; res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  const faq = await publicFaq(); rows.forEach(w => { w.faq = (faq[w.topic_key || w.slug] || []).slice(0, 8); });
   res.end(JSON.stringify({ webinars: rows.map(toPublic), settings }));
 }
 
@@ -882,7 +885,7 @@ async function watch(req, res) {
   else if (w.recording_kind === 'storage') video = { type: 'file', url: await signedRead(w.recording_ref) };
   else video = { type: 'link', url: w.recording_ref };
   return ok(res, { title: w.title, subtitle: w.subtitle, starts_at: w.starts_at, products: w.products, summary: w.recording_summary, takeaways: w.recording_takeaways, chapters: w.recording_chapters,
-    slides_url: w.slides_url || webinarFiles(w, 'after').deck, video, p: person.id, t: full ? tok('p', person.id) : tok('w', person.id), name: person.name }); // a typed email never gets a full personal token
+    slides_url: w.slides_url || webinarFiles(w, 'after').deck, faq: ((await publicFaq())[w.topic_key || w.slug] || []).slice(0, 10), video, p: person.id, t: full ? tok('p', person.id) : tok('w', person.id), name: person.name }); // a typed email never gets a full personal token
 }
 
 async function cert(res, q) {

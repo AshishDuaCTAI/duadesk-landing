@@ -47,3 +47,5 @@ footer.site{border-top:1px solid var(--line);padding:28px 0 40px;color:var(--mut
 .panel{max-width:620px;width:100%}
 .big{font-size:44px;line-height:1}
 @media (max-width:760px){.f{grid-template-columns:1fr}.toplinks .hide-s{display:none}}
+
+.faq{margin:10px 0 4px}.faq dt{font-weight:700;margin:10px 0 2px}.faq dd{margin:0;color:var(--mut)}
