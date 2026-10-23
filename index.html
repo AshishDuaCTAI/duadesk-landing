@@ -1338,6 +1338,20 @@ ol.pf-start li b,ol.pf-phases li b{display:block;color:#fff}
 @media(prefers-reduced-motion:reduce){.st-flow path{animation:none}.st-panel{animation:none}}
 
 </style>
+<style>
+/* Banking: new addition highlight */
+.navlinks a.nav-new{color:#bff3ea;animation:ddNewGlow 1.8s ease-in-out infinite}
+.navlinks a.nav-new:hover{color:#fff;border-color:#8fe9db}
+.new-badge{display:inline-block;margin-left:6px;font:800 9.5px/1 Inter,sans-serif;letter-spacing:.5px;text-transform:uppercase;background:linear-gradient(135deg,#f0d18a,#d6ae55);color:#151006;border-radius:999px;padding:4px 7px;vertical-align:1px;animation:ddBlink 1.2s ease-in-out infinite;white-space:nowrap}
+.navlinks a.nav-new .new-badge{position:absolute;top:-11px;right:-10px;margin:0;font-size:8.5px;padding:3px 6px;box-shadow:0 2px 8px rgba(0,0,0,.45)}
+.nav.open .navlinks a.nav-new .new-badge{position:static;margin-left:10px;font-size:9.5px}
+@media(min-width:901px){.navin{gap:14px}.navlinks{gap:10px}.navlinks a{font-size:12.5px}.navlinks .wpill{padding:6px 10px 6px 20px}.navlinks .wpill:before{left:8px}}
+@media(min-width:901px) and (max-width:1080px){.navin{gap:8px}.navlinks{gap:6px}}
+@media(min-width:901px) and (max-width:1000px){.navbot{display:none!important}}
+@keyframes ddBlink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes ddNewGlow{0%,100%{box-shadow:0 0 0 0 rgba(23,182,164,0)}50%{box-shadow:0 0 16px 2px rgba(23,182,164,.6)}}
+@media(prefers-reduced-motion:reduce){.navlinks a.nav-new,.new-badge{animation:none}}
+</style>
 </head>
 <body data-mode="hub">
 <div class="atmo hub"></div><div class="atmo ent"></div><div class="atmo com"></div><div class="atmo fam"></div>
@@ -1370,7 +1384,7 @@ ol.pf-start li b,ol.pf-phases li b{display:block;color:#fff}
    <g><ellipse cx="140" cy="26.6" rx="12.5" ry="3.4" fill="#16273f" stroke="#f0d18a" stroke-width="1"/><circle cx="140" cy="17.5" r="8.5" fill="#f0d18a" stroke="#d6ae55" stroke-width="1.2"/><text x="140" y="21.2" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="700" fill="#3a2c07">₹</text><animateTransform attributeName="transform" type="translate" values="0 0;0 -1.6;0 0" dur="1.9s" repeatCount="indefinite"/></g>
    <text x="158" y="16" text-anchor="middle" font-family="Georgia,serif" font-size="8" font-weight="700" fill="#50d69a">+₹<animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.7;1" dur="2.6s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" values="0 5;0 -6" dur="2.6s" repeatCount="indefinite"/></text>
   </svg></div>
-  <div class="navlinks" id="navLinks"><a href="#how">The story</a><a href="webinars.html">Webinars</a><a href="#enterprise" class="wpill w-ent" data-w="ent">Organisation</a><a href="#community" class="wpill w-com" data-w="com">Social Leadership</a><a href="#life" class="wpill w-fam" data-w="fam">Life Journey</a><a href="/banking/">Banking</a><a href="#value" class="ent-only" data-w="ent">Value Lab</a><a href="#" class="pl-menu-link">All product links</a></div>
+  <div class="navlinks" id="navLinks"><a href="#how">The story</a><a href="webinars.html">Webinars</a><a href="#enterprise" class="wpill w-ent" data-w="ent">Organisation</a><a href="#community" class="wpill w-com" data-w="com">Social Leadership</a><a href="#life" class="wpill w-fam" data-w="fam">Life Journey</a><a href="/banking/" class="wpill nav-new" style="--w:#17b6a4">Banking<span class="new-badge">New addition</span></a><a href="#value" class="ent-only" data-w="ent">Value Lab</a><a href="#" class="pl-menu-link">All product links</a></div>
   <!-- Language selector hidden for now: translations for the new sections are not ready. The selector and all translation code (DD_T, DD_I18N, ddTranslate) are kept; to restore, put the langbox markup back here and set DD_LANG_ENABLED to true. -->
 <div class="navcta"><button id="assessTop" class="btn gold ent-only" onclick="goTo('assessment')">Free assessment</button><button id="demoTop" class="btn ghost" onclick="openDemo()">Request a demo →</button></div>
 <button class="menubtn" id="menuBtn" type="button" aria-expanded="false" aria-controls="navLinks">Menu</button>
@@ -2559,7 +2573,7 @@ ol.pf-start li b,ol.pf-phases li b{display:block;color:#fff}
   <li><a class="pl-link" href="https://consulting.duadesk.com" target="_blank" rel="noopener"><b>Dua Pragya</b><span>Advisory</span><em>consulting.duadesk.com</em></a></li>
   <li><a class="pl-link" href="https://retail.duadesk.com" target="_blank" rel="noopener"><b>Dua Vyapar</b><span>Retail shops</span><em>retail.duadesk.com</em></a></li>
  </ul></section>
- <section class="pl-group w-bank" style="--w:#17b6a4;--w2:#8fe9db"><h3>Banking and financial services</h3><ul>
+ <section class="pl-group w-bank" style="--w:#17b6a4;--w2:#8fe9db"><h3>Banking and financial services <span class="new-badge">New addition</span></h3><ul>
   <li><a class="pl-link" href="/banking/"><b>About DuaDesk FS</b><span>The six command centers, on one page</span><em>duadesk.com/banking</em></a></li>
   <li><a class="pl-link" href="https://fs.duadesk.com" target="_blank" rel="noopener"><b>DuaDesk FS</b><span>All six, and the P³ guide</span><em>fs.duadesk.com</em></a></li>
   <li><a class="pl-link" href="https://fsceo.duadesk.com" target="_blank" rel="noopener"><b>DuaDesk FS Sarthi</b><span>For the CEO</span><em>fsceo.duadesk.com</em></a></li>
