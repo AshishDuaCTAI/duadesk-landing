@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Vista EPC Platform — Blueprint review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Domine:wght@400;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/vista/assets/review.css?v=1">
+</head>
+<body>
+<header class="top">
+  <button class="icon-btn menu-btn hidden" id="menuBtn" aria-label="Show all slides">☰</button>
+  <div class="brand">Vista EPC Platform<small>Blueprint review</small></div>
+  <div class="prog hidden" id="prog"><div class="bar" id="progBar"></div><b id="progText"></b></div>
+  <div class="who" id="who"></div>
+</header>
+
+<div id="screenLoading" class="loading"><div class="spinner"></div>Opening your review…</div>
+
+<div id="screenError" class="center hidden">
+  <div class="card">
+    <h2>This review needs your personal link</h2>
+    <p class="muted" id="errText">Please open the link that was sent to you. Each Vista leader has their own link so that their views are recorded under their name.</p>
+    <p class="muted">If the link does not work, ask Ashish Dua for a new one.</p>
+  </div>
+</div>
+
+<div id="screenWelcome" class="center hidden">
+  <div class="card">
+    <h1 id="welcomeTitle">Welcome</h1>
+    <p>This is the blueprint for the Vista EPC Platform: <b>60 slides</b> covering tenders and bids, project delivery, materials, people, money and risk, reports, data storage, AI agents and the plan.</p>
+    <p>For <b>each slide</b>, please choose one of four views. Where you choose anything other than “Completely agree”, please write what you would change or want to discuss.</p>
+    <div class="tally" id="legend"></div>
+    <p class="muted">Your answers are saved as you go. You can stop at any time and come back with the same link. When you have been through every slide, you give an overall view and submit.</p>
+    <p class="muted">Figures on the slides are illustrative unless they come from the sample RVNL tender.</p>
+    <div class="actions"><button class="btn primary" id="startBtn">Start the review</button></div>
+  </div>
+</div>
+
+<div id="screenReview" class="layout hidden">
+  <nav class="side" id="side" aria-label="Slides"></nav>
+  <main class="main">
+    <div class="banner hidden" id="lockedBanner"></div>
+    <p class="crumb" id="crumb"></p>
+    <h2 class="slide-title" id="slideTitle"></h2>
+    <div class="slide-box" id="slideBox"></div>
+    <div class="nav-row">
+      <button class="btn" id="prevBtn">← Previous</button>
+      <span class="count" id="count"></span>
+      <button class="btn" id="nextBtn">Next →</button>
+    </div>
+    <details class="notes" id="notesBox"><summary>More detail on this slide</summary><p id="notes"></p></details>
+
+    <section class="panel" id="panel" aria-label="Your view on this slide">
+      <h3>Your view on this slide</h3>
+      <div class="verdicts" id="verdicts" role="radiogroup" aria-label="Your view"></div>
+      <div class="fb">
+        <label for="fbText" id="fbLabel">Your feedback (optional when you completely agree)</label>
+        <textarea id="fbText" maxlength="4000" placeholder="What would you change, add or remove? What should we discuss?"></textarea>
+        <div class="hint"><span id="fbHint"></span><span id="fbCount">0 / 4000</span></div>
+      </div>
+      <div class="status" id="status" aria-live="polite"></div>
+      <div class="actions">
+        <button class="btn" id="finishBtn">Finish and submit…</button>
+        <button class="btn primary" id="saveNextBtn">Save and next →</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="screenFinish" class="center hidden">
+  <div class="card">
+    <h2>Your overall view</h2>
+    <div class="tally" id="finishTally"></div>
+    <div id="finishMissing"></div>
+    <div id="finishFlagged"></div>
+    <div id="overallForm">
+      <h3 style="margin:18px 0 10px">Overall, on the blueprint</h3>
+      <div class="verdicts" id="overallVerdicts"></div>
+      <div class="fb">
+        <label for="overallText">Overall comments, priorities or conditions</label>
+        <textarea id="overallText" maxlength="8000" placeholder="Anything that applies to the whole blueprint: what matters most, what must change before building, who else should be involved."></textarea>
+      </div>
+      <div class="status" id="finishStatus" aria-live="polite"></div>
+      <div class="actions">
+        <button class="btn" id="backBtn">← Back to the slides</button>
+        <button class="btn primary" id="submitBtn">Submit my review</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="screenDone" class="center hidden">
+  <div class="card">
+    <h2>Thank you</h2>
+    <p id="doneText">Your review has been submitted.</p>
+    <div class="tally" id="doneTally"></div>
+    <p class="muted">You can still look through the slides and your answers. To change anything now, ask Ashish Dua to reopen your review.</p>
+    <div class="actions"><button class="btn" id="browseBtn">Look through the slides</button></div>
+  </div>
+</div>
+
+<script src="/vista/assets/frame.js?v=1"></script>
+<script src="/vista/assets/common.js?v=1"></script>
+<script src="/vista/assets/review.js?v=1"></script>
+</body>
+</html>
