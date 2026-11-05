@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Vista EPC Platform — where each data element is stored</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Domine:wght@400;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/vista/assets/review.css?v=2">
+<link rel="stylesheet" href="/vistadata/data.css?v=1">
+</head>
+<body>
+<header class="top">
+  <div class="brand">Vista EPC Platform<small>Where each data element is stored</small></div>
+  <div class="prog hidden" id="prog"><div class="bar" id="progBar"></div><b id="progText"></b></div>
+  <div class="who" id="who"></div>
+</header>
+
+<div id="screenLoading" class="loading"><div class="spinner"></div>Opening your review…</div>
+
+<div id="screenError" class="center hidden">
+  <div class="card">
+    <h2>This review needs your personal link</h2>
+    <p class="muted" id="errText">Please open the link that was sent to you. Each Vista leader has their own link so that their decisions are recorded under their name.</p>
+    <p class="muted">If the link does not work, ask Ashish Dua for a new one.</p>
+  </div>
+</div>
+
+<div id="screenWelcome" class="center hidden">
+  <div class="card">
+    <h1 id="welcomeTitle">Welcome</h1>
+    <p>Vista asked that <b>financial data, tender submission data, prices and employee salaries stay on Vista’s own servers</b>, and that everything else runs on the cloud so sites can work from phones.</p>
+    <p>This page lists <b id="nRows">every</b> data element the platform will hold, grouped by area. For each one it shows where we propose to keep it, <span class="zone L">Local server</span> or <span class="zone C">Cloud</span>, and why.</p>
+    <p>For each row, please choose <b>Agree</b> or <b>Not agree</b>. If you do not agree, say where it should be and why.</p>
+    <div class="tally" id="welcomeTally"></div>
+    <p class="muted">Your answers save as you go. You can stop and come back with the same link. When every row is answered, give your overall view and submit.</p>
+    <div class="actions"><button class="btn primary" id="startBtn">Start</button></div>
+  </div>
+</div>
+
+<div id="screenList" class="hidden">
+  <div class="dwrap">
+    <div class="banner hidden" id="lockedBanner"></div>
+    <div class="toolbar">
+      <div class="chips" id="filters" role="group" aria-label="Show">
+        <button data-f="all" class="on">All</button>
+        <button data-f="open">Not answered</button>
+        <button data-f="L">Local server</button>
+        <button data-f="C">Cloud</button>
+        <button data-f="no">Not agreed</button>
+      </div>
+      <input id="search" type="search" placeholder="Search, e.g. salary, GPS, quotes" aria-label="Search data elements">
+    </div>
+    <div id="groups"></div>
+    <div class="finishbar"><span id="finishNote" class="muted"></span><button class="btn primary" id="finishBtn">Finish and submit…</button></div>
+  </div>
+</div>
+
+<div id="screenFinish" class="center hidden">
+  <div class="card">
+    <h2>Your overall view</h2>
+    <div class="tally" id="finishTally"></div>
+    <div id="finishMissing"></div>
+    <div id="finishFlagged"></div>
+    <h3 style="margin:18px 0 10px">Overall, on where the data is kept</h3>
+    <div class="verdicts" id="overallVerdicts"></div>
+    <div class="fb">
+      <label for="overallText">Overall comments or conditions</label>
+      <textarea id="overallText" maxlength="8000" placeholder="For example: anything that must change before we build, or anyone else who should confirm (CA, IT partner)."></textarea>
+    </div>
+    <div class="status" id="finishStatus" aria-live="polite"></div>
+    <div class="actions">
+      <button class="btn" id="backBtn">← Back to the list</button>
+      <button class="btn primary" id="submitBtn">Submit my review</button>
+    </div>
+  </div>
+</div>
+
+<div id="screenDone" class="center hidden">
+  <div class="card">
+    <h2>Thank you</h2>
+    <p id="doneText">Your review has been submitted.</p>
+    <div class="tally" id="doneTally"></div>
+    <p class="muted">You can still look through the list and your answers. To change anything now, ask Ashish Dua to reopen your review.</p>
+    <div class="actions"><button class="btn" id="browseBtn">Look through the list</button></div>
+  </div>
+</div>
+
+<script src="/vista/assets/common.js?v=2"></script>
+<script src="/vistadata/data.js?v=1"></script>
+</body>
+</html>

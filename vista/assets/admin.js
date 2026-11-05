@@ -4,6 +4,9 @@
   const $ = id => document.getElementById(id);
   const SKEY = 'vista.admin.session';
   let session = null, D = null, content = null, tab = 'people';
+  const DECK = window.VISTA_DECK || 'vista-blueprint', IS_DATA = DECK === 'vista-data';
+  const VS = () => IS_DATA ? VERDICTS.filter(v => v.id === 'agree' || v.id === 'not_agreed') : VERDICTS;
+  const ZONE = { L: 'Local server', C: 'Cloud' }, ALT = { local: 'Local server', cloud: 'Cloud', split: 'Split between the two' };
 
   // ---------- auth (Supabase GoTrue REST) ----------
   const ss = { get() { try { return JSON.parse(sessionStorage.getItem(SKEY)); } catch { return null; } }, set(v) { try { v ? sessionStorage.setItem(SKEY, JSON.stringify(v)) : sessionStorage.removeItem(SKEY); } catch { } } };
@@ -50,7 +53,7 @@
   }
 
   async function load() {
-    D = await call('vista_admin_overview', { p_deck: 'vista-blueprint' });
+    D = await call('vista_admin_overview', { p_deck: DECK });
     D.byReviewer = Object.fromEntries(D.reviewers.map(r => [r.id, r]));
     D.bySlide = {};
     D.reviews.forEach(v => { (D.bySlide[v.slide] = D.bySlide[v.slide] || []).push(v); });
@@ -74,8 +77,8 @@
     $('kpis').innerHTML =
       `<div><span class="muted">Reviewers</span><b>${act.length}</b></div>` +
       `<div><span class="muted">Submitted</span><b>${submitted} of ${act.length}</b></div>` +
-      `<div><span class="muted">Slide answers</span><b>${total} of ${n * act.length}</b></div>` +
-      `<div><span class="muted">Answers by view</span><div class="stack" style="margin-top:12px">${VERDICTS.map(v => `<i title="${v.label}: ${counts[v.id]}" style="width:${total ? counts[v.id] / total * 100 : 0}%;background:${v.color}"></i>`).join('')}</div><span class="muted" style="font-size:12px">${VERDICTS.map(v => `${v.short} ${counts[v.id]}`).join(' · ')}</span></div>`;
+      `<div><span class="muted">${IS_DATA ? 'Row answers' : 'Slide answers'}</span><b>${total} of ${n * act.length}</b></div>` +
+      `<div><span class="muted">Answers by view</span><div class="stack" style="margin-top:12px">${VS().map(v => `<i title="${v.label}: ${counts[v.id]}" style="width:${total ? counts[v.id] / total * 100 : 0}%;background:${v.color}"></i>`).join('')}</div><span class="muted" style="font-size:12px">${VS().map(v => `${v.short} ${counts[v.id]}`).join(' · ')}</span></div>`;
     renderPeople(); renderSlides(); renderOverall(); renderLog();
   }
 
@@ -96,13 +99,15 @@
         </div></td></tr>`).join('') || `<tr><td colspan="7" class="muted">No reviewers yet. Add each Vista leader above; each gets a personal link.</td></tr>`);
   }
   function showLink(name, tok) {
-    const url = `${location.origin}/vista/#k=${tok}`;
-    const msg = `Dear ${name.split(' ')[0]}, please review the Vista EPC Platform blueprint here. For each slide you can agree, agree with feedback, ask to discuss, or disagree. Your answers save as you go: ${url}`;
+    const url = `${location.origin}/${IS_DATA ? 'vistadata' : 'vista'}/#k=${tok}`;
+    const msg = IS_DATA
+      ? `Dear ${name.split(' ')[0]}, here is the list of every data element in the Vista EPC Platform, with where we propose to keep it: on Vista's own servers or on the cloud. For each row, please mark Agree or Not agree. Your answers save as you go: ${url}`
+      : `Dear ${name.split(' ')[0]}, please review the Vista EPC Platform blueprint here. For each slide you can agree, agree with feedback, ask to discuss, or disagree. Your answers save as you go: ${url}`;
     $('linkOut').innerHTML = `<div class="linkbox"><b>Personal link for ${esc(name)}</b> <span class="muted" style="font-size:12px">Shown once. Use “New link” later if it is lost; the old one then stops working.</span>
       <input id="linkVal" readonly value="${esc(url)}" style="margin:8px 0">
       <div class="row"><button class="btn small" id="copyLink">Copy link</button><button class="btn small" id="copyMsg">Copy message</button>
       <a class="btn small" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msg)}">Send on WhatsApp</a>
-      <a class="btn small" href="mailto:?subject=${encodeURIComponent('Vista EPC Platform: blueprint review')}&body=${encodeURIComponent(msg)}">Send by email</a></div></div>`;
+      <a class="btn small" href="mailto:?subject=${encodeURIComponent(IS_DATA ? 'Vista EPC Platform: where each data element is stored' : 'Vista EPC Platform: blueprint review')}&body=${encodeURIComponent(msg)}">Send by email</a></div></div>`;
     const copy = async (t, b) => { try { await navigator.clipboard.writeText(t); b.textContent = 'Copied'; } catch { $('linkVal').select(); } };
     $('copyLink').onclick = e => copy(url, e.target); $('copyMsg').onclick = e => copy(msg, e.target);
   }
@@ -111,7 +116,7 @@
     const st = $('addStatus'); st.textContent = 'Creating…'; st.className = 'status wait';
     try {
       const name = $('nName').value.trim();
-      const r = await call('vista_admin_add_reviewer', { p_name: name, p_designation: $('nDesig').value, p_email: $('nEmail').value, p_deck: 'vista-blueprint' });
+      const r = await call('vista_admin_add_reviewer', { p_name: name, p_designation: $('nDesig').value, p_email: $('nEmail').value, p_deck: DECK });
       st.textContent = ''; showLink(name, r.token);
       $('addForm').reset(); await load();
     } catch (err) { st.textContent = err.message; st.className = 'status err'; }
@@ -138,13 +143,13 @@
       if (f === 'fb' && !withFb.length) return '';
       if (f === 'pending' && list.length >= (who ? 1 : act.length)) return '';
       const tot = list.length || 1;
-      return `<tr><td>${s.n}</td><td><a href="#" data-pv="${esc(s.id)}">${esc(s.title)}</a><br><span class="muted" style="font-size:12px">${esc(s.section)}</span></td>
+      return `<tr><td>${IS_DATA ? esc(s.id) : s.n}</td><td>${IS_DATA ? `<b>${esc(s.title)}</b> <span class="zone ${s.d.zone}">${ZONE[s.d.zone]}</span><br><span class="muted" style="font-size:12px">${esc(s.d.includes)}</span>` : `<a href="#" data-pv="${esc(s.id)}">${esc(s.title)}</a><br><span class="muted" style="font-size:12px">${esc(s.section)}</span>`}</td>
         <td><div class="stack">${VERDICTS.map(v => `<i style="width:${c[v.id] / tot * 100}%;background:${v.color}"></i>`).join('')}</div>
-        <span class="muted" style="font-size:12px">${VERDICTS.filter(v => c[v.id]).map(v => `${v.short} ${c[v.id]}`).join(' · ') || 'No answers yet'}</span></td>
+        <span class="muted" style="font-size:12px">${VS().filter(v => c[v.id]).map(v => `${v.short} ${c[v.id]}`).join(' · ') || 'No answers yet'}</span></td>
         <td>${list.length} / ${who ? 1 : act.length}</td></tr>` +
-        (withFb.length ? `<tr class="fbrow"><td></td><td colspan="3">${withFb.map(v => `<div class="fbitem" style="--c:${V[v.verdict].color}"><b>${esc(D.byReviewer[v.reviewer_id].name)} · ${esc(V[v.verdict].label)}</b> <span class="muted" style="font-size:12px">${fmtTime(v.at)}</span><div>${esc(v.feedback).replace(/\n/g, '<br>')}</div></div>`).join('')}</td></tr>` : '');
+        (withFb.length ? `<tr class="fbrow"><td></td><td colspan="3">${withFb.map(v => `<div class="fbitem" style="--c:${V[v.verdict].color}"><b>${esc(D.byReviewer[v.reviewer_id].name)} · ${esc(IS_DATA && v.verdict === 'not_agreed' ? 'Not agreed' : V[v.verdict].label)}${v.alt ? ' · should be: ' + esc(ALT[v.alt]) : ''}</b> <span class="muted" style="font-size:12px">${fmtTime(v.at)}</span><div>${esc(v.feedback).replace(/\n/g, '<br>')}</div></div>`).join('')}</td></tr>` : '');
     }).join('');
-    $('slideTable').innerHTML = `<tr><th>#</th><th>Slide</th><th>Views</th><th>Answered</th></tr>` + (rows || `<tr><td colspan="4" class="muted">Nothing matches this filter.</td></tr>`);
+    $('slideTable').innerHTML = `<tr><th>#</th><th>${IS_DATA ? 'Data element and proposed location' : 'Slide'}</th><th>Views</th><th>Answered</th></tr>` + (rows || `<tr><td colspan="4" class="muted">Nothing matches this filter.</td></tr>`);
   }
   $('slideFilter').onchange = renderSlides; $('slideWho').onchange = renderSlides;
 
@@ -156,12 +161,12 @@
   }
 
   function renderLog() {
-    const who = $('logWho').value, title = Object.fromEntries(D.slides.map(s => [s.id, `${s.n}. ${s.title}`]));
+    const who = $('logWho').value, title = Object.fromEntries(D.slides.map(s => [s.id, `${IS_DATA ? s.id : s.n + '.'} ${s.title}`]));
     const rows = D.log.filter(l => !who || l.reviewer_id === who).slice().reverse();
     $('logTable').innerHTML = `<tr><th>When</th><th>Reviewer</th><th>What</th><th>Slide</th><th>View</th><th>Feedback at that moment</th></tr>` +
       (rows.map(l => `<tr><td style="white-space:nowrap">${fmtTime(l.at)}</td><td>${esc((D.byReviewer[l.reviewer_id] || {}).name || '')}</td><td>${esc(l.event)}</td>
         <td>${esc(title[l.slide] || '')}</td><td>${l.verdict ? `<span class="pill" style="--c:${V[l.verdict].color}">${esc(V[l.verdict].short)}</span>` : ''}</td>
-        <td>${esc(l.feedback || '').replace(/\n/g, '<br>')}</td></tr>`).join('') || `<tr><td colspan="6" class="muted">No activity yet.</td></tr>`);
+        <td>${l.alt ? `<b>Should be: ${esc(ALT[l.alt])}</b><br>` : ''}${esc(l.feedback || '').replace(/\n/g, '<br>')}</td></tr>`).join('') || `<tr><td colspan="6" class="muted">No activity yet.</td></tr>`);
   }
   $('logWho').onchange = renderLog;
 
@@ -193,16 +198,16 @@
   }
   const stamp = () => new Date().toISOString().slice(0, 10);
   $('csvBtn').onclick = () => {
-    const rows = [['Slide no', 'Slide', 'Section', 'Reviewer', 'Designation', 'View', 'Feedback', 'Saved at']];
-    D.slides.forEach(s => (D.bySlide[s.id] || []).forEach(v => { const r = D.byReviewer[v.reviewer_id]; rows.push([s.n, s.title, s.section, r.name, r.designation || '', V[v.verdict].label, v.feedback || '', v.at]); }));
-    D.reviewers.filter(r => r.submitted_at).forEach(r => rows.push(['', 'OVERALL', '', r.name, r.designation || '', r.overall_verdict ? V[r.overall_verdict].label : '', r.overall_comment || '', r.submitted_at]));
-    download(`vista-review-answers-${stamp()}.csv`, rows);
+    const rows = [[IS_DATA ? 'Row' : 'Slide no', IS_DATA ? 'Data element' : 'Slide', 'Section', 'Proposed location', 'Reviewer', 'Designation', 'View', 'Should be', 'Feedback', 'Saved at']];
+    D.slides.forEach(s => (D.bySlide[s.id] || []).forEach(v => { const r = D.byReviewer[v.reviewer_id]; rows.push([IS_DATA ? s.id : s.n, s.title, s.section, s.d ? ZONE[s.d.zone] : '', r.name, r.designation || '', IS_DATA && v.verdict === 'not_agreed' ? 'Not agreed' : V[v.verdict].label, v.alt ? ALT[v.alt] : '', v.feedback || '', v.at]); }));
+    D.reviewers.filter(r => r.submitted_at).forEach(r => rows.push(['', 'OVERALL', '', '', r.name, r.designation || '', r.overall_verdict ? V[r.overall_verdict].label : '', '', r.overall_comment || '', r.submitted_at]));
+    download(`${DECK}-answers-${stamp()}.csv`, rows);
   };
   $('csvLogBtn').onclick = () => {
     const title = Object.fromEntries(D.slides.map(s => [s.id, s.title])), num = Object.fromEntries(D.slides.map(s => [s.id, s.n]));
-    const rows = [['When', 'Reviewer', 'Event', 'Slide no', 'Slide', 'View', 'Feedback']];
-    D.log.forEach(l => rows.push([l.at, (D.byReviewer[l.reviewer_id] || {}).name || '', l.event, num[l.slide] || '', title[l.slide] || '', l.verdict ? V[l.verdict].label : '', l.feedback || '']));
-    download(`vista-review-changes-${stamp()}.csv`, rows);
+    const rows = [['When', 'Reviewer', 'Event', IS_DATA ? 'Row' : 'Slide no', IS_DATA ? 'Data element' : 'Slide', 'View', 'Should be', 'Feedback']];
+    D.log.forEach(l => rows.push([l.at, (D.byReviewer[l.reviewer_id] || {}).name || '', l.event, IS_DATA ? (l.slide || '') : (num[l.slide] || ''), title[l.slide] || '', l.verdict ? V[l.verdict].label : '', l.alt ? ALT[l.alt] : '', l.feedback || '']));
+    download(`${DECK}-changes-${stamp()}.csv`, rows);
   };
 
   boot();
