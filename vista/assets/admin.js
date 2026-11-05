@@ -99,15 +99,18 @@
         </div></td></tr>`).join('') || `<tr><td colspan="7" class="muted">No reviewers yet. Add each Vista leader above; each gets a personal link.</td></tr>`);
   }
   function showLink(name, tok) {
-    const url = `${location.origin}/${IS_DATA ? 'vistadata' : 'vista'}/#k=${tok}`;
-    const msg = IS_DATA
+    const IS_VIDEO = DECK === 'vista-video';
+    const url = `${location.origin}/${IS_VIDEO ? 'vistavideo' : IS_DATA ? 'vistadata' : 'vista'}/#k=${tok}`;
+    const msg = IS_VIDEO
+      ? `Dear ${name.split(' ')[0]}, here is a 13-minute film on the Vista EPC Platform, prepared for the Board of Directors: ${url}`
+      : IS_DATA
       ? `Dear ${name.split(' ')[0]}, here is the list of every data element in the Vista EPC Platform, with where we propose to keep it: on Vista's own servers or on the cloud. For each row, please mark Agree or Not agree. Your answers save as you go: ${url}`
       : `Dear ${name.split(' ')[0]}, please review the Vista EPC Platform blueprint here. For each slide you can agree, agree with feedback, ask to discuss, or disagree. Your answers save as you go: ${url}`;
     $('linkOut').innerHTML = `<div class="linkbox"><b>Personal link for ${esc(name)}</b> <span class="muted" style="font-size:12px">Shown once. Use “New link” later if it is lost; the old one then stops working.</span>
       <input id="linkVal" readonly value="${esc(url)}" style="margin:8px 0">
       <div class="row"><button class="btn small" id="copyLink">Copy link</button><button class="btn small" id="copyMsg">Copy message</button>
       <a class="btn small" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msg)}">Send on WhatsApp</a>
-      <a class="btn small" href="mailto:?subject=${encodeURIComponent(IS_DATA ? 'Vista EPC Platform: where each data element is stored' : 'Vista EPC Platform: blueprint review')}&body=${encodeURIComponent(msg)}">Send by email</a></div></div>`;
+      <a class="btn small" href="mailto:?subject=${encodeURIComponent(IS_VIDEO ? 'Vista EPC Platform: film for the Board' : IS_DATA ? 'Vista EPC Platform: where each data element is stored' : 'Vista EPC Platform: blueprint review')}&body=${encodeURIComponent(msg)}">Send by email</a></div></div>`;
     const copy = async (t, b) => { try { await navigator.clipboard.writeText(t); b.textContent = 'Copied'; } catch { $('linkVal').select(); } };
     $('copyLink').onclick = e => copy(url, e.target); $('copyMsg').onclick = e => copy(msg, e.target);
   }

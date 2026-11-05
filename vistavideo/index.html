@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Vista EPC Platform — film for the Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Domine:wght@400;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/vista/assets/review.css?v=2">
+<style>
+body{background:#0E1A2B}
+.stage{max-width:1180px;margin:0 auto;padding:28px 20px 60px;color:#F5F3EE}
+.eyebrow{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#E3A13B;font-weight:600;margin:0 0 8px}
+h1{font-family:Domine,Georgia,serif;font-size:clamp(26px,4vw,40px);margin:0 0 6px}
+.lede{color:#C9D3DF;margin:0 0 20px;max-width:760px}
+.frame{position:relative;width:100%;aspect-ratio:16/9;background:#13233A;border-radius:14px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center}
+.frame video{width:100%;height:100%;display:block;background:#000}
+.cover{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:6%;background:#13233A}
+.cover .bar{width:90px;height:5px;background:#E3A13B;border-radius:3px;margin-bottom:22px}
+.cover h2{font-family:Domine,Georgia,serif;font-size:clamp(26px,5vw,56px);margin:0 0 12px;color:#F5F3EE}
+.cover p{color:#C9D3DF;margin:0 0 26px;font-size:clamp(14px,1.8vw,19px)}
+.play{align-self:flex-start;display:flex;align-items:center;gap:12px;background:#E3A13B;color:#13233A;border:0;border-radius:999px;padding:14px 26px;font-weight:700;font-size:17px}
+.play:disabled{opacity:.7}
+.progress{height:6px;width:min(420px,80%);background:rgba(255,255,255,.15);border-radius:3px;overflow:hidden;margin-top:18px}
+.progress i{display:block;height:100%;width:0;background:#E3A13B;transition:width .2s}
+.note{color:#9FB0C4;font-size:13px;margin-top:14px}
+.chapters{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:18px}
+.chapters button{background:#13233A;border:1px solid #24395A;color:#F5F3EE;border-radius:10px;padding:10px 12px;text-align:left;font-size:14px}
+.chapters button span{display:block;color:#E3A13B;font-size:12px;font-weight:600}
+.chapters button:hover{border-color:#E3A13B}
+.err{background:#2A1616;border:1px solid #6B2B22;color:#F3CFC8;border-radius:12px;padding:18px}
+</style>
+</head>
+<body>
+<div class="stage">
+  <p class="eyebrow">A film for the Board of Directors</p>
+  <h1>Vista EPC Platform</h1>
+  <p class="lede" id="lede">One platform from tender to final bill, with every rupee on Vista’s own servers. About 13 minutes.</p>
+  <div id="err" class="err hidden"></div>
+  <div class="frame" id="frame">
+    <video id="vid" playsinline controls preload="none" class="hidden"></video>
+    <div class="cover" id="cover">
+      <div class="bar"></div>
+      <h2 id="hello">Opening…</h2>
+      <p>Narrated overview: bids, projects, materials, people, money and risk, reports, data security, AI and the plan.</p>
+      <button class="play" id="playBtn" disabled>▶ Play the film</button>
+      <div class="progress hidden" id="prog"><i id="progBar"></i></div>
+      <div class="note" id="note">The film loads securely before it starts (about 26 MB).</div>
+    </div>
+  </div>
+  <div class="chapters hidden" id="chapters"></div>
+</div>
+<script src="/vista/assets/common.js?v=2"></script>
+<script>
+(function () {
+  const { rpc, store, esc } = window.VistaReview;
+  const $ = id => document.getElementById(id);
+  const CH = [['Opening', 0], ['1 · Bids', 99], ['2 · Projects', 253], ['3 · Materials', 337], ['4 · People', 377], ['5 · Money and risk', 460], ['6 · Reports', 544], ['7 · Data security and AI', 585], ['8 · AI agents', 674], ['9 · Compliance and plan', 714]];
+  let token, film, url, sent = {};
+  function fail(m) { $('err').textContent = m; $('err').classList.remove('hidden'); $('frame').classList.add('hidden'); }
+  function readToken() {
+    const h = new URLSearchParams(location.hash.slice(1)); let t = h.get('k');
+    if (t) { store.set('vistavideo.k', t); history.replaceState(null, '', location.pathname); } else t = store.get('vistavideo.k');
+    return t && /^[0-9a-f]{32,128}$/i.test(t) ? t : null;
+  }
+  async function start() {
+    token = readToken();
+    if (!token) return fail('This film needs the personal link that was sent to you. If it does not work, ask Ashish Dua for a new one.');
+    try { const d = await rpc('vista_video_open', { p_token: token }); film = d.film; $('hello').textContent = d.viewer.name ? 'Welcome, ' + d.viewer.name.split(' ')[0] : 'Welcome'; }
+    catch (e) { store.del('vistavideo.k'); return fail(/invalid link/.test(e.message) ? 'This link is not valid any more. Please ask Ashish Dua for a new one.' : e.message); }
+    $('playBtn').disabled = false;
+  }
+  async function load() {
+    $('playBtn').disabled = true; $('playBtn').textContent = 'Loading…'; $('prog').classList.remove('hidden');
+    const res = await fetch('/vistavideo/' + encodeURIComponent(film.file), { cache: 'force-cache' });
+    if (!res.ok) throw new Error('Could not load the film (' + res.status + ').');
+    const total = +res.headers.get('content-length') || 26133163, reader = res.body.getReader(), parts = []; let got = 0;
+    for (;;) { const { done, value } = await reader.read(); if (done) break; parts.push(value); got += value.length; $('progBar').style.width = Math.min(100, got / total * 100) + '%'; }
+    const buf = new Uint8Array(got); let o = 0; for (const p of parts) { buf.set(p, o); o += p.length; }
+    $('playBtn').textContent = 'Unlocking…';
+    const raw = Uint8Array.from(atob(film.key), c => c.charCodeAt(0));
+    const key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);
+    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: buf.slice(0, 12) }, key, buf.slice(12));
+    return URL.createObjectURL(new Blob([plain], { type: 'video/mp4' }));
+  }
+  const v = $('vid');
+  $('playBtn').onclick = async () => {
+    try { url = url || await load(); } catch (e) { return fail('The film could not be opened: ' + e.message); }
+    v.src = url; v.classList.remove('hidden'); $('cover').classList.add('hidden');
+    $('chapters').innerHTML = CH.map(([n, t]) => `<button data-t="${t}"><span>${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}</span>${esc(n)}</button>`).join('');
+    $('chapters').classList.remove('hidden');
+    v.play().catch(() => {});
+  };
+  $('chapters').onclick = e => { const b = e.target.closest('button'); if (!b) return; v.currentTime = +b.dataset.t; v.play().catch(() => {}); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  const ev = e => { if (sent[e]) return; sent[e] = 1; rpc('vista_video_event', { p_token: token, p_event: e }).catch(() => {}); };
+  v.addEventListener('play', () => ev('played'));
+  v.addEventListener('timeupdate', () => { const p = v.currentTime / (v.duration || 1); if (p > .25) ev('watched 25%'); if (p > .5) ev('watched 50%'); if (p > .75) ev('watched 75%'); });
+  v.addEventListener('ended', () => ev('watched to the end'));
+  start();
+})();
+</script>
+</body>
+</html>
