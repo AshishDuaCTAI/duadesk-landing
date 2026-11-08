@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Domine:wght@400;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/vista/assets/review.css?v=2">
-<link rel="stylesheet" href="/vistaprocess/proc.css?v=3">
+<link rel="stylesheet" href="/vistaprocess/proc.css?v=5">
 </head>
 <body>
 <header class="top">
@@ -34,6 +34,7 @@
     <p>This is the detailed process for <b>A. Projects</b> in the Vista EPC Platform: <span id="counts"></span> It also proposes the format of each report you will receive, and illustrative mobile app screens. Before the platform is built, every step, report and screen must be agreed by the people who will use them.</p>
     <p class="muted" id="scope"></p>
     <div class="rules"><b>For every step you will see</b> what happens, who does it, what the AI agent does, whether its data is held on <span class="zone L">Local server</span> or <span class="zone C">Cloud</span>, which master data it creates, maintains or uses (and who owns that master data), and the control.</div>
+    <div class="rules"><b>Marks to look for.</b> <span class="mk ai">AI autonomous</span> the agent would act on its own: we explain why, and ask if a person must approve first. <span class="mk ex">External</span> a document that goes to or comes from a vendor, client, bank or government: we ask you to confirm its format. <span class="mk au">Audit trail</span> what is recorded permanently at that step.</div>
     <p><b>Your view on each step, report and screen:</b> Agree · Agree with changes · Need to discuss · Not agreed. For anything other than Agree, write a short comment. Answers save as you go, and you can come back with the same link.</p>
     <p><b>In the review meeting:</b> keep this page open on your phone or laptop and record your own view as each sub-process is explained. Your answers are yours alone; the other reviewers (<span id="others"></span>) record theirs separately, and Ashish brings them together.</p>
     <div class="actions"><button class="btn primary" id="startBtn">Start the review</button></div>
@@ -48,6 +49,8 @@
         <button data-f="all" class="on">All</button>
         <button data-f="open">Not answered</button>
         <button data-f="L">Touches local server</button>
+        <button data-f="auto">AI autonomous</button>
+        <button data-f="ext">External-facing</button>
         <button data-f="flag">My comments</button>
       </div>
       <select id="jump" aria-label="Go to sub-process" style="padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;max-width:260px"></select>
@@ -90,6 +93,6 @@
 
 <script>window.VISTA_PROC = { slug: "vistaprojects" };</script>
 <script src="/vista/assets/common.js?v=2"></script>
-<script src="/vistaprocess/proc.js?v=3"></script>
+<script src="/vistaprocess/proc.js?v=5"></script>
 </body>
 </html>

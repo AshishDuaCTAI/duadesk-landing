@@ -43,12 +43,27 @@
 .rscroll{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:#fff}
 .rscroll table{border-collapse:collapse;width:100%;font-size:12.5px;min-width:560px}
 .rscroll th{background:var(--sand);text-align:left;padding:6px 8px;font-weight:700;white-space:nowrap}
-.rscroll td{padding:6px 8px;border-top:1px solid var(--sand);color:#4F5B6B}
+.rscroll td{padding:6px 8px;border-top:1px solid var(--sand);color:#4F5B6B;vertical-align:top}
 .mob{display:flex;gap:18px;align-items:flex-start}
 .mob img{width:230px;flex:none;border-radius:26px}
 .mob .mtext{flex:1;min-width:0}
 .mrules{margin:10px 0 0;padding-left:22px;font-size:14px}.mrules li{margin:0 0 6px}
 @media (max-width:700px){.mob{flex-direction:column;align-items:center}.mob img{width:78%}.mob .mtext{width:100%}}
+.mks{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 2px}
+.mk{font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 9px;border:1px solid}
+.mk.ai{background:#6B2FA3;color:#fff;border-color:#6B2FA3}.mk.as{color:#6B2FA3;border-color:#C9B3E3;background:#F5EFFB}.mk.mn{color:#5B6676;border-color:#D6D0C2;background:#fff}
+.mk.ex{background:#9B2C2C;color:#fff;border-color:#9B2C2C}.mk.au{color:#13233A;border-color:#B9B2A3;background:#EFEBE2}
+.gov{margin-top:12px;border-radius:10px;padding:10px 12px;font-size:14px}
+.gov.ai{background:#F5EFFB;border:1px solid #C9B3E3}.gov.ex{background:#FBEFEF;border:1px solid #E5BDBD}
+.gov ul{margin:6px 0 0;padding-left:20px;font-size:13.5px}.gov li{margin:2px 0}
+.gacts{margin-top:4px;font-size:13.5px}
+.q{font-weight:700;margin-top:10px}
+.qopts{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.xo{border:2px solid var(--line);background:#fff;border-radius:9px;padding:6px 11px;font-weight:600;font-size:13px}
+.gov.ai .xo.on{border-color:#6B2FA3;background:#E9DDF6;color:#4B1F78}.gov.ex .xo.on{border-color:#9B2C2C;background:#F5DADA;color:#7A1F1F}
+.xo:disabled{opacity:.6}
+.qhint{font-size:12.5px;color:var(--mut);margin-top:6px}
+.flow i{font-style:normal;color:#fff;border-radius:6px;padding:0 4px}.flow i.fai{background:#6B2FA3}.flow i.fex{background:#9B2C2C}
 .finishbar{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--line);padding:10px 20px;display:flex;justify-content:flex-end;align-items:center;gap:14px;z-index:15}
 .bulk{font-size:13px}
 .rules{font-size:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:12px 0}
