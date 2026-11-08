@@ -66,4 +66,13 @@
   const fmtTime = iso => iso ? new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
 
   window.VistaReview = { SB_URL, SB_KEY, VERDICTS, V, rpc, loadSlides, mountSlide, esc, store, fmtTime };
+
+  // When the person came through the review portal, offer a way back to it.
+  document.addEventListener('DOMContentLoaded', () => {
+    if (location.pathname.startsWith('/vistareview') || /\/admin\/?$/.test(location.pathname) || !store.get('vistareview.s')) return;
+    const top = document.querySelector('header.top'); if (!top) return;
+    const a = document.createElement('a'); a.href = '/vistareview/'; a.textContent = '← My reviews';
+    a.style.cssText = 'color:#E3A13B;font-weight:700;font-size:13px;text-decoration:none;white-space:nowrap;order:-1;margin-right:4px';
+    top.insertBefore(a, top.firstChild);
+  });
 })();

@@ -26,7 +26,7 @@
     else t = store.get(TK);
     return t && /^[0-9a-f]{32,128}$/i.test(t) ? t : null;
   }
-  const dKey = () => CFG.slug + '.drafts.' + S.token.slice(0, 12);
+  const dKey = () => CFG.slug + '.drafts.' + ((S.data && S.data.reviewer && S.data.reviewer.name) || S.token.slice(0, 12)).replace(/\W+/g, '_');
   const saveDrafts = () => store.set(dKey(), JSON.stringify(S.drafts));
 
   async function start() {
@@ -34,6 +34,7 @@
     if (!S.token) return show('screenError');
     try { S.data = await rpc('vista_proc_open', { p_token: S.token }); }
     catch (e) {
+      if ((e.code === '28000' || /invalid link/.test(e.message)) && store.get('vistareview.s')) { store.del(TK); location.replace('/vistareview/'); return; }
       if (e.code === '28000' || /invalid link/.test(e.message)) { store.del(TK); $('errText').textContent = 'This link is not valid for this review. It may have been replaced by a newer one, or it belongs to another area.'; }
       else $('errText').textContent = e.message;
       return show('screenError');
@@ -56,7 +57,7 @@
     $('who').textContent = r.name + (r.designation ? ' · ' + r.designation : '');
     $('welcomeTitle').textContent = 'Dear ' + r.name.split(' ')[0] + ',';
     $('scope').textContent = S.A.scope;
-    $('counts').innerHTML = `<b>${nProc}</b> sub-processes with <b>${nSteps}</b> steps, <b>${nRep}</b> report formats, and <b>${nMob}</b> mobile app screens with the mobility rules.`;
+    if (CFG.slug === 'vistapillars') $('counts').innerHTML = `<b>${S.steps.length - 4}</b> sub-processes and <b>4</b> decisions.`; else $('counts').innerHTML = `<b>${nProc}</b> sub-processes with <b>${nSteps}</b> steps, <b>${nRep}</b> report formats, and <b>${nMob}</b> mobile app screens with the mobility rules.`;
     $('others').textContent = S.A.reviewers.map(x => x[0]).join(', ');
     if (r.submitted_at) return showDone();
     const done = Object.keys(S.reviews).length;
@@ -71,6 +72,9 @@
   const needText = s => (s.verdict && s.verdict !== 'agree') || s.extra.approval === 'limit' || s.extra.format === 'own' || s.extra.format === 'party';
   const AQ = [['alone', 'No: act alone and report'], ['each', 'Yes: approve each time'], ['limit', 'Only above a limit']];
   const FQ = [['ok', 'Yes, as proposed'], ['own', 'Use our template'], ['party', 'Use the party’s format']];
+  const PCOL = { C: '#2E7D4F', P: '#1F5F99', K: '#6B2FA3', Q: '#B7791F' };
+  const CHIPS = { pillar: ['Primary should be Cost reduction', 'Primary should be Profitability', 'Primary should be Controls', 'Primary should be Delivery quality', 'Driver is not right', 'Discuss in the meeting'],
+    def: ['Discuss in the meeting', 'Change who does this', 'Keep this on the local server', 'Add an approval step', 'Not needed at Vista', 'Timing is not practical', 'Our format is different'] };
   const ACAT = () => Object.fromEntries((S.A.audit_cats || []).map(c => [c.code, c]));
   function marks(st) {
     let m = '';
@@ -130,7 +134,8 @@
     const s = state(st.id), dis = S.locked ? 'disabled' : '', saved = S.reviews[st.id], z = ZC[st.zone];
     const need = needText(s);
     const box = need || (s.feedback || '').trim() ? `<div class="cbox"><label for="fb-${esc(st.id)}">${esc(PROMPT[s.verdict] || 'Comment (optional)')}</label>
-      <textarea id="fb-${esc(st.id)}" data-fb="${esc(st.id)}" maxlength="4000" ${dis} placeholder="Write in your own words. Hindi or English is fine.">${esc(s.feedback || '')}</textarea></div>` : '';
+      <textarea id="fb-${esc(st.id)}" data-fb="${esc(st.id)}" maxlength="4000" ${dis} placeholder="Write in your own words, or tap a phrase below. Hindi or English is fine.">${esc(s.feedback || '')}</textarea>
+      ${S.locked ? '' : `<div class="qchips">${(CHIPS[st.kind] || CHIPS.def).map(c => `<button class="qc" data-qc="${esc(c)}">+ ${esc(c)}</button>`).join('')}</div>`}</div>` : '';
     let status = '';
     if (S.locked) status = saved ? 'Saved' : '';
     else if (S.drafts[st.id]) status = !s.verdict ? 'Choose a view, to save' : need && !(s.feedback || '').trim() ? 'Add a comment to save' : 'Not saved yet';
@@ -139,6 +144,12 @@
     const scls = S.drafts[st.id] ? (/^(Add|Choose)/.test(status) ? 'err' : 'wait') : status.startsWith('Please') ? 'err' : 'ok';
     const vrow = `<div class="vrow">${SV.map(v => `<button class="vb ${s.verdict === v.id ? 'on' : ''}" data-v="${v.id}" style="--c:${v.color}" ${dis}>${esc(v.label)}</button>`).join('')}
         <span class="sstatus ${scls}" id="st-${esc(st.id)}">${esc(status)}</span></div>${box}`;
+    if (st.kind === 'confirm') return `<article class="step ${cls(st.id)}" id="s-${esc(st.id)}" data-id="${esc(st.id)}">
+      <div class="stop"><div class="stitle"><span class="id">${esc(st.id)}</span>${esc(st.title)}</div></div>${vrow}</article>`;
+    if (st.kind === 'pillar') return `<article class="step ${cls(st.id)}" id="s-${esc(st.id)}" data-id="${esc(st.id)}">
+      <div class="stop"><div class="stitle"><span class="id">${esc(st.ref)}</span>${esc(st.title)}</div><span class="muted" style="font-size:12px">${st.nsteps} steps in the process pack</span></div>
+      <div class="pmini">${(S.A.pillars || []).filter(p => st.map[p.code] && st.map[p.code].level === 2).map(p => `<span style="--pc:${PCOL[p.code]}">● ${esc(p.name)}</span>`).join('')}</div>
+      <div class="pgrid">${(S.A.pillars || []).map(p => { const m = st.map[p.code]; return `<div class="pc ${m ? (m.level === 2 ? 'pri' : 'sup') : 'none'}" style="--pc:${PCOL[p.code]}"><b>${esc(p.name)}</b>${m ? `<i>${m.level === 2 ? '● Primary' : '○ Supporting'}</i><span>${esc(m.driver)}</span><small>Steps: ${esc(m.steps)}</small>` : '<span class="muted">—</span>'}</div>`; }).join('')}</div>${vrow}</article>`;
     if (st.kind === 'audit') return `<article class="step ${cls(st.id)}" id="s-${esc(st.id)}" data-id="${esc(st.id)}">
       <div class="stop"><div class="stitle"><span class="id">${esc(st.id)}</span>${esc(st.title)}</div></div>
       <p class="swhat">${esc(st.what)}</p>
@@ -191,14 +202,14 @@
       const vis = sub.steps.filter(visible); if (!vis.length) return '';
       const done = sub.steps.filter(st => S.reviews[st.id]).length;
       const left = sub.steps.filter(st => !S.reviews[st.id] && !S.drafts[st.id] && !qMissing(st, {})).length;
-      return `<section class="sub" id="sub-${esc(sub.id)}"><div class="shead"><h2>${esc(sub.id)} · ${esc(sub.name)}</h2>
-        <div class="smeta"><span>${sub.steps.length} steps · ${done} answered</span>
+      return `<section class="sub" id="sub-${esc(sub.id)}"><div class="shead"><h2>${CFG.slug === 'vistapillars' ? '' : esc(sub.id) + ' · '}${esc(sub.name)}</h2>
+        <div class="smeta"><span>${sub.steps.length} items · ${done} answered</span>
         ${!S.locked && left ? `<button class="btn small bulk" data-bulk="${esc(sub.id)}">Agree with the ${left} not yet answered</button>` : ''}</div></div>
         ${flowHtml(sub)}${vis.map(stepHtml).join('')}</section>`;
     }).join('') || '<p class="muted">Nothing matches.</p>';
     progress();
   }
-  function rerow(id) { const el = $('s-' + id); if (el) el.outerHTML = stepHtml(S.byId[id]); progress(); }
+  function rerow(id) { const el = $('s-' + id); if (!el) return progress(); const open = el.classList.contains('open'); el.outerHTML = stepHtml(S.byId[id]); const n = $('s-' + id); if (n) { if (open) n.classList.add('open'); if (S.cur === id) n.classList.add('cur'); } progress(); }
   function progress() {
     const n = S.steps.length, vals = Object.values(S.reviews);
     $('progBar').innerHTML = SV.map(v => `<i style="width:${vals.filter(x => x.verdict === v.id).length / n * 100}%;background:${v.color}"></i>`).join('');
@@ -237,17 +248,23 @@
       const id = b.closest('.step').dataset.id, cur = state(id);
       S.drafts[id] = { verdict: b.dataset.v, feedback: cur.feedback || '', extra: cur.extra };
       saveDrafts(); rerow(id);
-      if (!needText(state(id)) || (cur.feedback || '').trim()) save(id);
+      if (!needText(state(id)) || (cur.feedback || '').trim()) { await save(id); afterAnswer(id); }
       else { const ta = $('fb-' + id); if (ta) ta.focus(); }
       return;
     }
+    const qc = e.target.closest('.qc'); if (qc && !S.locked) {
+      const id = qc.closest('.step').dataset.id, ta = $('fb-' + id); if (!ta) return;
+      const t = ta.value.trim(); ta.value = t ? (/[.!?]$/.test(t) ? t + ' ' : t + '. ') + qc.dataset.qc : qc.dataset.qc;
+      ta.dispatchEvent(new Event('input', { bubbles: true })); ta.focus(); return;
+    }
+    const tt = e.target.closest('.stitle'); if (tt && $('subs').classList.contains('quick')) { tt.closest('.step').classList.toggle('open'); return; }
     const xo = e.target.closest('.xo'); if (xo && !S.locked) {
       const id = xo.closest('.step').dataset.id, cur = state(id);
       const extra = { ...cur.extra, [xo.dataset.x]: xo.dataset.o };
       S.drafts[id] = { verdict: cur.verdict, feedback: cur.feedback || '', extra };
       saveDrafts(); rerow(id);
       const ns = state(id);
-      if (ns.verdict && (!needText(ns) || (ns.feedback || '').trim())) save(id);
+      if (ns.verdict && (!needText(ns) || (ns.feedback || '').trim())) { await save(id); afterAnswer(id); }
       else if (ns.verdict) { const ta = $('fb-' + id); if (ta) ta.focus(); }
       return;
     }
@@ -271,13 +288,51 @@
   });
   $('subs').addEventListener('focusout', e => { const ta = e.target; if (ta.dataset && ta.dataset.fb && S.drafts[ta.dataset.fb]) save(ta.dataset.fb); });
 
+  // ---------- easy answering: next item, quick view, keys ----------
+  const complete = id => { const st = S.byId[id], s = state(id); return !!(S.reviews[id] && !S.drafts[id] && !qMissing(st, s.extra)); };
+  S.auto = store.get('vistareview.auto') !== '0';
+  function setCur(id) { document.querySelectorAll('.step.cur').forEach(x => x.classList.remove('cur')); const el = $('s-' + id); if (el) el.classList.add('cur'); S.cur = id; }
+  function goNext(fromId) {
+    const els = [...document.querySelectorAll('#subs .step')], i = els.findIndex(x => x.dataset.id === fromId);
+    const nxt = els.slice(i + 1).concat(els.slice(0, Math.max(i, 0))).find(x => !complete(x.dataset.id));
+    if (!nxt) { $('finishNote').textContent = 'All answered — press Finish and submit'; $('finishBtn').focus(); return; }
+    nxt.scrollIntoView({ behavior: 'smooth', block: 'start' }); setCur(nxt.dataset.id);
+  }
+  function afterAnswer(id) { if (S.auto && complete(id)) setTimeout(() => goNext(id), 350); }
+  let st0; window.addEventListener('scroll', () => { clearTimeout(st0); st0 = setTimeout(() => {
+    if ($('screenList').classList.contains('hidden')) return;
+    const el = [...document.querySelectorAll('#subs .step')].find(x => x.getBoundingClientRect().bottom > 170); if (el && el.dataset.id !== S.cur) setCur(el.dataset.id);
+  }, 120); }, { passive: true });
+  document.addEventListener('keydown', e => {
+    if ($('screenList').classList.contains('hidden') || S.locked || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
+    const k = e.key, el = S.cur && $('s-' + S.cur); if (!el) return;
+    if ('1234'.includes(k) && k.length === 1) { const b = el.querySelector(`.vb[data-v="${SV[+k - 1].id}"]`); if (b) { e.preventDefault(); b.click(); } }
+    else if (k === 'n' || k === 'N') { e.preventDefault(); goNext(S.cur); }
+  });
+  function addTools() {
+    if ($('viewBtn')) return;
+    const tb = document.querySelector('.toolbar'), wrap = document.createElement('div'); wrap.className = 'vtools';
+    wrap.innerHTML = `<button class="btn small" id="viewBtn"></button><label class="autoj"><input type="checkbox" id="autoChk" ${S.auto ? 'checked' : ''}> Jump to the next item after answering</label>`;
+    tb.appendChild(wrap);
+    const setView = q => { $('subs').classList.toggle('quick', q); $('viewBtn').textContent = q ? 'Show full detail' : 'Quick view'; store.set('vistareview.quick', q ? '1' : '0'); };
+    setView(store.get('vistareview.quick') === '1');
+    $('viewBtn').onclick = () => setView(!$('subs').classList.contains('quick'));
+    $('autoChk').onchange = e => { S.auto = e.target.checked; store.set('vistareview.auto', S.auto ? '1' : '0'); };
+    const nb = document.createElement('button'); nb.className = 'btn'; nb.id = 'nextBtn'; nb.textContent = 'Next unanswered ↓';
+    nb.onclick = () => goNext(S.cur || (S.steps[0] && S.steps[0].id));
+    $('finishBtn').parentNode.insertBefore(nb, $('finishBtn'));
+    const hint = document.createElement('span'); hint.className = 'keyhint'; hint.textContent = 'Keys: 1 Agree · 2 Agree with changes · 3 Discuss · 4 Not agreed · N next';
+    $('finishBtn').parentNode.insertBefore(hint, $('finishNote'));
+  }
   $('filters').onclick = e => { const b = e.target.closest('button'); if (!b) return; S.filter = b.dataset.f; document.querySelectorAll('#filters button').forEach(x => x.classList.toggle('on', x === b)); render(); };
   let qt; $('search').oninput = e => { clearTimeout(qt); qt = setTimeout(() => { S.q = e.target.value.trim().toLowerCase(); render(); }, 200); };
   $('jump').onchange = e => { const el = $('sub-' + e.target.value); if (el) el.scrollIntoView({ block: 'start' }); e.target.value = ''; };
   $('startBtn').onclick = () => openList();
   function openList() {
     show('screenList'); $('prog').classList.remove('hidden');
-    $('jump').innerHTML = '<option value="">Go to sub-process…</option>' + S.A.subs.map(s => `<option value="${esc(s.id)}">${esc(s.id)} · ${esc(s.name)}</option>`).join('');
+    addTools();
+    $('jump').innerHTML = '<option value="">Go to sub-process…</option>' + S.A.subs.map(s => `<option value="${esc(s.id)}">${CFG.slug === 'vistapillars' ? '' : esc(s.id) + ' · '}${esc(s.name)}</option>`).join('');
     $('lockedBanner').classList.toggle('hidden', !S.locked);
     if (S.locked) $('lockedBanner').textContent = S.data.reviewer.submitted_at ? `You submitted your review on ${fmtTime(S.data.reviewer.submitted_at)}. Answers are shown read-only.` : 'This review is closed. Answers are shown read-only.';
     render();

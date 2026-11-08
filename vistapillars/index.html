@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Vista review — The four pillars</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Domine:wght@400;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/vista/assets/review.css?v=2">
+<link rel="stylesheet" href="/vistaprocess/proc.css?v=6">
+</head>
+<body>
+<header class="top">
+  <div class="brand">Vista review<small>The four pillars</small></div>
+  <div class="prog hidden" id="prog"><div class="bar" id="progBar"></div><b id="progText"></b></div>
+  <div class="who" id="who"></div>
+</header>
+
+<div id="screenLoading" class="loading"><div class="spinner"></div>Opening your review…</div>
+
+<div id="screenError" class="center hidden">
+  <div class="card">
+    <h2>This review needs your personal link</h2>
+    <p class="muted" id="errText">Please open the link that was sent to you by email. Each reviewer has their own link so that their views are recorded under their name.</p>
+    <p class="muted">If the link does not work, ask Ashish Dua for a new one.</p>
+  </div>
+</div>
+
+<div id="screenWelcome" class="center hidden">
+  <div class="card">
+    <h1 id="welcomeTitle">Welcome</h1>
+    <p>Every proposed process has been mapped to the four pillars that should drive an EPC company: <b style="color:#2E7D4F">Cost reduction</b>, <b style="color:#1F5F99">Profitability</b>, <b style="color:#6B2FA3">Controls</b> and <b style="color:#B7791F">Delivery quality</b>. This review covers <span id="counts"></span></p>
+    <p class="muted" id="scope"></p>
+    <div class="rules">For each sub-process you will see which pillar is <b>primary</b> (what it is measured on), which are <b>supporting</b>, what drives each link, and the steps that carry it. First, four short decisions on the pillars themselves.</div>
+    <p><b>Your view on each item:</b> Agree · Agree with changes · Need to discuss · Not agreed. For anything other than Agree, tap a ready phrase (for example “Primary should be Controls”) or write a short comment. Answers save as you go.</p>
+    <span id="others" class="hidden"></span>
+    <div class="actions"><button class="btn primary" id="startBtn">Start the review</button></div>
+  </div>
+</div>
+
+<div id="screenList" class="hidden">
+  <div class="dwrap">
+    <div class="banner hidden" id="lockedBanner"></div>
+    <div class="toolbar">
+      <div class="chips" id="filters" role="group" aria-label="Show">
+        <button data-f="all" class="on">All</button>
+        <button data-f="open">Not answered</button>
+        
+        
+        
+        <button data-f="flag">My comments</button>
+      </div>
+      <select id="jump" aria-label="Go to sub-process" style="padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;max-width:260px"></select>
+      <input id="search" type="search" placeholder="Search, e.g. billing, stores, safety" aria-label="Search steps">
+    </div>
+    <div id="subs"></div>
+    <div class="finishbar"><span id="finishNote" class="muted"></span><button class="btn primary" id="finishBtn">Finish and submit…</button></div>
+  </div>
+</div>
+
+<div id="screenFinish" class="center hidden">
+  <div class="card">
+    <h2>Your decision on this process</h2>
+    <div class="tally" id="finishTally"></div>
+    <div id="finishMissing"></div>
+    <div id="finishFlagged"></div>
+    <h3 style="margin:18px 0 10px">Overall, on the four-pillar map</h3>
+    <div class="verdicts" id="overallVerdicts"></div>
+    <div class="fb">
+      <label for="overallText">Overall comments or conditions</label>
+      <textarea id="overallText" maxlength="8000" placeholder="For example: what must change before we build, or a step that is missing."></textarea>
+    </div>
+    <div class="status" id="finishStatus" aria-live="polite"></div>
+    <div class="actions">
+      <button class="btn" id="backBtn">← Back to the steps</button>
+      <button class="btn primary" id="submitBtn">Submit my review</button>
+    </div>
+  </div>
+</div>
+
+<div id="screenDone" class="center hidden">
+  <div class="card">
+    <h2>Thank you</h2>
+    <p id="doneText">Your review has been submitted.</p>
+    <div class="tally" id="doneTally"></div>
+    <p class="muted">You can still look through the steps and your answers. To change anything now, ask Ashish Dua to reopen your review.</p>
+    <div class="actions"><button class="btn" id="browseBtn">Look through the steps</button></div>
+  </div>
+</div>
+
+<script>window.VISTA_PROC = { slug: "vistapillars" };</script>
+<script src="/vista/assets/common.js?v=3"></script>
+<script src="/vistaprocess/proc.js?v=6"></script>
+</body>
+</html>
