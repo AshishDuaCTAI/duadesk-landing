@@ -5,7 +5,7 @@
   const SKEY = 'vista.admin.session';
   let session = null, D = null, content = null, tab = 'people';
   const DECK = window.VISTA_DECK || 'vista-blueprint', IS_DATA = DECK === 'vista-data', IS_PROC = DECK.startsWith('vista-proc-') || DECK === 'vista-pillars';
-  const PROC = { 'vista-proc-d': ['vistabidding', 'D. Sales and bidding'], 'vista-proc-a': ['vistaprojects', 'A. Projects'], 'vista-proc-b': ['vistaprocurement', 'B. Procurement'], 'vista-proc-c': ['vistahr', 'C. HR'], 'vista-pillars': ['vistapillars', 'the four pillars'] };
+  const PROC = { 'vista-proc-d': ['vistabidding', 'D. Sales and bidding'], 'vista-proc-a': ['vistaprojects', 'A. Projects'], 'vista-proc-b': ['vistaprocurement', 'B. Procurement'], 'vista-proc-c': ['vistahr', 'C. HR'], 'vista-pillars': ['vistapillars', 'the four pillars'], 'vista-proc-e': ['vistafinance', 'E. Finance and accounts'] };
   const PV = { agree: 'Agree', agree_feedback: 'Agree with changes', discuss: 'Need to discuss', not_agreed: 'Not agreed' };
   const VL = id => IS_PROC ? PV[id] : V[id].label;
   let PSTEP = {}, PMD = {};
