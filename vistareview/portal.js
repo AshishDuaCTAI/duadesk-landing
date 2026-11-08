@@ -61,6 +61,7 @@
     st.textContent = 'Checking…'; st.className = 'status wait'; $('loginBtn').disabled = true;
     try {
       const r = await rpc('vista_login', { p_email: $('email').value.trim(), p_pin: pin });
+      if (!r || r.ok === false) throw new Error((r && r.error) || 'Email or PIN is not right.');
       store.set(SK, r.session); $('pin').value = ''; st.textContent = '';
       show('loading'); await load();
     } catch (err) { st.textContent = err.message; st.className = 'status err'; $('pin').select(); }

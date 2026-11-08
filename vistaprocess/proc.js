@@ -12,6 +12,7 @@
     { id: 'not_agreed', label: 'Not agreed', color: '#B4412F' },
   ];
   const SVL = Object.fromEntries(SV.map(v => [v.id, v]));
+  const OVL = { agree: 'Approved', agree_feedback: 'Approved with the changes I noted', discuss: 'Need to discuss first', not_agreed: 'Not approved' };
   const ZC = { 'Local server': 'L', 'Cloud': 'C', 'Both': 'X' };
   const ZCOL = { L: '#C98A1E', C: '#1F5F99', X: '#7A5BA6' };
   const PROMPT = { agree_feedback: 'What should change?', discuss: 'What do you want to discuss?', not_agreed: 'What is wrong, and how should it work at Vista?' };
@@ -288,7 +289,9 @@
     const qc = e.target.closest('.qc'); if (qc && !S.locked) {
       const id = qc.closest('.step').dataset.id, ta = $('fb-' + id); if (!ta) return;
       const t = ta.value.trim(); ta.value = t ? (/[.!?]$/.test(t) ? t + ' ' : t + '. ') + qc.dataset.qc : qc.dataset.qc;
-      ta.dispatchEvent(new Event('input', { bubbles: true })); ta.focus(); return;
+      ta.dispatchEvent(new Event('input', { bubbles: true })); ta.focus();
+      if (state(id).verdict) { await save(id); afterAnswer(id); }
+      return;
     }
     const tt = e.target.closest('.stitle'); if (tt && $('subs').classList.contains('quick')) { tt.closest('.step').classList.toggle('open'); return; }
     const xo = e.target.closest('.xo'); if (xo && !S.locked) {
@@ -409,7 +412,7 @@
   };
   function showDone() {
     const r = S.data.reviewer;
-    $('doneText').innerHTML = `Your review was submitted on ${esc(fmtTime(r.submitted_at))}${r.overall_verdict ? `, with the decision <b>${esc(SVL[r.overall_verdict].label)}</b>` : ''}.`;
+    $('doneText').innerHTML = `Your review was submitted on ${esc(fmtTime(r.submitted_at))}${r.overall_verdict ? `, with the decision <b>${esc(OVL[r.overall_verdict])}</b>` : ''}.`;
     $('doneTally').innerHTML = tally(); $('prog').classList.remove('hidden'); progress();
     show('screenDone');
   }
