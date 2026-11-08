@@ -4,7 +4,11 @@
   const $ = id => document.getElementById(id);
   const SKEY = 'vista.admin.session';
   let session = null, D = null, content = null, tab = 'people';
-  const DECK = window.VISTA_DECK || 'vista-blueprint', IS_DATA = DECK === 'vista-data';
+  const DECK = window.VISTA_DECK || 'vista-blueprint', IS_DATA = DECK === 'vista-data', IS_PROC = DECK.startsWith('vista-proc-');
+  const PROC = { 'vista-proc-d': ['vistabidding', 'D. Sales and bidding'], 'vista-proc-a': ['vistaprojects', 'A. Projects'], 'vista-proc-b': ['vistaprocurement', 'B. Procurement'], 'vista-proc-c': ['vistahr', 'C. HR'] };
+  const PV = { agree: 'Agree', agree_feedback: 'Agree with changes', discuss: 'Need to discuss', not_agreed: 'Not agreed' };
+  const VL = id => IS_PROC ? PV[id] : V[id].label;
+  let PSTEP = {}, PMD = {};
   const VS = () => IS_DATA ? VERDICTS.filter(v => v.id === 'agree' || v.id === 'not_agreed') : VERDICTS;
   const ZONE = { L: 'Local server', C: 'Cloud' }, ALT = { local: 'Local server', cloud: 'Cloud', split: 'Split between the two' };
 
@@ -53,6 +57,10 @@
   }
 
   async function load() {
+    if (IS_PROC && !Object.keys(PSTEP).length) {
+      const c = await call('vista_admin_proc_content', { p_deck: DECK }); const A = await loadSlides(c.file, c.key);
+      A.md.forEach(m => { PMD[m.code] = m; }); A.subs.forEach(sub => sub.steps.forEach(st => { PSTEP[st.id] = st; }));
+    }
     D = await call('vista_admin_overview', { p_deck: DECK });
     D.byReviewer = Object.fromEntries(D.reviewers.map(r => [r.id, r]));
     D.bySlide = {};
@@ -77,7 +85,7 @@
     $('kpis').innerHTML =
       `<div><span class="muted">Reviewers</span><b>${act.length}</b></div>` +
       `<div><span class="muted">Submitted</span><b>${submitted} of ${act.length}</b></div>` +
-      `<div><span class="muted">${IS_DATA ? 'Row answers' : 'Slide answers'}</span><b>${total} of ${n * act.length}</b></div>` +
+      `<div><span class="muted">${IS_DATA ? 'Row answers' : IS_PROC ? 'Step answers' : 'Slide answers'}</span><b>${total} of ${n * act.length}</b></div>` +
       `<div><span class="muted">Answers by view</span><div class="stack" style="margin-top:12px">${VS().map(v => `<i title="${v.label}: ${counts[v.id]}" style="width:${total ? counts[v.id] / total * 100 : 0}%;background:${v.color}"></i>`).join('')}</div><span class="muted" style="font-size:12px">${VS().map(v => `${v.short} ${counts[v.id]}`).join(' · ')}</span></div>`;
     renderPeople(); renderSlides(); renderOverall(); renderLog();
   }
@@ -100,8 +108,10 @@
   }
   function showLink(name, tok) {
     const IS_VIDEO = DECK === 'vista-video';
-    const url = `${location.origin}/${IS_VIDEO ? 'vistavideo' : IS_DATA ? 'vistadata' : 'vista'}/#k=${tok}`;
-    const msg = IS_VIDEO
+    const url = `${location.origin}/${IS_PROC ? PROC[DECK][0] : IS_VIDEO ? 'vistavideo' : IS_DATA ? 'vistadata' : 'vista'}/#k=${tok}`;
+    const msg = IS_PROC
+      ? `Dear ${name.split(' ')[0]}, here is your personal link to review the Vista process for ${PROC[DECK][1]}. For each step, choose Agree, Agree with changes, Need to discuss or Not agreed, and add your comment. Your answers save as you go: ${url}`
+      : IS_VIDEO
       ? `Dear ${name.split(' ')[0]}, here is a 13-minute film on the Vista EPC Platform, prepared for the Board of Directors: ${url}`
       : IS_DATA
       ? `Dear ${name.split(' ')[0]}, here is the list of every data element in the Vista EPC Platform, with where we propose to keep it: on Vista's own servers or on the cloud. For each row, please mark Agree or Not agree. Your answers save as you go: ${url}`
@@ -110,7 +120,7 @@
       <input id="linkVal" readonly value="${esc(url)}" style="margin:8px 0">
       <div class="row"><button class="btn small" id="copyLink">Copy link</button><button class="btn small" id="copyMsg">Copy message</button>
       <a class="btn small" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msg)}">Send on WhatsApp</a>
-      <a class="btn small" href="mailto:?subject=${encodeURIComponent(IS_VIDEO ? 'Vista EPC Platform: film for the Board' : IS_DATA ? 'Vista EPC Platform: where each data element is stored' : 'Vista EPC Platform: blueprint review')}&body=${encodeURIComponent(msg)}">Send by email</a></div></div>`;
+      <a class="btn small" href="mailto:?subject=${encodeURIComponent(IS_PROC ? 'Vista process review: ' + PROC[DECK][1] : IS_VIDEO ? 'Vista EPC Platform: film for the Board' : IS_DATA ? 'Vista EPC Platform: where each data element is stored' : 'Vista EPC Platform: blueprint review')}&body=${encodeURIComponent(msg)}">Send by email</a></div></div>`;
     const copy = async (t, b) => { try { await navigator.clipboard.writeText(t); b.textContent = 'Copied'; } catch { $('linkVal').select(); } };
     $('copyLink').onclick = e => copy(url, e.target); $('copyMsg').onclick = e => copy(msg, e.target);
   }
@@ -146,29 +156,30 @@
       if (f === 'fb' && !withFb.length) return '';
       if (f === 'pending' && list.length >= (who ? 1 : act.length)) return '';
       const tot = list.length || 1;
-      return `<tr><td>${IS_DATA ? esc(s.id) : s.n}</td><td>${IS_DATA ? `<b>${esc(s.title)}</b> <span class="zone ${s.d.zone}">${ZONE[s.d.zone]}</span><br><span class="muted" style="font-size:12px">${esc(s.d.includes)}</span>` : `<a href="#" data-pv="${esc(s.id)}">${esc(s.title)}</a><br><span class="muted" style="font-size:12px">${esc(s.section)}</span>`}</td>
+      const P = PSTEP[s.id];
+      return `<tr><td>${IS_DATA || IS_PROC ? esc(s.id) : s.n}</td><td>${IS_PROC ? `<b>${esc(s.title)}</b> ${P ? `<span class="zone ${P.zone === 'Local server' ? 'L' : P.zone === 'Cloud' ? 'C' : 'X'}">${esc(P.zone)}</span>` : ''}<br><span class="muted" style="font-size:12px">${esc(s.section)}${P ? ' · ' + esc(P.what) : ''}${P && P.md.length ? '<br>Master data: ' + P.md.map(m => esc(m.code + ' ' + m.name + ' (' + m.act.toLowerCase() + (PMD[m.code] ? '; maintained by ' + PMD[m.code].maintains : '') + ')')).join('; ') : ''}</span>` : IS_DATA ? `<b>${esc(s.title)}</b> <span class="zone ${s.d.zone}">${ZONE[s.d.zone]}</span><br><span class="muted" style="font-size:12px">${esc(s.d.includes)}</span>` : `<a href="#" data-pv="${esc(s.id)}">${esc(s.title)}</a><br><span class="muted" style="font-size:12px">${esc(s.section)}</span>`}</td>
         <td><div class="stack">${VERDICTS.map(v => `<i style="width:${c[v.id] / tot * 100}%;background:${v.color}"></i>`).join('')}</div>
         <span class="muted" style="font-size:12px">${VS().filter(v => c[v.id]).map(v => `${v.short} ${c[v.id]}`).join(' · ') || 'No answers yet'}</span></td>
         <td>${list.length} / ${who ? 1 : act.length}</td></tr>` +
-        (withFb.length ? `<tr class="fbrow"><td></td><td colspan="3">${withFb.map(v => `<div class="fbitem" style="--c:${V[v.verdict].color}"><b>${esc(D.byReviewer[v.reviewer_id].name)} · ${esc(IS_DATA && v.verdict === 'not_agreed' ? 'Not agreed' : V[v.verdict].label)}${v.alt ? ' · should be: ' + esc(ALT[v.alt]) : ''}</b> <span class="muted" style="font-size:12px">${fmtTime(v.at)}</span><div>${esc(v.feedback).replace(/\n/g, '<br>')}</div></div>`).join('')}</td></tr>` : '');
+        (withFb.length ? `<tr class="fbrow"><td></td><td colspan="3">${withFb.map(v => `<div class="fbitem" style="--c:${V[v.verdict].color}"><b>${esc(D.byReviewer[v.reviewer_id].name)} · ${esc(IS_DATA && v.verdict === 'not_agreed' ? 'Not agreed' : VL(v.verdict))}${v.alt ? ' · should be: ' + esc(ALT[v.alt]) : ''}</b> <span class="muted" style="font-size:12px">${fmtTime(v.at)}</span><div>${esc(v.feedback).replace(/\n/g, '<br>')}</div></div>`).join('')}</td></tr>` : '');
     }).join('');
-    $('slideTable').innerHTML = `<tr><th>#</th><th>${IS_DATA ? 'Data element and proposed location' : 'Slide'}</th><th>Views</th><th>Answered</th></tr>` + (rows || `<tr><td colspan="4" class="muted">Nothing matches this filter.</td></tr>`);
+    $('slideTable').innerHTML = `<tr><th>#</th><th>${IS_DATA ? 'Data element and proposed location' : IS_PROC ? 'Step' : 'Slide'}</th><th>Views</th><th>Answered</th></tr>` + (rows || `<tr><td colspan="4" class="muted">Nothing matches this filter.</td></tr>`);
   }
   $('slideFilter').onchange = renderSlides; $('slideWho').onchange = renderSlides;
 
   function renderOverall() {
     $('overallTable').innerHTML = `<tr><th>Reviewer</th><th>Overall view</th><th>Comment</th><th>Submitted</th></tr>` +
       (D.reviewers.filter(r => r.submitted_at).map(r => `<tr><td><b>${esc(r.name)}</b><br><span class="muted" style="font-size:12px">${esc(r.designation || '')}</span></td>
-        <td>${r.overall_verdict ? `<span class="pill" style="--c:${V[r.overall_verdict].color}">${esc(V[r.overall_verdict].label)}</span>` : ''}</td>
+        <td>${r.overall_verdict ? `<span class="pill" style="--c:${V[r.overall_verdict].color}">${esc(IS_PROC ? { agree: 'Approved', agree_feedback: 'Approved with changes', discuss: 'Discuss first', not_agreed: 'Not approved' }[r.overall_verdict] : V[r.overall_verdict].label)}</span>` : ''}</td>
         <td>${esc(r.overall_comment || '').replace(/\n/g, '<br>')}</td><td>${fmtTime(r.submitted_at)}</td></tr>`).join('') || `<tr><td colspan="4" class="muted">No one has submitted yet.</td></tr>`);
   }
 
   function renderLog() {
-    const who = $('logWho').value, title = Object.fromEntries(D.slides.map(s => [s.id, `${IS_DATA ? s.id : s.n + '.'} ${s.title}`]));
+    const who = $('logWho').value, title = Object.fromEntries(D.slides.map(s => [s.id, `${IS_DATA || IS_PROC ? s.id : s.n + '.'} ${s.title}`]));
     const rows = D.log.filter(l => !who || l.reviewer_id === who).slice().reverse();
     $('logTable').innerHTML = `<tr><th>When</th><th>Reviewer</th><th>What</th><th>Slide</th><th>View</th><th>Feedback at that moment</th></tr>` +
       (rows.map(l => `<tr><td style="white-space:nowrap">${fmtTime(l.at)}</td><td>${esc((D.byReviewer[l.reviewer_id] || {}).name || '')}</td><td>${esc(l.event)}</td>
-        <td>${esc(title[l.slide] || '')}</td><td>${l.verdict ? `<span class="pill" style="--c:${V[l.verdict].color}">${esc(V[l.verdict].short)}</span>` : ''}</td>
+        <td>${esc(title[l.slide] || '')}</td><td>${l.verdict ? `<span class="pill" style="--c:${V[l.verdict].color}">${esc(IS_PROC ? PV[l.verdict] : V[l.verdict].short)}</span>` : ''}</td>
         <td>${l.alt ? `<b>Should be: ${esc(ALT[l.alt])}</b><br>` : ''}${esc(l.feedback || '').replace(/\n/g, '<br>')}</td></tr>`).join('') || `<tr><td colspan="6" class="muted">No activity yet.</td></tr>`);
   }
   $('logWho').onchange = renderLog;
@@ -201,15 +212,15 @@
   }
   const stamp = () => new Date().toISOString().slice(0, 10);
   $('csvBtn').onclick = () => {
-    const rows = [[IS_DATA ? 'Row' : 'Slide no', IS_DATA ? 'Data element' : 'Slide', 'Section', 'Proposed location', 'Reviewer', 'Designation', 'View', 'Should be', 'Feedback', 'Saved at']];
-    D.slides.forEach(s => (D.bySlide[s.id] || []).forEach(v => { const r = D.byReviewer[v.reviewer_id]; rows.push([IS_DATA ? s.id : s.n, s.title, s.section, s.d ? ZONE[s.d.zone] : '', r.name, r.designation || '', IS_DATA && v.verdict === 'not_agreed' ? 'Not agreed' : V[v.verdict].label, v.alt ? ALT[v.alt] : '', v.feedback || '', v.at]); }));
+    const rows = [[IS_DATA ? 'Row' : IS_PROC ? 'Step' : 'Slide no', IS_DATA ? 'Data element' : IS_PROC ? 'Step name' : 'Slide', IS_PROC ? 'Sub-process' : 'Section', IS_PROC ? 'Data held' : 'Proposed location', 'Reviewer', 'Designation', 'View', 'Should be', 'Feedback', 'Saved at']];
+    D.slides.forEach(s => (D.bySlide[s.id] || []).forEach(v => { const r = D.byReviewer[v.reviewer_id]; rows.push([IS_DATA || IS_PROC ? s.id : s.n, s.title, s.section, IS_PROC ? (PSTEP[s.id] || {}).zone || '' : s.d ? ZONE[s.d.zone] : '', r.name, r.designation || '', IS_DATA && v.verdict === 'not_agreed' ? 'Not agreed' : VL(v.verdict), v.alt ? ALT[v.alt] : '', v.feedback || '', v.at]); }));
     D.reviewers.filter(r => r.submitted_at).forEach(r => rows.push(['', 'OVERALL', '', '', r.name, r.designation || '', r.overall_verdict ? V[r.overall_verdict].label : '', '', r.overall_comment || '', r.submitted_at]));
     download(`${DECK}-answers-${stamp()}.csv`, rows);
   };
   $('csvLogBtn').onclick = () => {
     const title = Object.fromEntries(D.slides.map(s => [s.id, s.title])), num = Object.fromEntries(D.slides.map(s => [s.id, s.n]));
     const rows = [['When', 'Reviewer', 'Event', IS_DATA ? 'Row' : 'Slide no', IS_DATA ? 'Data element' : 'Slide', 'View', 'Should be', 'Feedback']];
-    D.log.forEach(l => rows.push([l.at, (D.byReviewer[l.reviewer_id] || {}).name || '', l.event, IS_DATA ? (l.slide || '') : (num[l.slide] || ''), title[l.slide] || '', l.verdict ? V[l.verdict].label : '', l.alt ? ALT[l.alt] : '', l.feedback || '']));
+    D.log.forEach(l => rows.push([l.at, (D.byReviewer[l.reviewer_id] || {}).name || '', l.event, IS_DATA || IS_PROC ? (l.slide || '') : (num[l.slide] || ''), title[l.slide] || '', l.verdict ? VL(l.verdict) : '', l.alt ? ALT[l.alt] : '', l.feedback || '']));
     download(`${DECK}-changes-${stamp()}.csv`, rows);
   };
 
