@@ -41,7 +41,10 @@
     try { S.A = await loadSlides(S.data.content.file, S.data.content.key); }
     catch (e) { $('errText').textContent = 'Could not open the process content: ' + e.message; return show('screenError'); }
     S.A.md.forEach(m => { S.md[m.code] = m; });
+    const nProc = S.A.subs.length, nRep = (S.A.reports || []).length;
+    if (nRep) S.A.subs.push({ id: 'R', name: 'Report formats for approval', steps: S.A.reports, isReports: true });
     S.A.subs.forEach(sub => sub.steps.forEach(st => { st.sub = sub.id; S.steps.push(st); S.byId[st.id] = st; }));
+    const nSteps = S.steps.length - nRep;
     S.reviews = S.data.reviews || {};
     try { S.drafts = JSON.parse(store.get(dKey()) || '{}'); } catch { S.drafts = {}; }
     for (const id of Object.keys(S.drafts)) if (!S.byId[id]) delete S.drafts[id];
@@ -50,7 +53,7 @@
     $('who').textContent = r.name + (r.designation ? ' · ' + r.designation : '');
     $('welcomeTitle').textContent = 'Dear ' + r.name.split(' ')[0] + ',';
     $('scope').textContent = S.A.scope;
-    $('counts').innerHTML = `<b>${S.A.subs.length}</b> sub-processes and <b>${S.steps.length}</b> steps.`;
+    $('counts').innerHTML = `<b>${nProc}</b> sub-processes with <b>${nSteps}</b> steps, and <b>${nRep}</b> report formats.`;
     $('others').textContent = S.A.reviewers.map(x => x[0]).join(', ');
     if (r.submitted_at) return showDone();
     const done = Object.keys(S.reviews).length;
@@ -67,7 +70,7 @@
     if (f === 'L' && ZC[st.zone] === 'C') return false;
     if (f === 'flag' && !(rv && rv.verdict !== 'agree') && !(S.drafts[st.id] && S.drafts[st.id].verdict !== 'agree')) return false;
     if (S.q) {
-      const hay = [st.id, st.title, st.what, st.who.join(' '), st.agent, st.control, st.md.map(m => m.code + ' ' + m.name).join(' ')].join(' ').toLowerCase();
+      const hay = [st.id, st.title, st.what, st.who.join(' '), st.agent, st.control || '', st.notes || '', (st.columns || []).join(' '), (st.receivers || []).join(' '), st.md.map(m => m.code + ' ' + m.name).join(' ')].join(' ').toLowerCase();
       if (!hay.includes(S.q)) return false;
     }
     return true;
@@ -89,6 +92,20 @@
     else if (S.drafts[st.id]) status = need && !(s.feedback || '').trim() ? 'Add a comment to save' : 'Not saved yet';
     else if (saved) status = 'Saved ' + fmtTime(saved.at);
     const scls = S.drafts[st.id] ? (status.startsWith('Add') ? 'err' : 'wait') : 'ok';
+    if (st.kind === 'report') return `<article class="step ${cls(st.id)}" id="s-${esc(st.id)}" data-id="${esc(st.id)}">
+      <div class="stop"><div class="stitle"><span class="id">${esc(st.id)}</span>${esc(st.title)}</div><span class="zone ${z}">Data held: ${esc(st.zone)}</span></div>
+      <p class="swhat">${esc(st.what)}</p>
+      <div class="sgrid">
+        <div><span>Who receives it</span>${st.receivers.map(esc).join('<br>')}</div>
+        <div><span>How often</span>${esc(st.freq)}</div>
+        <div><span>Prepared by</span>${esc(st.owner)}<br>AI agent: ${esc(st.agent)}</div>
+        <div><span>How it is delivered</span>${esc(st.delivery)}</div>
+        <div><span>Filters</span>${esc(st.filters)}</div>
+        <div><span>Highlights and rules</span>${esc(st.notes)}</div>
+      </div>
+      <div class="rlay"><span>Proposed layout · sample values, for illustration only</span><div class="rscroll"><table><tr>${st.columns.map(c => `<th>${esc(c)}</th>`).join('')}</tr>${st.sample.map(r => `<tr>${r.map(v => `<td>${esc(v)}</td>`).join('')}</tr>`).join('')}</table></div></div>
+      <div class="vrow">${SV.map(v => `<button class="vb ${s.verdict === v.id ? 'on' : ''}" data-v="${v.id}" style="--c:${v.color}" ${dis}>${esc(v.label)}</button>`).join('')}
+        <span class="sstatus ${scls}" id="st-${esc(st.id)}">${esc(status)}</span></div>${box}</article>`;
     return `<article class="step ${cls(st.id)}" id="s-${esc(st.id)}" data-id="${esc(st.id)}">
       <div class="stop"><div class="stitle"><span class="id">${esc(st.id)}</span>${esc(st.title)}</div><span class="zone ${z}">Data held: ${esc(st.zone)}</span></div>
       <p class="swhat">${esc(st.what)}</p>
@@ -102,6 +119,7 @@
         <span class="sstatus ${scls}" id="st-${esc(st.id)}">${esc(status)}</span></div>${box}</article>`;
   }
   function flowHtml(sub) {
+    if (sub.isReports) return '<p class="muted" style="margin:4px 0 10px;font-size:14px">For each report: is it the right report, for the right people, at the right time, with the right columns? Say what to add, remove or change.</p>';
     return `<div class="flow">${sub.steps.map((st, i) => {
       const rv = S.reviews[st.id], c = rv ? (rv.verdict === 'agree' ? 'ok' : 'no') : '';
       return (i ? '<span class="arr">→</span>' : '') + `<a href="#s-${esc(st.id)}" data-jump="${esc(st.id)}" class="${c}" style="--zc:${ZCOL[ZC[st.zone]]}"><b>${esc(st.id)} · ${esc(st.zone)}</b>${esc(st.title)}</a>`;
@@ -123,8 +141,8 @@
   function progress() {
     const n = S.steps.length, vals = Object.values(S.reviews);
     $('progBar').innerHTML = SV.map(v => `<i style="width:${vals.filter(x => x.verdict === v.id).length / n * 100}%;background:${v.color}"></i>`).join('');
-    $('progText').textContent = `${vals.length} of ${n} steps`;
-    $('finishNote').textContent = vals.length < n ? `${n - vals.length} steps still to answer` : 'All steps answered';
+    $('progText').textContent = `${vals.length} of ${n} answered`;
+    $('finishNote').textContent = vals.length < n ? `${n - vals.length} still to answer` : 'All answered';
     $('finishBtn').disabled = S.locked;
   }
 
@@ -201,7 +219,7 @@
     for (const id of Object.keys(S.drafts)) await save(id);
     $('finishTally').innerHTML = tally();
     const missing = S.steps.filter(st => !S.reviews[st.id]);
-    $('finishMissing').innerHTML = missing.length ? `<div class="banner"><b>${missing.length} step${missing.length > 1 ? 's' : ''} still need${missing.length > 1 ? '' : 's'} a view</b> before you can submit: ${missing.slice(0, 20).map(st => `<a href="#" data-goto="${esc(st.id)}">${esc(st.id)}</a>`).join(', ')}${missing.length > 20 ? '…' : ''}</div>` : '';
+    $('finishMissing').innerHTML = missing.length ? `<div class="banner"><b>${missing.length} item${missing.length > 1 ? 's' : ''} (steps or reports) still need${missing.length > 1 ? '' : 's'} a view</b> before you can submit: ${missing.slice(0, 20).map(st => `<a href="#" data-goto="${esc(st.id)}">${esc(st.id)}</a>`).join(', ')}${missing.length > 20 ? '…' : ''}</div>` : '';
     const fl = S.steps.filter(st => S.reviews[st.id] && S.reviews[st.id].verdict !== 'agree');
     $('finishFlagged').innerHTML = fl.length ? `<p style="margin:14px 0 0"><b>Your comments</b></p><ul class="list-plain">${fl.map(st => `<li><a href="#" data-goto="${esc(st.id)}">${esc(st.id)} ${esc(st.title)}</a> · <b style="color:${SVL[S.reviews[st.id].verdict].color}">${esc(SVL[S.reviews[st.id].verdict].label)}</b><br><span class="muted">${esc(S.reviews[st.id].feedback || '')}</span></li>`).join('')}</ul>` : '';
     $('overallVerdicts').innerHTML = SV.map(v => `<button class="vbtn ${S.overall === v.id ? 'on' : ''}" data-v="${v.id}" style="--c:${v.color}">${esc(v.id === 'agree' ? 'Approved' : v.id === 'agree_feedback' ? 'Approved with the changes I noted' : v.id === 'discuss' ? 'Need to discuss first' : 'Not approved')}</button>`).join('');

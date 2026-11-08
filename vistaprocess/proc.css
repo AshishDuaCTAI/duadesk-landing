@@ -38,6 +38,12 @@
 .cbox{margin-top:10px}
 .cbox textarea{width:100%;min-height:72px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff;resize:vertical}
 .cbox label{font-size:13px;font-weight:600;display:block;margin-bottom:4px}
+.rlay{margin-top:12px}
+.rlay>span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--blue);font-weight:700;margin-bottom:4px}
+.rscroll{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:#fff}
+.rscroll table{border-collapse:collapse;width:100%;font-size:12.5px;min-width:560px}
+.rscroll th{background:var(--sand);text-align:left;padding:6px 8px;font-weight:700;white-space:nowrap}
+.rscroll td{padding:6px 8px;border-top:1px solid var(--sand);color:#4F5B6B}
 .finishbar{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--line);padding:10px 20px;display:flex;justify-content:flex-end;align-items:center;gap:14px;z-index:15}
 .bulk{font-size:13px}
 .rules{font-size:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:12px 0}

@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Domine:wght@400;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/vista/assets/review.css?v=2">
-<link rel="stylesheet" href="/vistaprocess/proc.css?v=1">
+<link rel="stylesheet" href="/vistaprocess/proc.css?v=2">
 </head>
 <body>
 <header class="top">
@@ -31,10 +31,10 @@
 <div id="screenWelcome" class="center hidden">
   <div class="card">
     <h1 id="welcomeTitle">Welcome</h1>
-    <p>This is the detailed process for <b>A. Projects</b> in the Vista EPC Platform: <span id="counts"></span> Before the platform is built, every step must be agreed by the people who will run it.</p>
+    <p>This is the detailed process for <b>A. Projects</b> in the Vista EPC Platform: <span id="counts"></span> It also proposes the format of each report you will receive. Before the platform is built, every step and every report must be agreed by the people who will use them.</p>
     <p class="muted" id="scope"></p>
     <div class="rules"><b>For every step you will see</b> what happens, who does it, what the AI agent does, whether its data is held on <span class="zone L">Local server</span> or <span class="zone C">Cloud</span>, which master data it creates, maintains or uses (and who owns that master data), and the control.</div>
-    <p><b>Your view on each step:</b> Agree · Agree with changes · Need to discuss · Not agreed. For anything other than Agree, write a short comment. Answers save as you go, and you can come back with the same link.</p>
+    <p><b>Your view on each step and report:</b> Agree · Agree with changes · Need to discuss · Not agreed. For anything other than Agree, write a short comment. Answers save as you go, and you can come back with the same link.</p>
     <p><b>In the review meeting:</b> keep this page open on your phone or laptop and record your own view as each sub-process is explained. Your answers are yours alone; the other reviewers (<span id="others"></span>) record theirs separately, and Ashish brings them together.</p>
     <div class="actions"><button class="btn primary" id="startBtn">Start the review</button></div>
   </div>
@@ -45,13 +45,13 @@
     <div class="banner hidden" id="lockedBanner"></div>
     <div class="toolbar">
       <div class="chips" id="filters" role="group" aria-label="Show">
-        <button data-f="all" class="on">All steps</button>
+        <button data-f="all" class="on">All</button>
         <button data-f="open">Not answered</button>
         <button data-f="L">Touches local server</button>
         <button data-f="flag">My comments</button>
       </div>
       <select id="jump" aria-label="Go to sub-process" style="padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;max-width:260px"></select>
-      <input id="search" type="search" placeholder="Search, e.g. RFQ, salary, MD12" aria-label="Search steps">
+      <input id="search" type="search" placeholder="Search, e.g. RFQ, salary, MD12, report" aria-label="Search steps">
     </div>
     <div id="subs"></div>
     <div class="finishbar"><span id="finishNote" class="muted"></span><button class="btn primary" id="finishBtn">Finish and submit…</button></div>
@@ -90,6 +90,6 @@
 
 <script>window.VISTA_PROC = { slug: "vistaprojects" };</script>
 <script src="/vista/assets/common.js?v=2"></script>
-<script src="/vistaprocess/proc.js?v=1"></script>
+<script src="/vistaprocess/proc.js?v=2"></script>
 </body>
 </html>
