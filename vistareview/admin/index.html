@@ -35,7 +35,7 @@ table.grid td{padding:9px 12px;border-top:1px solid var(--sand);vertical-align:t
   <div class="status" id="signinStatus"></div><div class="actions"><button class="btn primary" type="submit">Sign in</button></div></form>
 </div></div>
 <div id="app" class="wrap hidden">
-  <p class="links">Responses by review: <a href="/vista/admin/">Blueprint</a><a href="/vistadata/admin/">Data location</a><a href="/vistapillars/admin/">Four pillars</a><a href="/vistabidding/admin/">D. Bidding</a><a href="/vistaprojects/admin/">A. Projects</a><a href="/vistaprocurement/admin/">B. Procurement</a><a href="/vistahr/admin/">C. HR</a><a href="/vistafinance/admin/">E. Finance</a><a href="/vistavideo/admin/">Film</a></p>
+  <p class="links">Responses by review: <a href="/vista/admin/">Blueprint</a><a href="/vistadata/admin/">Data location</a><a href="/vistapillars/admin/">Four pillars</a><a href="/vistabidding/admin/">D. Bidding</a><a href="/vistaprojects/admin/">A. Projects</a><a href="/vistaprocurement/admin/">B. Procurement</a><a href="/vistahr/admin/">C. HR</a><a href="/vistafinance/admin/">E. Finance</a><a href="/vistaai/admin/">Data, assistant, duties</a><a href="/vistavideo/admin/">Film</a></p>
   <div id="pinOut"></div>
   <table class="grid" id="people"></table>
   <p class="muted" style="font-size:13px">A new PIN replaces the old one and logs the person out of every device. People are locked for 15 minutes after 5 wrong PINs.</p>
@@ -45,7 +45,7 @@ table.grid td{padding:9px 12px;border-top:1px solid var(--sand);vertical-align:t
 (function () {
   const { SB_URL, SB_KEY, rpc, esc, fmtTime } = window.VistaReview;
   const $ = id => document.getElementById(id), SKEY = 'vista.admin.session';
-  const PATH = { 'vista-blueprint': '/vista/admin/', 'vista-data': '/vistadata/admin/', 'vista-video': '/vistavideo/admin/', 'vista-pillars': '/vistapillars/admin/', 'vista-proc-d': '/vistabidding/admin/', 'vista-proc-a': '/vistaprojects/admin/', 'vista-proc-b': '/vistaprocurement/admin/', 'vista-proc-c': '/vistahr/admin/', 'vista-proc-e': '/vistafinance/admin/' };
+  const PATH = { 'vista-blueprint': '/vista/admin/', 'vista-data': '/vistadata/admin/', 'vista-video': '/vistavideo/admin/', 'vista-pillars': '/vistapillars/admin/', 'vista-proc-d': '/vistabidding/admin/', 'vista-proc-a': '/vistaprojects/admin/', 'vista-proc-b': '/vistaprocurement/admin/', 'vista-proc-c': '/vistahr/admin/', 'vista-proc-e': '/vistafinance/admin/', 'vista-aisod': '/vistaai/admin/' };
   let session = null, P = [];
   const ss = { get() { try { return JSON.parse(sessionStorage.getItem(SKEY)); } catch { return null; } }, set(v) { try { v ? sessionStorage.setItem(SKEY, JSON.stringify(v)) : sessionStorage.removeItem(SKEY); } catch { } } };
   async function auth(grant, body) {

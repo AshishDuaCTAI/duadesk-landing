@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Vista review — Outside data, assistant and duties — responses</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Domine:wght@400;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/vista/assets/review.css?v=2"><link rel="stylesheet" href="/vistadata/data.css?v=1"><link rel="stylesheet" href="/vistaprocess/proc.css?v=6">
+<style>
+.wrap{max-width:1240px;margin:0 auto;padding:20px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 16px}
+.tabs button{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:7px 14px;font-weight:600;font-size:14px}
+.tabs button.on{background:var(--navy);color:var(--cream);border-color:var(--navy)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kpis>div{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px}
+.kpis b{display:block;font-family:Domine,Georgia,serif;font-size:26px}
+table.grid{width:100%;border-collapse:collapse;background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:14px}
+table.grid th{text-align:left;background:var(--sand);padding:9px 12px;font-size:12px;letter-spacing:.03em;text-transform:uppercase;color:#4F5B6B}
+table.grid td{padding:9px 12px;border-top:1px solid var(--sand);vertical-align:top}
+.stack{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--sand);min-width:120px}
+.stack i{display:block;height:100%}
+.fbrow{background:#fff}
+.fbrow td{padding:0 12px 12px}
+.fbitem{border-left:4px solid var(--c);padding:6px 10px;margin:8px 0;background:var(--cream);border-radius:0 8px 8px 0}
+.fbitem b{font-size:13px}
+.linkbox{background:#EAF2E8;border:1px solid #BCD7B5;border-radius:10px;padding:14px;margin-top:12px}
+.linkbox input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;font-family:monospace;font-size:13px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.form{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end}
+.form label{font-size:12px;color:var(--mut);display:flex;flex-direction:column;gap:4px}
+.form input,.filters select,.signin input{padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fff}
+.filters{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.preview{position:fixed;inset:0;background:rgba(19,35,58,.7);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}
+.preview .inner{width:min(1200px,100%);background:var(--paper);border-radius:12px;padding:14px}
+.signin{max-width:420px;margin:60px auto}
+.signin label{display:block;font-size:13px;color:var(--mut);margin:10px 0 4px}
+.signin input{width:100%}
+@media (max-width:900px){.kpis{grid-template-columns:1fr 1fr}.form{grid-template-columns:1fr}.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">Review · Outside data, assistant and duties<small>Responses (admin) · <a href="/vistabidding/admin/" style="color:#E3A13B">Sales and bidding</a> · <a href="/vistaprojects/admin/" style="color:#E3A13B">Projects</a> · <a href="/vistahr/admin/" style="color:#E3A13B">HR</a></small></div>
+  <div class="who" id="who"></div>
+  <button class="icon-btn hidden" id="signOutBtn">Sign out</button>
+</header>
+
+<div id="signin" class="signin hidden">
+  <div class="card">
+    <h2>Sign in</h2>
+    <p class="muted">Use your Dua Desk platform login. Only listed admins can see the responses.</p>
+    <form id="signinForm">
+      <label for="email">Email</label><input id="email" type="email" autocomplete="username" required>
+      <label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required>
+      <div class="status" id="signinStatus"></div>
+      <div class="actions"><button class="btn primary" type="submit">Sign in</button></div>
+    </form>
+  </div>
+</div>
+
+<div id="app" class="wrap hidden">
+  <div class="kpis" id="kpis"></div>
+  <div class="row" style="justify-content:space-between;margin-bottom:6px">
+    <div class="tabs" id="tabs">
+      <button data-t="people" class="on">Reviewers and links</button>
+      <button data-t="slides">By step (all reviewers)</button>
+      <button data-t="overall">Overall views</button>
+      <button data-t="log">Thought process (every change)</button>
+    </div>
+    <div class="row">
+      <button class="btn small" id="refreshBtn">Refresh</button>
+      <button class="btn small" id="csvBtn">Download CSV (all answers)</button>
+      <button class="btn small" id="csvLogBtn">Download CSV (every change)</button>
+    </div>
+  </div>
+
+  <section id="tab-people">
+    <div class="card" style="margin-bottom:14px">
+      <h3 style="margin:0 0 10px">Add a reviewer for this area</h3>
+      <form class="form" id="addForm">
+        <label>Name<input id="nName" required maxlength="120" placeholder="e.g. Managing Director"></label>
+        <label>Designation<input id="nDesig" maxlength="120" placeholder="e.g. CEO"></label>
+        <label>Email (for your reference)<input id="nEmail" type="email" maxlength="254"></label>
+        <button class="btn primary" type="submit">Create personal link</button>
+      </form>
+      <div class="status" id="addStatus"></div>
+      <div id="linkOut"></div>
+    </div>
+    <table class="grid" id="peopleTable"></table>
+  </section>
+
+  <section id="tab-slides" class="hidden">
+    <div class="filters">
+      <label>Show <select id="slideFilter">
+        <option value="all">All steps</option>
+        <option value="flag">Steps marked “Need to discuss” or “Not agreed”</option>
+        <option value="fb">Steps with any comment</option>
+        <option value="pending">Steps not yet answered by everyone</option>
+        <option value="auto">AI-autonomous steps</option>
+        <option value="ext">External-facing documents</option>
+      </select></label>
+      <label>Reviewer <select id="slideWho"><option value="">Everyone</option></select></label>
+    </div>
+    <table class="grid" id="slideTable"></table>
+  </section>
+
+  <section id="tab-overall" class="hidden"><table class="grid" id="overallTable"></table></section>
+
+  <section id="tab-log" class="hidden">
+    <div class="filters"><label>Reviewer <select id="logWho"><option value="">Everyone</option></select></label></div>
+    <table class="grid" id="logTable"></table>
+  </section>
+</div>
+
+<div id="preview" class="preview hidden"><div class="inner">
+  <div class="row" style="justify-content:space-between;margin-bottom:10px"><b id="pvTitle"></b><button class="btn small" id="pvClose">Close</button></div>
+  <div class="slide-box" id="pvBox"></div>
+</div></div>
+
+<script>window.VISTA_DECK = "vista-aisod";</script>
+<script src="/vista/assets/common.js?v=3"></script>
+<script src="/vista/assets/admin.js?v=11"></script>
+</body>
+</html>

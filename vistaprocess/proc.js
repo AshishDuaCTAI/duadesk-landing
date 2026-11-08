@@ -57,7 +57,7 @@
     $('who').textContent = r.name + (r.designation ? ' · ' + r.designation : '');
     $('welcomeTitle').textContent = 'Dear ' + r.name.split(' ')[0] + ',';
     $('scope').textContent = S.A.scope;
-    if (CFG.slug === 'vistapillars') $('counts').innerHTML = `<b>${S.steps.length - 4}</b> sub-processes and <b>4</b> decisions.`; else $('counts').innerHTML = `<b>${nProc}</b> sub-processes with <b>${nSteps}</b> steps, <b>${nRep}</b> report formats, and <b>${nMob}</b> mobile app screens with the mobility rules.`;
+    if (CFG.slug === 'vistaai') $('counts').innerHTML = `<b>${S.steps.length}</b> items in five parts.`; else if (CFG.slug === 'vistapillars') $('counts').innerHTML = `<b>${S.steps.length - 4}</b> sub-processes and <b>4</b> decisions.`; else $('counts').innerHTML = `<b>${nProc}</b> sub-processes with <b>${nSteps}</b> steps, <b>${nRep}</b> report formats, and <b>${nMob}</b> mobile app screens with the mobility rules.`;
     $('others').textContent = S.A.reviewers.map(x => x[0]).join(', ');
     if (r.submitted_at) return showDone();
     const done = Object.keys(S.reviews).length;
@@ -73,7 +73,12 @@
   const AQ = [['alone', 'No: act alone and report'], ['each', 'Yes: approve each time'], ['limit', 'Only above a limit']];
   const FQ = [['ok', 'Yes, as proposed'], ['own', 'Use our template'], ['party', 'Use the party’s format']];
   const PCOL = { C: '#2E7D4F', P: '#1F5F99', K: '#6B2FA3', Q: '#B7791F' };
-  const CHIPS = { pillar: ['Primary should be Cost reduction', 'Primary should be Profitability', 'Primary should be Controls', 'Primary should be Delivery quality', 'Driver is not right', 'Discuss in the meeting'],
+  const CHIPS = { source: ['We use this today', 'We do not use this', 'Login is with someone else', 'Another source to add', 'Discuss in the meeting'],
+    chat: ['Add this question:', 'Not needed for this role', 'Should also work on WhatsApp', 'Discuss in the meeting'],
+    level: ['Strict', 'Lean', 'Balanced, but stricter for Finance', 'Discuss in the meeting'],
+    sod: ['Block it', 'Warn and review', 'Allow at small sites', 'Discuss in the meeting'],
+    matrix: ['Change who approves', 'Add a value limit', 'Post is vacant: who covers?', 'Discuss in the meeting'],
+    pillar: ['Primary should be Cost reduction', 'Primary should be Profitability', 'Primary should be Controls', 'Primary should be Delivery quality', 'Driver is not right', 'Discuss in the meeting'],
     def: ['Discuss in the meeting', 'Change who does this', 'Keep this on the local server', 'Add an approval step', 'Not needed at Vista', 'Timing is not practical', 'Our format is different'] };
   const ACAT = () => Object.fromEntries((S.A.audit_cats || []).map(c => [c.code, c]));
   function marks(st) {
@@ -144,6 +149,34 @@
     const scls = S.drafts[st.id] ? (/^(Add|Choose)/.test(status) ? 'err' : 'wait') : status.startsWith('Please') ? 'err' : 'ok';
     const vrow = `<div class="vrow">${SV.map(v => `<button class="vb ${s.verdict === v.id ? 'on' : ''}" data-v="${v.id}" style="--c:${v.color}" ${dis}>${esc(v.label)}</button>`).join('')}
         <span class="sstatus ${scls}" id="st-${esc(st.id)}">${esc(status)}</span></div>${box}`;
+    const T = (head, rows) => `<div class="rscroll"><table><tr>${head.map(h => `<th>${esc(h)}</th>`).join('')}</tr>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</table></div>`;
+    const top = extra => `<div class="stop"><div class="stitle"><span class="id">${esc(st.id)}</span>${esc(st.title)}</div>${extra || ''}</div>`;
+    if (st.kind === 'source') return `<article class="step ${cls(st.id)}" id="s-${esc(st.id)}" data-id="${esc(st.id)}">${top(`<span class="zone ${z}">Held on: ${esc(st.zone)}</span>`)}
+      <div class="mks"><span class="mk mn">${esc(st.group)}</span></div>
+      <div class="sgrid"><div><span>What we take</span>${esc(st.take)}</div><div><span>How it comes in</span>${esc(st.how)}</div><div><span>How often</span>${esc(st.freq)}</div><div><span>Example</span><i>${esc(st.example)}</i></div></div>
+      <div class="gov ex" style="background:#EEF3FA;border-color:#C7D7EC"><b>Please tell us:</b> ${esc(st.ask)}</div>${vrow}</article>`;
+    if (st.kind === 'chat') return `<article class="step ${cls(st.id)}" id="s-${esc(st.id)}" data-id="${esc(st.id)}">${top()}
+      ${T(['Example question', 'Answer comes from', 'Where and how it is shown'], st.qs.map(q => [`<i>“${esc(q[0])}”</i>`, esc(q[1]), esc(q[2])]))}
+      <p class="muted" style="font-size:13px;margin:8px 0 0">Are these the right questions for this role? Add the questions your team really asks in the comment.</p>${vrow}</article>`;
+    if (st.kind === 'agents') return `<article class="step ${cls(st.id)}" id="s-${esc(st.id)}" data-id="${esc(st.id)}">${top()}
+      ${T(['Agent', 'Meaning', 'What it does', 'Works on'], st.agents.map(a => [`<b>${esc(a[0])}</b>`, esc(a[1]), esc(a[2]), `<span class="zone ${ZC[a[3]]}">${esc(a[3])}</span>`]))}${vrow}</article>`;
+    if (st.kind === 'level') return `<article class="step ${cls(st.id)}" id="s-${esc(st.id)}" data-id="${esc(st.id)}">${top()}
+      ${T(['Level', 'What it means', 'Trade-off'], st.levels.map(l => [`<b>${esc(l[0])}</b>`, esc(l[1]), esc(l[2])]))}
+      <p class="muted" style="font-size:13px;margin:8px 0 0">Agree = adopt Balanced as recommended. For another level choose “Agree with changes” and tap Strict or Lean.</p>${vrow}</article>`;
+    if (st.kind === 'sod') return `<article class="step ${cls(st.id)}" id="s-${esc(st.id)}" data-id="${esc(st.id)}">
+      <div class="stop"><div class="stitle"><span class="id">${esc(st.id)}</span>${esc(st.a)} <span style="color:#9B2C2C">≠</span> ${esc(st.b)}</div><span class="mk mn">${esc(st.area)}</span></div>
+      <div class="sgrid"><div><span>Risk if one person does both</span>${esc(st.risk)}</div><div><span>Proposed (Balanced)</span><b>${esc(st.prop)}</b> · System: ${esc(st.ctl)}</div></div>${vrow}</article>`;
+    if (st.kind === 'matrix') return `<article class="step ${cls(st.id)}" id="s-${esc(st.id)}" data-id="${esc(st.id)}">${top()}
+      ${T(['Activity', 'Starts', 'Approves', 'Carries out', 'Records / checks', 'Never the same person as'], st.rows.map(r => [`<b>${esc(r[0])}</b>`, esc(r[1]), esc(r[2]), esc(r[3]), esc(r[4]), `<b style="color:#9B2C2C">${esc(r[5])}</b>`]))}${vrow}</article>`;
+    if (st.kind === 'metrics') return `<article class="step ${cls(st.id)}" id="s-${esc(st.id)}" data-id="${esc(st.id)}">${top()}
+      ${T(['Measure', 'Source', 'Target', 'How often'], st.metrics.map(m => [`<b>${esc(m[0])}</b>`, esc(m[1]), esc(m[2]), esc(m[3])]))}${vrow}</article>`;
+    if (st.kind === 'ask') {
+      const AV = [['agree_feedback', 'Save my answer', '#1F5F99'], ['discuss', 'Discuss in meeting', '#B7791F'], ['agree', 'No input from me', '#5B6676']];
+      return `<article class="step ${cls(st.id)}" id="s-${esc(st.id)}" data-id="${esc(st.id)}">
+      <div class="stop"><div class="stitle" style="font-weight:600"><span class="id">${esc(st.id)}</span>${esc(st.title)}</div><span class="mk mn">${esc(st.topic)}</span></div>
+      <div class="cbox"><textarea id="fb-${esc(st.id)}" data-fb="${esc(st.id)}" maxlength="4000" ${dis} placeholder="Your answer. Hindi or English is fine.">${esc(s.feedback || '')}</textarea></div>
+      <div class="vrow">${AV.map(([v, l, c]) => `<button class="vb ${s.verdict === v ? 'on' : ''}" data-v="${v}" style="--c:${c}" ${dis}>${esc(l)}</button>`).join('')}<span class="sstatus ${scls}" id="st-${esc(st.id)}">${esc(status)}</span></div></article>`;
+    }
     if (st.kind === 'confirm') return `<article class="step ${cls(st.id)}" id="s-${esc(st.id)}" data-id="${esc(st.id)}">
       <div class="stop"><div class="stitle"><span class="id">${esc(st.id)}</span>${esc(st.title)}</div></div>${vrow}</article>`;
     if (st.kind === 'pillar') return `<article class="step ${cls(st.id)}" id="s-${esc(st.id)}" data-id="${esc(st.id)}">
@@ -202,9 +235,9 @@
       const vis = sub.steps.filter(visible); if (!vis.length) return '';
       const done = sub.steps.filter(st => S.reviews[st.id]).length;
       const left = sub.steps.filter(st => !S.reviews[st.id] && !S.drafts[st.id] && !qMissing(st, {})).length;
-      return `<section class="sub" id="sub-${esc(sub.id)}"><div class="shead"><h2>${CFG.slug === 'vistapillars' ? '' : esc(sub.id) + ' · '}${esc(sub.name)}</h2>
+      return `<section class="sub" id="sub-${esc(sub.id)}"><div class="shead"><h2>${/vistapillars|vistaai/.test(CFG.slug) ? '' : esc(sub.id) + ' · '}${esc(sub.name)}</h2>
         <div class="smeta"><span>${sub.steps.length} items · ${done} answered</span>
-        ${!S.locked && left ? `<button class="btn small bulk" data-bulk="${esc(sub.id)}">Agree with the ${left} not yet answered</button>` : ''}</div></div>
+        ${!S.locked && left && sub.steps[0].kind !== 'ask' ? `<button class="btn small bulk" data-bulk="${esc(sub.id)}">Agree with the ${left} not yet answered</button>` : ''}</div></div>
         ${flowHtml(sub)}${vis.map(stepHtml).join('')}</section>`;
     }).join('') || '<p class="muted">Nothing matches.</p>';
     progress();
@@ -332,7 +365,7 @@
   function openList() {
     show('screenList'); $('prog').classList.remove('hidden');
     addTools();
-    $('jump').innerHTML = '<option value="">Go to sub-process…</option>' + S.A.subs.map(s => `<option value="${esc(s.id)}">${CFG.slug === 'vistapillars' ? '' : esc(s.id) + ' · '}${esc(s.name)}</option>`).join('');
+    $('jump').innerHTML = '<option value="">Go to sub-process…</option>' + S.A.subs.map(s => `<option value="${esc(s.id)}">${/vistapillars|vistaai/.test(CFG.slug) ? '' : esc(s.id) + ' · '}${esc(s.name)}</option>`).join('');
     $('lockedBanner').classList.toggle('hidden', !S.locked);
     if (S.locked) $('lockedBanner').textContent = S.data.reviewer.submitted_at ? `You submitted your review on ${fmtTime(S.data.reviewer.submitted_at)}. Answers are shown read-only.` : 'This review is closed. Answers are shown read-only.';
     render();

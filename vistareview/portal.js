@@ -11,10 +11,11 @@
     'vista-proc-b': { path: '/vistaprocurement/', key: 'vistaprocurement.k', label: 'Process · B', color: '#1F5F99', what: 'Procurement: items, RFQs, POs, delivery, invoices, stores.', mins: 40 },
     'vista-proc-c': { path: '/vistahr/', key: 'vistahr.k', label: 'Process · C', color: '#1F5F99', what: 'HR: people processes, attendance, timesheets, KRAs, compliance.', mins: 40 },
     'vista-proc-e': { path: '/vistafinance/', key: 'vistafinance.k', label: 'Process · E', color: '#1F5F99', what: 'Finance and accounts: GST, TDS, project control, direct costing, billing, payments, treasury, close, MIS and audit.', mins: 60 },
+    'vista-aisod': { path: '/vistaai/', key: 'vistaai.k', label: 'Data, assistant, duties', color: '#9B2C2C', what: 'Outside data the platform reads, the Vista assistant, the AI agents, and segregation of duties. Answer for your own area.', mins: 25 },
     'vista-pillars': { path: '/vistapillars/', key: 'vistapillars.k', label: 'Four pillars', color: '#6B2FA3', what: 'What drives each process: cost, profitability, controls, delivery quality.', mins: 20 },
     'vista-video': { path: '/vistavideo/', key: 'vistavideo.k', label: 'Film', color: '#2E7D4F', what: 'The 13-minute Board film of the platform.', mins: 13 },
   };
-  const ORDER = ['vista-video', 'vista-blueprint', 'vista-data', 'vista-pillars', 'vista-proc-d', 'vista-proc-a', 'vista-proc-b', 'vista-proc-c', 'vista-proc-e'];
+  const ORDER = ['vista-video', 'vista-blueprint', 'vista-data', 'vista-pillars', 'vista-proc-d', 'vista-proc-a', 'vista-proc-b', 'vista-proc-c', 'vista-proc-e', 'vista-aisod'];
   const show = id => ['loading', 'login', 'portal'].forEach(x => $(x).classList.toggle('hidden', x !== id));
 
   async function load() {
