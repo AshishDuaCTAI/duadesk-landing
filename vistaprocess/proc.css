@@ -44,6 +44,11 @@
 .rscroll table{border-collapse:collapse;width:100%;font-size:12.5px;min-width:560px}
 .rscroll th{background:var(--sand);text-align:left;padding:6px 8px;font-weight:700;white-space:nowrap}
 .rscroll td{padding:6px 8px;border-top:1px solid var(--sand);color:#4F5B6B}
+.mob{display:flex;gap:18px;align-items:flex-start}
+.mob img{width:230px;flex:none;border-radius:26px}
+.mob .mtext{flex:1;min-width:0}
+.mrules{margin:10px 0 0;padding-left:22px;font-size:14px}.mrules li{margin:0 0 6px}
+@media (max-width:700px){.mob{flex-direction:column;align-items:center}.mob img{width:78%}.mob .mtext{width:100%}}
 .finishbar{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--line);padding:10px 20px;display:flex;justify-content:flex-end;align-items:center;gap:14px;z-index:15}
 .bulk{font-size:13px}
 .rules{font-size:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:12px 0}

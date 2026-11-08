@@ -59,7 +59,7 @@
   async function load() {
     if (IS_PROC && !Object.keys(PSTEP).length) {
       const c = await call('vista_admin_proc_content', { p_deck: DECK }); const A = await loadSlides(c.file, c.key);
-      A.md.forEach(m => { PMD[m.code] = m; }); A.subs.forEach(sub => sub.steps.forEach(st => { PSTEP[st.id] = st; })); (A.reports || []).forEach(st => { PSTEP[st.id] = st; });
+      A.md.forEach(m => { PMD[m.code] = m; }); A.subs.forEach(sub => sub.steps.forEach(st => { PSTEP[st.id] = st; })); (A.reports || []).forEach(st => { PSTEP[st.id] = st; }); (A.mobile || []).forEach(st => { PSTEP[st.id] = st; });
     }
     D = await call('vista_admin_overview', { p_deck: DECK });
     D.byReviewer = Object.fromEntries(D.reviewers.map(r => [r.id, r]));

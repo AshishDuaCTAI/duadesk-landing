@@ -43,8 +43,10 @@
     S.A.md.forEach(m => { S.md[m.code] = m; });
     const nProc = S.A.subs.length, nRep = (S.A.reports || []).length;
     if (nRep) S.A.subs.push({ id: 'R', name: 'Report formats for approval', steps: S.A.reports, isReports: true });
+    const nMob = (S.A.mobile || []).filter(m => m.kind === 'mobile').length;
+    if (S.A.mobile && S.A.mobile.length) S.A.subs.push({ id: 'M', name: 'Mobile app for approval', steps: S.A.mobile, isMobile: true });
     S.A.subs.forEach(sub => sub.steps.forEach(st => { st.sub = sub.id; S.steps.push(st); S.byId[st.id] = st; }));
-    const nSteps = S.steps.length - nRep;
+    const nSteps = S.steps.length - nRep - (S.A.mobile || []).length;
     S.reviews = S.data.reviews || {};
     try { S.drafts = JSON.parse(store.get(dKey()) || '{}'); } catch { S.drafts = {}; }
     for (const id of Object.keys(S.drafts)) if (!S.byId[id]) delete S.drafts[id];
@@ -53,7 +55,7 @@
     $('who').textContent = r.name + (r.designation ? ' · ' + r.designation : '');
     $('welcomeTitle').textContent = 'Dear ' + r.name.split(' ')[0] + ',';
     $('scope').textContent = S.A.scope;
-    $('counts').innerHTML = `<b>${nProc}</b> sub-processes with <b>${nSteps}</b> steps, and <b>${nRep}</b> report formats.`;
+    $('counts').innerHTML = `<b>${nProc}</b> sub-processes with <b>${nSteps}</b> steps, <b>${nRep}</b> report formats, and <b>${nMob}</b> mobile app screens with the mobility rules.`;
     $('others').textContent = S.A.reviewers.map(x => x[0]).join(', ');
     if (r.submitted_at) return showDone();
     const done = Object.keys(S.reviews).length;
@@ -92,6 +94,17 @@
     else if (S.drafts[st.id]) status = need && !(s.feedback || '').trim() ? 'Add a comment to save' : 'Not saved yet';
     else if (saved) status = 'Saved ' + fmtTime(saved.at);
     const scls = S.drafts[st.id] ? (status.startsWith('Add') ? 'err' : 'wait') : 'ok';
+    const vrow = `<div class="vrow">${SV.map(v => `<button class="vb ${s.verdict === v.id ? 'on' : ''}" data-v="${v.id}" style="--c:${v.color}" ${dis}>${esc(v.label)}</button>`).join('')}
+        <span class="sstatus ${scls}" id="st-${esc(st.id)}">${esc(status)}</span></div>${box}`;
+    if (st.kind === 'mrule') return `<article class="step ${cls(st.id)}" id="s-${esc(st.id)}" data-id="${esc(st.id)}">
+      <div class="stop"><div class="stitle"><span class="id">${esc(st.id)}</span>${esc(st.title)}</div></div>
+      <p class="swhat">${esc(st.what)}</p>
+      <ol class="mrules">${st.rules.map(([k, v]) => `<li><b>${esc(k)}.</b> ${esc(v)}</li>`).join('')}</ol>${vrow}</article>`;
+    if (st.kind === 'mobile') return `<article class="step ${cls(st.id)}" id="s-${esc(st.id)}" data-id="${esc(st.id)}">
+      <div class="mob"><img src="data:image/jpeg;base64,${st.img}" alt="Illustrative phone screen: ${esc(st.title)}">
+      <div class="mtext"><div class="stop"><div class="stitle"><span class="id">${esc(st.id)}</span>${esc(st.title)}</div><span class="zone ${z}">${z === 'L' ? 'Local server · Vista VPN only' : 'Cloud · offline: ' + esc(st.offline)}</span></div>
+      <p class="swhat">${esc(st.what)}</p>
+      <div class="sgrid" style="grid-template-columns:1fr"><div><span>Who uses it</span>${esc(st.users)}</div><div><span>Kept on the phone</span>${esc(st.stores)}</div></div>${vrow}</div></div></article>`;
     if (st.kind === 'report') return `<article class="step ${cls(st.id)}" id="s-${esc(st.id)}" data-id="${esc(st.id)}">
       <div class="stop"><div class="stitle"><span class="id">${esc(st.id)}</span>${esc(st.title)}</div><span class="zone ${z}">Data held: ${esc(st.zone)}</span></div>
       <p class="swhat">${esc(st.what)}</p>
@@ -119,6 +132,7 @@
         <span class="sstatus ${scls}" id="st-${esc(st.id)}">${esc(status)}</span></div>${box}</article>`;
   }
   function flowHtml(sub) {
+    if (sub.isMobile) return '<p class="muted" style="margin:4px 0 10px;font-size:14px">Illustrative screens: sample values, not Vista data. Blue = cloud (works offline). Amber = local server, opened only over Vista VPN, nothing saved on the phone.</p>';
     if (sub.isReports) return '<p class="muted" style="margin:4px 0 10px;font-size:14px">For each report: is it the right report, for the right people, at the right time, with the right columns? Say what to add, remove or change.</p>';
     return `<div class="flow">${sub.steps.map((st, i) => {
       const rv = S.reviews[st.id], c = rv ? (rv.verdict === 'agree' ? 'ok' : 'no') : '';
@@ -219,7 +233,7 @@
     for (const id of Object.keys(S.drafts)) await save(id);
     $('finishTally').innerHTML = tally();
     const missing = S.steps.filter(st => !S.reviews[st.id]);
-    $('finishMissing').innerHTML = missing.length ? `<div class="banner"><b>${missing.length} item${missing.length > 1 ? 's' : ''} (steps or reports) still need${missing.length > 1 ? '' : 's'} a view</b> before you can submit: ${missing.slice(0, 20).map(st => `<a href="#" data-goto="${esc(st.id)}">${esc(st.id)}</a>`).join(', ')}${missing.length > 20 ? '…' : ''}</div>` : '';
+    $('finishMissing').innerHTML = missing.length ? `<div class="banner"><b>${missing.length} item${missing.length > 1 ? 's' : ''} (steps, reports or screens) still need${missing.length > 1 ? '' : 's'} a view</b> before you can submit: ${missing.slice(0, 20).map(st => `<a href="#" data-goto="${esc(st.id)}">${esc(st.id)}</a>`).join(', ')}${missing.length > 20 ? '…' : ''}</div>` : '';
     const fl = S.steps.filter(st => S.reviews[st.id] && S.reviews[st.id].verdict !== 'agree');
     $('finishFlagged').innerHTML = fl.length ? `<p style="margin:14px 0 0"><b>Your comments</b></p><ul class="list-plain">${fl.map(st => `<li><a href="#" data-goto="${esc(st.id)}">${esc(st.id)} ${esc(st.title)}</a> · <b style="color:${SVL[S.reviews[st.id].verdict].color}">${esc(SVL[S.reviews[st.id].verdict].label)}</b><br><span class="muted">${esc(S.reviews[st.id].feedback || '')}</span></li>`).join('')}</ul>` : '';
     $('overallVerdicts').innerHTML = SV.map(v => `<button class="vbtn ${S.overall === v.id ? 'on' : ''}" data-v="${v.id}" style="--c:${v.color}">${esc(v.id === 'agree' ? 'Approved' : v.id === 'agree_feedback' ? 'Approved with the changes I noted' : v.id === 'discuss' ? 'Need to discuss first' : 'Not approved')}</button>`).join('');
