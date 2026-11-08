@@ -70,9 +70,9 @@
   // When the person came through the review portal, offer a way back to it.
   document.addEventListener('DOMContentLoaded', () => {
     if (location.pathname.startsWith('/vistareview') || /\/admin\/?$/.test(location.pathname) || !store.get('vistareview.s')) return;
-    const top = document.querySelector('header.top'); if (!top) return;
+    const top = document.querySelector('header.top');
     const a = document.createElement('a'); a.href = '/vistareview/'; a.textContent = '← My reviews';
-    a.style.cssText = 'color:#E3A13B;font-weight:700;font-size:13px;text-decoration:none;white-space:nowrap;order:-1;margin-right:4px';
-    top.insertBefore(a, top.firstChild);
+    if (top) { a.style.cssText = 'color:#E3A13B;font-weight:700;font-size:13px;text-decoration:none;white-space:nowrap;order:-1;margin-right:4px'; top.insertBefore(a, top.firstChild); }
+    else { a.style.cssText = 'position:fixed;top:12px;left:14px;z-index:99;background:#13233A;color:#E3A13B;font:700 13px/1 IBM Plex Sans,Arial,sans-serif;padding:8px 12px;border-radius:999px;text-decoration:none'; document.body.appendChild(a); }
   });
 })();
