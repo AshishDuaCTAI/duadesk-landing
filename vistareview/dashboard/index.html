@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Vista Review Progress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Domine:wght@400;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/vista/assets/review.css?v=2">
+<style>
+:root{--ag:#2E7D4F;--af:#1F5F99;--di:#D69A2D;--na:#A3342A;--un:#E2DDD1}
+.wrap{max-width:1280px;margin:0 auto;padding:18px 18px 60px}
+.bar-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.tile{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.tile .v{font-family:Domine,Georgia,serif;font-size:30px;font-weight:700;line-height:1.1}
+.tile .l{font-size:13px;color:var(--mut)}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+.panel h2{font-family:Domine,Georgia,serif;font-size:19px;margin:0 0 4px}
+.panel .sub{font-size:13px;color:var(--mut);margin:0 0 12px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink);margin:0 0 10px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:5px}
+.hrow{display:grid;grid-template-columns:260px 1fr 150px;gap:12px;align-items:center;padding:6px 0;cursor:pointer}
+.hrow:hover .lab{color:var(--blue)}
+.hrow .lab{font-size:14px;font-weight:600}
+.hrow .lab small{display:block;font-weight:400;color:var(--mut);font-size:12px}
+.sbar{display:flex;height:16px;gap:2px;background:transparent}
+.sbar i{display:block;height:100%;border-radius:2px;min-width:0}
+.sbar i:first-child{border-radius:4px 2px 2px 4px}.sbar i:last-child{border-radius:2px 4px 4px 2px}
+.hrow .num{font-size:13px;text-align:right;color:var(--ink)}
+.hrow .num b{font-size:15px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:14px}
+.pc{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff}
+.pc h3{margin:0 0 2px;font-size:15px}
+.pc .meta{font-size:12px;color:var(--mut);margin-bottom:8px}
+.prow{display:grid;grid-template-columns:120px 1fr 64px;gap:8px;align-items:center;font-size:13px;padding:3px 0}
+.prow .sbar{height:12px}
+.badge{font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px;background:#E7F2EA;color:#2E7D4F}
+table.hm{border-collapse:separate;border-spacing:3px;width:100%;font-size:13px}
+table.hm th{font-size:11.5px;color:var(--mut);font-weight:700;text-align:center;padding:4px;vertical-align:bottom}
+table.hm th.p{text-align:left}
+table.hm td{text-align:center;border-radius:6px;padding:7px 4px;min-width:64px}
+table.hm td.p{text-align:left;background:none;font-weight:600;white-space:nowrap}
+table.hm td.na{background:#F3F0E8;color:#B9B2A3}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.filters select,.filters input{padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#fff}
+.pt{border-left:5px solid var(--c);background:#fff;border-radius:0 10px 10px 0;padding:9px 12px;margin:0 0 8px;box-shadow:0 0 0 1px var(--line)}
+.pt .h{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13px}
+.pt .t{font-weight:700;font-size:14px;margin-top:2px}
+.pt .c{font-size:14px;margin-top:4px;white-space:pre-wrap}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;color:#fff;border-radius:999px;padding:1px 8px;background:var(--c)}
+.tip{position:fixed;pointer-events:none;background:#13233A;color:#fff;font-size:12.5px;padding:6px 9px;border-radius:7px;z-index:60;display:none;max-width:280px}
+.signin{max-width:420px;margin:60px auto}.signin label{display:block;font-size:13px;color:var(--mut);margin:10px 0 4px}.signin input{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:9px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}
+.tabs button{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:7px 14px;font-weight:600;font-size:14px}
+.tabs button.on{background:var(--navy);color:var(--cream);border-color:var(--navy)}
+.remind{font-size:12px}
+@media (max-width:800px){.tiles{grid-template-columns:1fr 1fr}.hrow{grid-template-columns:1fr;gap:4px}.hrow .num{text-align:left}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">Vista review progress<small>Live · all processes and people</small></div>
+  <div class="who" id="who"></div>
+  <button class="icon-btn hidden" id="signOutBtn" style="background:none;border:1px solid #3A4E6B;color:#E7ECF2;border-radius:8px;padding:6px 10px">Sign out</button>
+</header>
+<div id="signin" class="signin hidden"><div class="card">
+  <h2>Sign in</h2><p class="muted">Use your Dua Desk platform login. Only listed admins can see this page.</p>
+  <form id="signinForm"><label for="email">Email</label><input id="email" type="email" autocomplete="username" required>
+  <label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required>
+  <div class="status" id="signinStatus"></div><div class="actions"><button class="btn primary" type="submit">Sign in</button></div></form>
+</div></div>
+
+<main id="app" class="wrap hidden">
+  <div class="bar-top">
+    <div class="tabs" id="tabs"><button data-t="overview" class="on">Overview</button><button data-t="process">By process</button><button data-t="people">By person</button><button data-t="points">Points raised</button></div>
+    <div class="row" style="display:flex;gap:10px;align-items:center"><span class="muted" style="font-size:13px" id="updated"></span><button class="btn small" id="refreshBtn">Refresh</button><a class="btn small" href="/vistareview/admin/">People and PINs</a></div>
+  </div>
+  <div class="tiles" id="tiles"></div>
+
+  <section id="t-overview">
+    <div class="panel">
+      <h2>All reviews at a glance</h2>
+      <p class="sub">Every answer expected from every reviewer. Click a review to see its points.</p>
+      <div class="legend" id="legend1"></div>
+      <div id="overall"></div>
+    </div>
+  </section>
+
+  <section id="t-process" class="hidden">
+    <div class="legend" id="legend2"></div>
+    <div class="grid2" id="procCards"></div>
+  </section>
+
+  <section id="t-people" class="hidden">
+    <div class="panel">
+      <h2>Each person, each review</h2>
+      <p class="sub">Percentage of items answered. ✓ = submitted. The last column shows what is still pending, with a ready reminder.</p>
+      <div style="overflow-x:auto"><table class="hm" id="heat"></table></div>
+    </div>
+  </section>
+
+  <section id="t-points" class="hidden">
+    <div class="panel">
+      <h2>Points raised</h2>
+      <p class="sub">Every answer other than a plain Agree, and every comment, with the reviewer’s own words.</p>
+      <div class="filters">
+        <select id="fDeck"><option value="">All reviews</option></select>
+        <select id="fWho"><option value="">All people</option></select>
+        <select id="fV"><option value="">All views</option><option value="not_agreed">Not agreed</option><option value="discuss">Need to discuss</option><option value="agree_feedback">Agree with changes / answers</option><option value="agree">Agree with a comment</option></select>
+        <input id="fQ" type="search" placeholder="Search comments">
+        <button class="btn small" id="csvBtn">Download CSV</button>
+        <span class="muted" id="ptCount" style="font-size:13px"></span>
+      </div>
+      <div id="points"></div>
+    </div>
+  </section>
+</main>
+<div class="tip" id="tip"></div>
+
+<script src="/vista/assets/common.js?v=3"></script>
+<script>
+(function () {
+  const { SB_URL, SB_KEY, rpc, esc, fmtTime } = window.VistaReview;
+  const $ = id => document.getElementById(id), SKEY = 'vista.admin.session';
+  const VS = [['agree', 'Agree', 'var(--ag)'], ['agree_feedback', 'Agree with changes', 'var(--af)'], ['discuss', 'Need to discuss', 'var(--di)'], ['not_agreed', 'Not agreed', 'var(--na)']];
+  const VL = Object.fromEntries(VS.map(v => [v[0], v]));
+  const SHORT = { 'vista-blueprint': 'Blueprint (60 slides)', 'vista-data': 'Data location', 'vista-pillars': 'Four pillars', 'vista-proc-d': 'D. Sales and bidding', 'vista-proc-a': 'A. Projects', 'vista-proc-b': 'B. Procurement', 'vista-proc-c': 'C. HR', 'vista-proc-e': 'E. Finance and accounts', 'vista-aisod': 'F. Data, assistant, duties' };
+  const ORDER = ['vista-blueprint', 'vista-data', 'vista-pillars', 'vista-proc-d', 'vista-proc-a', 'vista-proc-b', 'vista-proc-c', 'vista-proc-e', 'vista-aisod'];
+  const PAGE = { 'vista-blueprint': '/vista/admin/', 'vista-data': '/vistadata/admin/', 'vista-pillars': '/vistapillars/admin/', 'vista-proc-d': '/vistabidding/admin/', 'vista-proc-a': '/vistaprojects/admin/', 'vista-proc-b': '/vistaprocurement/admin/', 'vista-proc-c': '/vistahr/admin/', 'vista-proc-e': '/vistafinance/admin/', 'vista-aisod': '/vistaai/admin/' };
+  const XA = { alone: 'Act alone', each: 'Approve each time', limit: 'Approve above a limit' }, XF = { ok: 'Format as proposed', own: 'Use our template', party: 'Use the party’s format' };
+  let session = null, D = null, timer = null;
+  const ss = { get() { try { return JSON.parse(sessionStorage.getItem(SKEY)); } catch { return null; } }, set(v) { try { v ? sessionStorage.setItem(SKEY, JSON.stringify(v)) : sessionStorage.removeItem(SKEY); } catch { } } };
+  async function auth(grant, body) {
+    const res = await fetch(`${SB_URL}/auth/v1/token?grant_type=${grant}`, { method: 'POST', headers: { apikey: SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const d = await res.json().catch(() => ({})); if (!res.ok) throw new Error(d.error_description || d.msg || 'Sign-in failed');
+    return { access_token: d.access_token, refresh_token: d.refresh_token, expires_at: Date.now() + (d.expires_in - 60) * 1000, email: d.user && d.user.email };
+  }
+  async function tok() { if (Date.now() > session.expires_at) { session = await auth('refresh_token', { refresh_token: session.refresh_token }); ss.set(session); } return session.access_token; }
+  const call = async (fn, a) => rpc(fn, a, await tok());
+  $('signinForm').onsubmit = async e => { e.preventDefault(); const st = $('signinStatus'); st.textContent = 'Signing in…';
+    try { session = await auth('password', { email: $('email').value.trim(), password: $('password').value }); $('password').value = ''; ss.set(session); boot(); } catch (err) { st.textContent = err.message; st.className = 'status err'; } };
+  $('signOutBtn').onclick = () => { ss.set(null); location.reload(); };
+  async function boot() {
+    session = session || ss.get(); if (!session) { $('signin').classList.remove('hidden'); return; }
+    try { const w = await call('vista_admin_whoami'); if (!w.admin) throw new Error('This login is not an admin for the Vista review.'); }
+    catch (e) { ss.set(null); session = null; $('signin').classList.remove('hidden'); $('signinStatus').textContent = e.message; return; }
+    $('signin').classList.add('hidden'); $('app').classList.remove('hidden'); $('signOutBtn').classList.remove('hidden'); $('who').textContent = session.email || '';
+    await load(); timer = setInterval(() => load().catch(() => { }), 60000);
+  }
+  $('refreshBtn').onclick = () => load();
+
+  const sum = c => VS.reduce((a, v) => a + (c[v[0]] || 0), 0);
+  const pct = (a, b) => b ? Math.round(a / b * 100) : 0;
+  function bar(c, expected) {
+    const done = sum(c), segs = VS.map(v => [v[1], c[v[0]] || 0, v[2]]).concat([['Not answered yet', Math.max(expected - done, 0), 'var(--un)']]);
+    return `<div class="sbar">${segs.filter(s => s[1] > 0).map(s => `<i style="flex:${s[1]};background:${s[2]}" data-tip="${esc(s[0])}: ${s[1]} (${pct(s[1], expected)}%)"></i>`).join('')}</div>`;
+  }
+  const legend = () => VS.map(v => `<span><i style="background:${v[2]}"></i>${v[1]}</span>`).join('') + '<span><i style="background:var(--un)"></i>Not answered yet</span>';
+
+  async function load() {
+    D = await call('vista_admin_dashboard');
+    D.decks.sort((a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id));
+    D.decks.forEach(d => { d.reviewers = d.reviewers.filter(r => r.person_id); d.expected = d.total * d.reviewers.length; d.c = { agree: 0, agree_feedback: 0, discuss: 0, not_agreed: 0 }; d.reviewers.forEach(r => VS.forEach(v => d.c[v[0]] += r.counts[v[0]] || 0)); });
+    D.decks = D.decks.filter(d => d.reviewers.length);
+    $('updated').textContent = 'Updated ' + fmtTime(D.at) + ' · refreshes every minute';
+    render();
+  }
+  function render() {
+    const exp = D.decks.reduce((a, d) => a + d.expected, 0), ans = D.decks.reduce((a, d) => a + sum(d.c), 0), agr = D.decks.reduce((a, d) => a + d.c.agree + d.c.agree_feedback, 0);
+    const people = {}; D.decks.forEach(d => d.reviewers.forEach(r => { (people[r.person_id] = people[r.person_id] || { name: r.name, designation: r.designation, email: r.email, items: [] }).items.push({ d, r }); }));
+    const subm = D.decks.reduce((a, d) => a + d.reviewers.filter(r => r.submitted_at).length, 0), seats = D.decks.reduce((a, d) => a + d.reviewers.length, 0);
+    const flagged = D.points.filter(p => p.verdict === 'discuss' || p.verdict === 'not_agreed').length;
+    $('tiles').innerHTML = [[pct(ans, exp) + '%', `Complete · ${ans.toLocaleString('en-IN')} of ${exp.toLocaleString('en-IN')} answers`], [pct(agr, ans) + '%', 'Agreed (with or without changes), of answers given'], [flagged, 'Points to discuss or not agreed'], [`${subm} / ${seats}`, 'Reviews submitted (person × review)']]
+      .map(t => `<div class="tile"><div class="v">${t[0]}</div><div class="l">${t[1]}</div></div>`).join('');
+    $('legend1').innerHTML = $('legend2').innerHTML = legend();
+    $('overall').innerHTML = D.decks.map(d => `<div class="hrow" data-deck="${d.id}"><div class="lab">${esc(SHORT[d.id] || d.title)}<small>${d.total} items × ${d.reviewers.length} reviewer${d.reviewers.length > 1 ? 's' : ''}</small></div>${bar(d.c, d.expected)}<div class="num"><b>${pct(sum(d.c), d.expected)}%</b> done · ${pct(d.c.agree + d.c.agree_feedback, sum(d.c))}% agreed</div></div>`).join('');
+    $('procCards').innerHTML = D.decks.map(d => {
+      const dp = D.points.filter(p => p.deck === d.id && (p.verdict === 'discuss' || p.verdict === 'not_agreed')).length;
+      return `<div class="pc"><h3>${esc(SHORT[d.id] || d.title)}</h3><div class="meta">${pct(sum(d.c), d.expected)}% done · ${pct(d.c.agree + d.c.agree_feedback, sum(d.c))}% agreed · ${dp} to discuss or not agreed · <a href="#" data-pts="${d.id}">see points</a> · <a href="${PAGE[d.id]}">responses page</a></div>
+        ${bar(d.c, d.expected)}<div style="height:10px"></div>
+        ${d.reviewers.map(r => `<div class="prow"><span>${esc(r.name)}</span>${bar(r.counts, d.total)}<span style="text-align:right">${r.submitted_at ? '<span class="badge">Submitted</span>' : pct(sum(r.counts), d.total) + '%'}</span></div>`).join('')}</div>`;
+    }).join('');
+    // people heat map
+    const P = Object.values(people).sort((a, b) => a.name.localeCompare(b.name));
+    const ramp = p => p === 0 ? ['#F3F0E8', '#5B6676'] : p < 25 ? ['#DCE8F5', '#13233A'] : p < 50 ? ['#A9C4E2', '#13233A'] : p < 75 ? ['#5E8FC6', '#fff'] : p < 100 ? ['#2F6BA8', '#fff'] : ['#174B7A', '#fff'];
+    $('heat').innerHTML = `<tr><th class="p">Person</th>${D.decks.map(d => `<th>${esc(SHORT[d.id] || d.id)}</th>`).join('')}<th>Pending</th></tr>` + P.map(p => {
+      let pend = 0; const lines = [];
+      const cells = D.decks.map(d => { const it = p.items.find(x => x.d === d); if (!it) return '<td class="na">—</td>';
+        const done = sum(it.r.counts), q = pct(done, d.total), [bg, fg] = ramp(q), left = d.total - done; pend += it.r.submitted_at ? 0 : left;
+        if (!it.r.submitted_at) lines.push(`${SHORT[d.id]}: ${left ? left + ' items left' : 'all answered, please press Submit'}`);
+        return `<td style="background:${bg};color:${fg}" data-tip="${esc(p.name)} · ${esc(SHORT[d.id])}: ${done} of ${d.total} answered${it.r.submitted_at ? ', submitted' : ''}${it.r.last_seen_at ? ' · last active ' + esc(fmtTime(it.r.last_seen_at)) : ' · not opened yet'}">${it.r.submitted_at ? '✓' : q + '%'}</td>`; }).join('');
+      const msg = `Dear ${p.name.split(' ')[0]}, a gentle reminder on the Vista review (duadesk.com/vistareview):\n${lines.map(l => '• ' + l).join('\n')}\nYour answers save as you go. Thank you.`;
+      return `<tr><td class="p">${esc(p.name)}<br><span class="muted" style="font-weight:400;font-size:11.5px">${esc(p.designation || '')}</span></td>${cells}<td style="text-align:left;min-width:150px">${pend ? `<b>${pend}</b> items<br><a class="remind" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msg)}">WhatsApp reminder</a> · <a class="remind" href="mailto:${esc(p.email || '')}?subject=${encodeURIComponent('Vista review: what is pending')}&body=${encodeURIComponent(msg)}">Email</a>` : lines.length ? '<span class="muted">All answered; Submit pending</span>' : '<span class="badge">All done</span>'}</td></tr>`;
+    }).join('');
+    // filters
+    const keepD = $('fDeck').value, keepW = $('fWho').value;
+    $('fDeck').innerHTML = '<option value="">All reviews</option>' + D.decks.map(d => `<option value="${d.id}">${esc(SHORT[d.id] || d.title)}</option>`).join('');
+    $('fWho').innerHTML = '<option value="">All people</option>' + [...new Set(D.points.map(p => p.reviewer))].sort().map(n => `<option>${esc(n)}</option>`).join('');
+    $('fDeck').value = keepD; $('fWho').value = keepW;
+    renderPoints();
+  }
+  function filtered() {
+    const fd = $('fDeck').value, fw = $('fWho').value, fv = $('fV').value, q = $('fQ').value.trim().toLowerCase();
+    return D.points.filter(p => (!fd || p.deck === fd) && (!fw || p.reviewer === fw) && (!fv || p.verdict === fv) && (!q || ((p.feedback || '') + ' ' + p.title + ' ' + p.item).toLowerCase().includes(q)))
+      .sort((a, b) => (ORDER.indexOf(a.deck) - ORDER.indexOf(b.deck)) || (a.n - b.n) || a.reviewer.localeCompare(b.reviewer));
+  }
+  const xtxt = p => [p.extra && p.extra.approval ? 'Approval: ' + XA[p.extra.approval] : '', p.extra && p.extra.format ? 'Format: ' + XF[p.extra.format] : '', p.alt ? 'Should be: ' + p.alt : ''].filter(Boolean).join(' · ');
+  function renderPoints() {
+    const L = filtered(); $('ptCount').textContent = `${L.length} point${L.length === 1 ? '' : 's'}`;
+    $('points').innerHTML = L.map(p => { const v = VL[p.verdict]; return `<div class="pt" style="--c:${v[2]}"><div class="h"><span><b>${esc(SHORT[p.deck] || p.deck)}</b> · ${esc(p.item)} · ${esc(p.section || '')}</span><span><span class="pill" style="--c:${v[2]}">${esc(p.verdict === 'agree' ? 'Agree, with comment' : v[1])}</span> <b>${esc(p.reviewer)}</b> · ${esc(fmtTime(p.at))}</span></div>
+      <div class="t">${esc(p.title)}</div>${xtxt(p) ? `<div class="muted" style="font-size:12.5px;margin-top:2px">${esc(xtxt(p))}</div>` : ''}${p.feedback ? `<div class="c">${esc(p.feedback)}</div>` : ''}</div>`; }).join('') || '<p class="muted">No points match.</p>';
+  }
+  ['fDeck', 'fWho', 'fV'].forEach(id => $(id).onchange = renderPoints); $('fQ').oninput = renderPoints;
+  function tab(t) { document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === t)); ['overview', 'process', 'people', 'points'].forEach(x => $('t-' + x).classList.toggle('hidden', x !== t)); }
+  $('tabs').onclick = e => { const b = e.target.closest('button'); if (b) tab(b.dataset.t); };
+  document.addEventListener('click', e => {
+    const r = e.target.closest('[data-deck],[data-pts]'); if (!r) return; e.preventDefault();
+    $('fDeck').value = r.dataset.deck || r.dataset.pts; $('fWho').value = ''; $('fV').value = ''; renderPoints(); tab('points');
+  });
+  const tip = $('tip');
+  document.addEventListener('mousemove', e => { const t = e.target.closest('[data-tip]'); if (!t) { tip.style.display = 'none'; return; } tip.textContent = t.dataset.tip; tip.style.display = 'block'; tip.style.left = Math.min(e.clientX + 12, innerWidth - 300) + 'px'; tip.style.top = (e.clientY + 14) + 'px'; });
+  const csvCell = v => { let s = String(v ?? ''); if (/^[=+\-@]/.test(s)) s = "'" + s; return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  $('csvBtn').onclick = () => {
+    const rows = [['Review', 'Item', 'Section', 'Title', 'Reviewer', 'View', 'Answers', 'Comment', 'Saved at']].concat(filtered().map(p => [SHORT[p.deck] || p.deck, p.item, p.section, p.title, p.reviewer, VL[p.verdict][1], xtxt(p), p.feedback || '', p.at]));
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + rows.map(r => r.map(csvCell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'vista-review-points-' + new Date().toISOString().slice(0, 10) + '.csv'; a.click();
+  };
+  boot();
+})();
+</script>
+</body>
+</html>

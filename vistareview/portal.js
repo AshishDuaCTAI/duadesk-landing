@@ -38,10 +38,18 @@
       const pct = r.total ? Math.round(r.done / r.total * 100) : 0, video = r.deck === 'vista-video';
       // hand the page its own access key; it is valid only while this login is
       store.set(k.key, r.token);
-      return `<a class="rc" style="--c:${k.color}" href="${k.path}">
+      const VC = { agree: '#2E7D4F', agree_feedback: '#1F5F99', discuss: '#D69A2D', not_agreed: '#A3342A' }, VN = { agree: 'Agree', agree_feedback: 'Agree with changes', discuss: 'Need to discuss', not_agreed: 'Not agreed' };
+      const team = (r.team || []), mix = r.mix || {}, mixTot = Object.values(mix).reduce((a, b) => a + b, 0), exp = r.total * Math.max(team.length, 1);
+      const teamHtml = video || !team.length ? '' : `<details class="team"><summary>Team progress · ${team.filter(t => t.submitted).length} of ${team.length} submitted</summary>
+        <div class="tbar">${Object.keys(VC).filter(k => mix[k]).map(k => `<i style="flex:${mix[k]};background:${VC[k]}" title="${VN[k]}: ${mix[k]}"></i>`).join('')}${exp - mixTot > 0 ? `<i style="flex:${exp - mixTot};background:#E2DDD1" title="Not answered yet: ${exp - mixTot}"></i>` : ''}</div>
+        <div class="tleg">${Object.keys(VC).map(k => `<span><i style="background:${VC[k]}"></i>${VN[k]} ${mix[k] || 0}</span>`).join('')}</div>
+        ${team.map(t => `<div class="trow${t.me ? ' me' : ''}"><span>${esc(t.name)}${t.me ? ' (you)' : ''}</span><span class="tb"><i style="width:${r.total ? Math.round(t.done / r.total * 100) : 0}%"></i></span><span>${t.submitted ? '✓ Submitted' : Math.round(t.done / (r.total || 1) * 100) + '%'}</span></div>`).join('')}</details>`;
+      const pend = (r.pending || []), pendHtml = video || r.submitted_at ? '' : pend.length ? `<details class="team"><summary>Your pending: ${pend.length} item${pend.length > 1 ? 's' : ''}</summary><ul class="plist">${pend.slice(0, 12).map(x => `<li><b>${esc(x.id)}</b> ${esc(x.title)}</li>`).join('')}${pend.length > 12 ? `<li class="muted">and ${pend.length - 12} more</li>` : ''}</ul></details>` : '<p class="ok">All answered. Open it and press <b>Finish and submit</b>.</p>';
+      return `<div class="rc" style="--c:${k.color}">
         <span class="k">${esc(k.label)}</span><h3>${esc(r.title)}</h3><p>${esc(k.what)}</p>
         ${video ? '' : `<div class="bar2"><i style="width:${pct}%"></i></div>`}
-        <div class="foot"><span>${video ? `About ${k.mins} minutes` : r.submitted_at ? `<span class="done">Submitted ${esc(fmtTime(r.submitted_at))}</span>` : `${r.done} of ${r.total} answered · about ${k.mins} min`}</span><span class="go">${video ? 'Watch →' : r.submitted_at ? 'View →' : r.done ? 'Continue →' : 'Start →'}</span></div></a>`;
+        <div class="foot"><span>${video ? `About ${k.mins} minutes` : r.submitted_at ? `<span class="done">Submitted ${esc(fmtTime(r.submitted_at))}</span>` : `${r.done} of ${r.total} answered · about ${k.mins} min`}</span><a class="go" href="${k.path}">${video ? 'Watch →' : r.submitted_at ? 'View →' : r.done ? 'Continue →' : 'Start →'}</a></div>
+        ${pendHtml}${teamHtml}</div>`;
     }).join('');
     show('portal');
   }
