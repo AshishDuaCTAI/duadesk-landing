@@ -10,12 +10,13 @@
     { id: 'agree_feedback', label: 'Agree with changes', color: '#1F5F99' },
     { id: 'discuss', label: 'Need to discuss', color: '#B7791F' },
     { id: 'not_agreed', label: 'Not agreed', color: '#B4412F' },
+    { id: 'na', label: 'Not applicable', color: '#7A8494' },
   ];
   const SVL = Object.fromEntries(SV.map(v => [v.id, v]));
   const OVL = { agree: 'Approved', agree_feedback: 'Approved with the changes I noted', discuss: 'Need to discuss first', not_agreed: 'Not approved' };
   const ZC = { 'Local server': 'L', 'Cloud': 'C', 'Both': 'X' };
   const ZCOL = { L: '#C98A1E', C: '#1F5F99', X: '#7A5BA6' };
-  const PROMPT = { agree_feedback: 'What should change?', discuss: 'What do you want to discuss?', not_agreed: 'What is wrong, and how should it work at Vista?' };
+  const PROMPT = { agree_feedback: 'What should change?', discuss: 'What do you want to discuss?', not_agreed: 'What is wrong, and how should it work at Vista?', na: 'Why it does not apply to you (optional)' };
   const TK = CFG.slug + '.k';
 
   const S = { token: null, data: null, A: null, steps: [], byId: {}, sub: {}, md: {}, reviews: {}, drafts: {}, locked: false, filter: 'all', q: '', timers: {} };
@@ -69,8 +70,9 @@
   // ---------- list ----------
   const state = id => { const x = S.drafts[id] || S.reviews[id] || { verdict: null, feedback: '' }; return { ...x, extra: x.extra || {} }; };
   const isAuto = st => st.auto === 'AI autonomous';
-  const qMissing = (st, ex) => (isAuto(st) && !ex.approval) || (st.ext && !ex.format);
-  const needText = s => (s.verdict && s.verdict !== 'agree') || s.extra.approval === 'limit' || s.extra.format === 'own' || s.extra.format === 'party';
+  // 'Not applicable' needs no answer to the approval or format question
+  const qMissing = (st, ex, v) => v !== 'na' && ((isAuto(st) && !(ex || {}).approval) || (st.ext && !(ex || {}).format));
+  const needText = s => s.verdict !== 'na' && ((s.verdict && s.verdict !== 'agree') || s.extra.approval === 'limit' || s.extra.format === 'own' || s.extra.format === 'party');
   const AQ = [['alone', 'No: act alone and report'], ['each', 'Yes: approve each time'], ['limit', 'Only above a limit']];
   const FQ = [['ok', 'Yes, as proposed'], ['own', 'Use our template'], ['party', 'Use the party’s format']];
   // The proposed format is already the outside party's own (first part before ';'), so "Use the party's format" would repeat "Yes, as proposed".
@@ -142,13 +144,13 @@
   function stepHtml(st) {
     const s = state(st.id), dis = S.locked ? 'disabled' : '', saved = S.reviews[st.id], z = ZC[st.zone];
     const need = needText(s);
-    const box = need || (s.feedback || '').trim() ? `<div class="cbox"><label for="fb-${esc(st.id)}">${esc(PROMPT[s.verdict] || 'Comment (optional)')}</label>
+    const box = need || s.verdict === 'na' || (s.feedback || '').trim() ? `<div class="cbox"><label for="fb-${esc(st.id)}">${esc(PROMPT[s.verdict] || (need ? 'Comment (required for the choice you made above)' : 'Comment (optional)'))}</label>
       <textarea id="fb-${esc(st.id)}" data-fb="${esc(st.id)}" maxlength="4000" ${dis} placeholder="Write in your own words, or tap a phrase below. Hindi or English is fine.">${esc(s.feedback || '')}</textarea>
       ${S.locked ? '' : `<div class="qchips">${(CHIPS[st.kind] || CHIPS.def).map(c => `<button class="qc" data-qc="${esc(c)}">+ ${esc(c)}</button>`).join('')}</div>`}</div>` : '';
     let status = '';
     if (S.locked) status = saved ? 'Saved' : '';
     else if (S.drafts[st.id]) status = !s.verdict ? 'Choose a view, to save' : need && !(s.feedback || '').trim() ? 'Add a comment to save' : 'Not saved yet';
-    else if (saved && qMissing(st, s.extra)) status = 'Please answer the question above';
+    else if (saved && qMissing(st, s.extra, s.verdict)) status = 'Please answer the question above';
     else if (saved) status = 'Saved ' + fmtTime(saved.at);
     const scls = S.drafts[st.id] ? (/^(Add|Choose)/.test(status) ? 'err' : 'wait') : status.startsWith('Please') ? 'err' : 'ok';
     const vrow = `<div class="vrow">${SV.map(v => `<button class="vb ${s.verdict === v.id ? 'on' : ''}" data-v="${v.id}" style="--c:${v.color}" ${dis}>${esc(v.label)}</button>`).join('')}
@@ -265,7 +267,7 @@
     if (needText({ verdict: d.verdict, extra: ex }) && !fb) return false;
     const st = $('st-' + id); if (st) { st.textContent = 'Saving…'; st.className = 'sstatus wait'; }
     try {
-      const res = await rpc('vista_proc_save', { p_token: S.token, p_step: id, p_verdict: d.verdict, p_feedback: fb, p_extra: Object.keys(ex).length ? ex : null });
+      const res = await rpc('vista_proc_save', { p_token: S.token, p_step: id, p_verdict: d.verdict, p_feedback: fb, p_extra: d.verdict !== 'na' && Object.keys(ex).length ? ex : null });
       S.reviews[id] = { verdict: d.verdict, feedback: fb, extra: ex, at: res.at };
       const now = S.drafts[id];
       if (now && now.verdict === d.verdict && (now.feedback || '').trim() === fb && JSON.stringify(now.extra || {}) === JSON.stringify(ex)) delete S.drafts[id];
@@ -328,7 +330,7 @@
   $('subs').addEventListener('focusout', e => { const ta = e.target; if (ta.dataset && ta.dataset.fb && S.drafts[ta.dataset.fb]) save(ta.dataset.fb); });
 
   // ---------- easy answering: next item, quick view, keys ----------
-  const complete = id => { const st = S.byId[id], s = state(id); return !!(S.reviews[id] && !S.drafts[id] && !qMissing(st, s.extra)); };
+  const complete = id => { const st = S.byId[id], s = state(id); return !!(S.reviews[id] && !S.drafts[id] && !qMissing(st, s.extra, s.verdict)); };
   S.auto = store.get('vistareview.auto') !== '0';
   function setCur(id) { document.querySelectorAll('.step.cur').forEach(x => x.classList.remove('cur')); const el = $('s-' + id); if (el) el.classList.add('cur'); S.cur = id; }
   function goNext(fromId) {
@@ -346,7 +348,7 @@
     if ($('screenList').classList.contains('hidden') || S.locked || e.ctrlKey || e.metaKey || e.altKey) return;
     if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
     const k = e.key, el = S.cur && $('s-' + S.cur); if (!el) return;
-    if ('1234'.includes(k) && k.length === 1) { const b = el.querySelector(`.vb[data-v="${SV[+k - 1].id}"]`); if (b) { e.preventDefault(); b.click(); } }
+    if ('12345'.includes(k) && k.length === 1) { const b = el.querySelector(`.vb[data-v="${SV[+k - 1].id}"]`); if (b) { e.preventDefault(); b.click(); } }
     else if (k === 'n' || k === 'N') { e.preventDefault(); goNext(S.cur); }
   });
   function addTools() {
@@ -361,7 +363,7 @@
     const nb = document.createElement('button'); nb.className = 'btn'; nb.id = 'nextBtn'; nb.textContent = 'Next unanswered ↓';
     nb.onclick = () => goNext(S.cur || (S.steps[0] && S.steps[0].id));
     $('finishBtn').parentNode.insertBefore(nb, $('finishBtn'));
-    const hint = document.createElement('span'); hint.className = 'keyhint'; hint.textContent = 'Keys: 1 Agree · 2 Agree with changes · 3 Discuss · 4 Not agreed · N next';
+    const hint = document.createElement('span'); hint.className = 'keyhint'; hint.textContent = 'Keys: 1 Agree · 2 Agree with changes · 3 Discuss · 4 Not agreed · 5 Not applicable · N next';
     $('finishBtn').parentNode.insertBefore(hint, $('finishNote'));
   }
   $('filters').onclick = e => { const b = e.target.closest('button'); if (!b) return; S.filter = b.dataset.f; document.querySelectorAll('#filters button').forEach(x => x.classList.toggle('on', x === b)); render(); };
@@ -385,11 +387,11 @@
   $('finishBtn').onclick = async () => {
     for (const id of Object.keys(S.drafts)) await save(id);
     $('finishTally').innerHTML = tally();
-    const missing = S.steps.filter(st => !S.reviews[st.id] || qMissing(st, S.reviews[st.id].extra || {}));
+    const missing = S.steps.filter(st => !S.reviews[st.id] || qMissing(st, S.reviews[st.id].extra || {}, S.reviews[st.id].verdict));
     $('finishMissing').innerHTML = missing.length ? `<div class="banner"><b>${missing.length} item${missing.length > 1 ? 's' : ''} (steps, reports or screens) still need${missing.length > 1 ? '' : 's'} a view or an answer to its question</b> before you can submit: ${missing.slice(0, 20).map(st => `<a href="#" data-goto="${esc(st.id)}">${esc(st.id)}</a>`).join(', ')}${missing.length > 20 ? '…' : ''}</div>` : '';
     const fl = S.steps.filter(st => S.reviews[st.id] && (S.reviews[st.id].verdict !== 'agree' || (S.reviews[st.id].feedback || '').trim()));
     $('finishFlagged').innerHTML = fl.length ? `<p style="margin:14px 0 0"><b>Your comments</b></p><ul class="list-plain">${fl.map(st => `<li><a href="#" data-goto="${esc(st.id)}">${esc(st.id)} ${esc(st.title)}</a> · <b style="color:${SVL[S.reviews[st.id].verdict].color}">${esc(SVL[S.reviews[st.id].verdict].label)}</b><br><span class="muted">${esc(S.reviews[st.id].feedback || '')}</span></li>`).join('')}</ul>` : '';
-    $('overallVerdicts').innerHTML = SV.map(v => `<button class="vbtn ${S.overall === v.id ? 'on' : ''}" data-v="${v.id}" style="--c:${v.color}">${esc(v.id === 'agree' ? 'Approved' : v.id === 'agree_feedback' ? 'Approved with the changes I noted' : v.id === 'discuss' ? 'Need to discuss first' : 'Not approved')}</button>`).join('');
+    $('overallVerdicts').innerHTML = SV.filter(v => v.id !== 'na').map(v => `<button class="vbtn ${S.overall === v.id ? 'on' : ''}" data-v="${v.id}" style="--c:${v.color}">${esc(v.id === 'agree' ? 'Approved' : v.id === 'agree_feedback' ? 'Approved with the changes I noted' : v.id === 'discuss' ? 'Need to discuss first' : 'Not approved')}</button>`).join('');
     $('submitBtn').disabled = missing.length > 0; $('submitBtn').textContent = 'Submit my review'; S.confirming = false; $('finishStatus').textContent = '';
     show('screenFinish');
   };

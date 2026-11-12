@@ -6,12 +6,13 @@
   let session = null, D = null, content = null, tab = 'people';
   const DECK = window.VISTA_DECK || 'vista-blueprint', IS_DATA = DECK === 'vista-data', IS_PROC = DECK.startsWith('vista-proc-') || DECK === 'vista-pillars' || DECK === 'vista-aisod';
   const PROC = { 'vista-proc-d': ['vistabidding', 'D. Sales and bidding'], 'vista-proc-a': ['vistaprojects', 'A. Projects'], 'vista-proc-b': ['vistaprocurement', 'B. Procurement'], 'vista-proc-c': ['vistahr', 'C. HR'], 'vista-pillars': ['vistapillars', 'the four pillars'], 'vista-proc-e': ['vistafinance', 'E. Finance and accounts'], 'vista-aisod': ['vistaai', 'outside data, the assistant and segregation of duties'] };
-  const PV = { agree: 'Agree', agree_feedback: 'Agree with changes', discuss: 'Need to discuss', not_agreed: 'Not agreed' };
+  const PV = { agree: 'Agree', agree_feedback: 'Agree with changes', discuss: 'Need to discuss', not_agreed: 'Not agreed', na: 'Not applicable' };
+  const VALL = [...VERDICTS, V.na];
   const VL = id => IS_PROC ? PV[id] : V[id].label;
   let PSTEP = {}, PMD = {};
   const XA = { alone: 'Act alone and report', each: 'Approve each time', limit: 'Approve above a limit' }, XF = { ok: 'Format as proposed', own: 'Use our template', party: 'Use the party’s format' };
   const xtxt = x => x ? [x.approval ? 'Approval: ' + XA[x.approval] : '', x.format ? 'Format: ' + XF[x.format] : ''].filter(Boolean).join(' · ') : '';
-  const VS = () => IS_DATA ? VERDICTS.filter(v => v.id === 'agree' || v.id === 'not_agreed') : VERDICTS;
+  const VS = () => IS_DATA ? VERDICTS.filter(v => v.id === 'agree' || v.id === 'not_agreed') : IS_PROC ? VALL : VERDICTS;
   const ZONE = { L: 'Local server', C: 'Cloud' }, ALT = { local: 'Local server', cloud: 'Cloud', split: 'Split between the two' };
 
   // ---------- auth (Supabase GoTrue REST) ----------
@@ -81,7 +82,7 @@
   function render() {
     const n = D.slides.length, act = active();
     const submitted = act.filter(r => r.submitted_at).length;
-    const counts = Object.fromEntries(VERDICTS.map(v => [v.id, 0]));
+    const counts = Object.fromEntries(VALL.map(v => [v.id, 0]));
     D.reviews.forEach(v => { if (!D.byReviewer[v.reviewer_id].revoked_at) counts[v.verdict]++; });
     const total = Object.values(counts).reduce((a, b) => a + b, 0);
     $('kpis').innerHTML =
@@ -152,7 +153,7 @@
     const rows = D.slides.map(s => {
       let list = (D.bySlide[s.id] || []).filter(v => !D.byReviewer[v.reviewer_id].revoked_at);
       if (who) list = list.filter(v => v.reviewer_id === who);
-      const c = Object.fromEntries(VERDICTS.map(v => [v.id, 0])); list.forEach(v => c[v.verdict]++);
+      const c = Object.fromEntries(VALL.map(v => [v.id, 0])); list.forEach(v => c[v.verdict]++);
       const withFb = list.filter(v => v.feedback || (v.extra && Object.keys(v.extra).length));
       if (f === 'flag' && !(c.discuss || c.not_agreed)) return '';
       if (f === 'fb' && !withFb.length) return '';
@@ -163,7 +164,7 @@
       const P = PSTEP[s.id];
       const MK = P ? `${P.auto === 'AI autonomous' ? ' <span class="mk ai">AI autonomous</span>' : ''}${P.ext ? ` <span class="mk ex">External · ${esc(P.ext.party)}</span>` : ''}` : '';
       return `<tr><td>${IS_DATA || IS_PROC ? esc(s.id) : s.n}</td><td>${IS_PROC ? `<b>${esc(s.title)}</b>${MK} ${P ? `<span class="zone ${P.zone === 'Local server' ? 'L' : P.zone === 'Cloud' ? 'C' : 'X'}">${esc(P.zone)}</span>` : ''}<br><span class="muted" style="font-size:12px">${esc(s.section)}${P ? ' · ' + esc(P.what) : ''}${P && P.md.length ? '<br>Master data: ' + P.md.map(m => esc(m.code + ' ' + m.name + ' (' + m.act.toLowerCase() + (PMD[m.code] ? '; maintained by ' + PMD[m.code].maintains : '') + ')')).join('; ') : ''}</span>` : IS_DATA ? `<b>${esc(s.title)}</b> <span class="zone ${s.d.zone}">${ZONE[s.d.zone]}</span><br><span class="muted" style="font-size:12px">${esc(s.d.includes)}</span>` : `<a href="#" data-pv="${esc(s.id)}">${esc(s.title)}</a><br><span class="muted" style="font-size:12px">${esc(s.section)}</span>`}</td>
-        <td><div class="stack">${VERDICTS.map(v => `<i style="width:${c[v.id] / tot * 100}%;background:${v.color}"></i>`).join('')}</div>
+        <td><div class="stack">${VALL.map(v => `<i style="width:${c[v.id] / tot * 100}%;background:${v.color}"></i>`).join('')}</div>
         <span class="muted" style="font-size:12px">${VS().filter(v => c[v.id]).map(v => `${v.short} ${c[v.id]}`).join(' · ') || 'No answers yet'}</span></td>
         <td>${list.length} / ${who ? 1 : act.length}</td></tr>` +
         (withFb.length ? `<tr class="fbrow"><td></td><td colspan="3">${withFb.map(v => `<div class="fbitem" style="--c:${V[v.verdict].color}"><b>${esc(D.byReviewer[v.reviewer_id].name)} · ${esc(IS_DATA && v.verdict === 'not_agreed' ? 'Not agreed' : VL(v.verdict))}${v.alt ? ' · should be: ' + esc(ALT[v.alt]) : ''}${xtxt(v.extra) ? ' · ' + esc(xtxt(v.extra)) : ''}</b> <span class="muted" style="font-size:12px">${fmtTime(v.at)}</span><div>${esc(v.feedback || '').replace(/\n/g, '<br>')}</div></div>`).join('')}</td></tr>` : '');

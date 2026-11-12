@@ -109,7 +109,7 @@ table.hm td.na{background:#F3F0E8;color:#B9B2A3}
       <div class="filters">
         <select id="fDeck"><option value="">All reviews</option></select>
         <select id="fWho"><option value="">All people</option></select>
-        <select id="fV"><option value="">All views</option><option value="not_agreed">Not agreed</option><option value="discuss">Need to discuss</option><option value="agree_feedback">Agree with changes / answers</option><option value="agree">Agree with a comment</option></select>
+        <select id="fV"><option value="">All views</option><option value="not_agreed">Not agreed</option><option value="discuss">Need to discuss</option><option value="agree_feedback">Agree with changes / answers</option><option value="agree">Agree with a comment</option><option value="na">Not applicable</option></select>
         <input id="fQ" type="search" placeholder="Search comments">
         <button class="btn small" id="csvBtn">Download CSV</button>
         <span class="muted" id="ptCount" style="font-size:13px"></span>
@@ -120,12 +120,12 @@ table.hm td.na{background:#F3F0E8;color:#B9B2A3}
 </main>
 <div class="tip" id="tip"></div>
 
-<script src="/vista/assets/common.js?v=4"></script>
+<script src="/vista/assets/common.js?v=5"></script>
 <script>
 (function () {
   const { SB_URL, SB_KEY, rpc, esc, fmtTime } = window.VistaReview;
   const $ = id => document.getElementById(id), SKEY = 'vista.admin.session';
-  const VS = [['agree', 'Agree', 'var(--ag)'], ['agree_feedback', 'Agree with changes', 'var(--af)'], ['discuss', 'Need to discuss', 'var(--di)'], ['not_agreed', 'Not agreed', 'var(--na)']];
+  const VS = [['agree', 'Agree', 'var(--ag)'], ['agree_feedback', 'Agree with changes', 'var(--af)'], ['discuss', 'Need to discuss', 'var(--di)'], ['not_agreed', 'Not agreed', 'var(--na)'], ['na', 'Not applicable', '#7A8494']];
   const VL = Object.fromEntries(VS.map(v => [v[0], v]));
   const SHORT = { 'vista-blueprint': 'Blueprint (60 slides)', 'vista-data': 'Data location', 'vista-pillars': 'Four pillars', 'vista-proc-d': 'D. Sales and bidding', 'vista-proc-a': 'A. Projects', 'vista-proc-b': 'B. Procurement', 'vista-proc-c': 'C. HR', 'vista-proc-e': 'E. Finance and accounts', 'vista-aisod': 'F. Data, assistant, duties' };
   const ORDER = ['vista-blueprint', 'vista-data', 'vista-pillars', 'vista-proc-d', 'vista-proc-a', 'vista-proc-b', 'vista-proc-c', 'vista-proc-e', 'vista-aisod'];
@@ -163,7 +163,7 @@ table.hm td.na{background:#F3F0E8;color:#B9B2A3}
   async function load() {
     D = await call('vista_admin_dashboard');
     D.decks.sort((a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id));
-    D.decks.forEach(d => { d.reviewers = d.reviewers.filter(r => r.person_id); d.expected = d.total * d.reviewers.length; d.c = { agree: 0, agree_feedback: 0, discuss: 0, not_agreed: 0 }; d.reviewers.forEach(r => VS.forEach(v => d.c[v[0]] += r.counts[v[0]] || 0)); });
+    D.decks.forEach(d => { d.reviewers = d.reviewers.filter(r => r.person_id); d.expected = d.total * d.reviewers.length; d.c = { agree: 0, agree_feedback: 0, discuss: 0, not_agreed: 0, na: 0 }; d.reviewers.forEach(r => VS.forEach(v => d.c[v[0]] += r.counts[v[0]] || 0)); });
     D.decks = D.decks.filter(d => d.reviewers.length);
     $('updated').textContent = 'Updated ' + fmtTime(D.at) + ' · refreshes every minute';
     render();

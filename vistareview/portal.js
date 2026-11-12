@@ -38,7 +38,7 @@
       const pct = r.total ? Math.round(r.done / r.total * 100) : 0, video = r.deck === 'vista-video';
       // hand the page its own access key; it is valid only while this login is
       store.set(k.key, r.token);
-      const VC = { agree: '#2E7D4F', agree_feedback: '#1F5F99', discuss: '#D69A2D', not_agreed: '#A3342A' }, VN = { agree: 'Agree', agree_feedback: 'Agree with changes', discuss: 'Need to discuss', not_agreed: 'Not agreed' };
+      const VC = { agree: '#2E7D4F', agree_feedback: '#1F5F99', discuss: '#D69A2D', not_agreed: '#A3342A', na: '#7A8494' }, VN = { agree: 'Agree', agree_feedback: 'Agree with changes', discuss: 'Need to discuss', not_agreed: 'Not agreed', na: 'Not applicable' };
       const team = (r.team || []), mix = r.mix || {}, mixTot = Object.values(mix).reduce((a, b) => a + b, 0), exp = r.total * Math.max(team.length, 1);
       const teamHtml = video || !team.length ? '' : `<details class="team"><summary>Team progress · ${team.filter(t => t.submitted).length} of ${team.length} submitted</summary>
         <div class="tbar">${Object.keys(VC).filter(k => mix[k]).map(k => `<i style="flex:${mix[k]};background:${VC[k]}" title="${VN[k]}: ${mix[k]}"></i>`).join('')}${exp - mixTot > 0 ? `<i style="flex:${exp - mixTot};background:#E2DDD1" title="Not answered yet: ${exp - mixTot}"></i>` : ''}</div>

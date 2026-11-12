@@ -10,6 +10,8 @@
     { id: 'not_agreed', label: 'Not agreed', short: 'Not agreed', color: '#B4412F', key: '4' },
   ];
   const V = Object.fromEntries(VERDICTS.map(v => [v.id, v]));
+  // Process reviews only: 'Not applicable' (no button on blueprint or data pages)
+  V.na = { id: 'na', label: 'Not applicable', short: 'N/A', color: '#7A8494', key: '5' };
 
   async function rpc(fn, args, accessToken) {
     const headers = { apikey: SB_KEY, 'Content-Type': 'application/json' };
