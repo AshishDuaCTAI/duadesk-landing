@@ -73,6 +73,8 @@
   const needText = s => (s.verdict && s.verdict !== 'agree') || s.extra.approval === 'limit' || s.extra.format === 'own' || s.extra.format === 'party';
   const AQ = [['alone', 'No: act alone and report'], ['each', 'Yes: approve each time'], ['limit', 'Only above a limit']];
   const FQ = [['ok', 'Yes, as proposed'], ['own', 'Use our template'], ['party', 'Use the party’s format']];
+  // The proposed format is already the outside party's own (first part before ';'), so "Use the party's format" would repeat "Yes, as proposed".
+  const partyFmt = f => { const p = String(f || '').split(';')[0].trim(); return /^(Employer|Contract|OEM|Bank|Tender|Portal|Auditor|Insurer|Client|Vendor|Supplier|Payroll tool)’s\b/i.test(p) || /^(Statutory|Inspection agency|Labour Code)\b/i.test(p); };
   const PCOL = { C: '#2E7D4F', P: '#1F5F99', K: '#6B2FA3', Q: '#B7791F' };
   const CHIPS = { source: ['We use this today', 'We do not use this', 'Login is with someone else', 'Another source to add', 'Discuss in the meeting'],
     chat: ['Add this question:', 'Not needed for this role', 'Should also work on WhatsApp', 'Discuss in the meeting'],
@@ -105,7 +107,8 @@
       h += `<div class="gov ex"><b>External-facing: ${esc(e.party)}</b> · ${esc(e.doc)} (${e.dir === 'Both' ? 'in and out' : e.dir === 'In' ? 'received by Vista' : 'sent by Vista'})
         <div class="gacts">Proposed format: ${esc(e.fmt)}</div>
         <div class="q">Is this the right format?</div>
-        <div class="qopts">${FQ.map(([k, l]) => `<button class="xo ${s.extra.format === k ? 'on' : ''}" data-x="format" data-o="${k}" ${dis}>${esc(l)}</button>`).join('')}</div>
+        <div class="qopts">${FQ.filter(([k]) => !(k === 'party' && partyFmt(e.fmt) && s.extra.format !== 'party')).map(([k, l]) => `<button class="xo ${s.extra.format === k ? 'on' : ''}" data-x="format" data-o="${k}" ${dis}>${esc(l)}</button>`).join('')}</div>
+        ${partyFmt(e.fmt) && s.extra.format !== 'party' ? '<div class="qhint">The proposed format is already the party’s own, so “Yes, as proposed” means using their format.</div>' : ''}
         ${s.extra.format === 'own' || s.extra.format === 'party' ? '<div class="qhint">Name the template in the comment below, and email the file to Ashish.</div>' : ''}</div>`;
     }
     return h;
