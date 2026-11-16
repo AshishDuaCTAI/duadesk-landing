@@ -31,18 +31,19 @@ button[disabled]{opacity:.6;cursor:wait}
   <form id="f" autocomplete="off">
     <label for="c">Access code</label>
     <input id="c" name="c" inputmode="text" autocapitalize="characters" spellcheck="false" required>
+    <label style="display:flex;gap:8px;align-items:center;font-weight:400;margin-top:12px;font-size:13px"><input type="checkbox" id="rem" checked style="width:auto;margin:0"> Remember this device for 30 days</label>
     <button id="b" type="submit">Open the demo</button>
     <div class="err" id="e" role="alert" aria-live="polite"></div>
   </form>
   <div class="foot">Works in Chrome or Edge on a computer or phone. No sign-in needed.</div>
 </main>
 <script>
-const META = {"v": 1, "salt": "2TWDlBUn4vFZV/nt1tlYtw==", "iter": 310000};
-const SK = 'vista-epc-demo-key';
+const META = {"v": 1, "salt": "CpXpcmXvq8dWHJ7pO18pgA==", "iter": 310000};
+const SK = 'vista-epc-demo-key', LK = 'vista-epc-demo-key-v'+META.salt.slice(0,8);
 const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 const toB64 = u => btoa(String.fromCharCode(...new Uint8Array(u)));
 const base = () => { let p = location.pathname.replace(/index\.html$/, ''); if (!p.endsWith('/')) p += '/'; return p };
-let blob = null;
+let blob = null, remember = true;
 async function load() { if (blob) return blob; const r = await fetch(base() + 'app.enc', { cache: 'no-cache' }); if (!r.ok) throw new Error('fetch'); blob = new Uint8Array(await r.arrayBuffer()); return blob }
 async function keyFrom(code) {
   const norm = code.toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -57,17 +58,18 @@ async function open(key) {
 }
 async function tryStored() {
   let raw = null; try { raw = sessionStorage.getItem(SK) } catch (e) { }
+  if (!raw) { try { const o = JSON.parse(localStorage.getItem(LK) || 'null'); if (o && o.exp > Date.now()) raw = o.k; else localStorage.removeItem(LK) } catch (e) { } }
   if (!raw) return false;
-  try { const k = await crypto.subtle.importKey('raw', b64(raw), 'AES-GCM', false, ['decrypt']); await open(k); return true } catch (e) { try { sessionStorage.removeItem(SK) } catch (x) { } return false }
+  try { const k = await crypto.subtle.importKey('raw', b64(raw), 'AES-GCM', false, ['decrypt']); await open(k); return true } catch (e) { try { sessionStorage.removeItem(SK); localStorage.removeItem(LK) } catch (x) { } return false }
 }
 const f = document.getElementById('f'), c = document.getElementById('c'), b = document.getElementById('b'), e = document.getElementById('e');
 if (!window.crypto || !crypto.subtle) { e.textContent = 'Please open this page in an up-to-date Chrome or Edge.'; b.disabled = true }
 f.addEventListener('submit', async ev => {
-  ev.preventDefault(); e.textContent = ''; b.disabled = true; b.textContent = 'Opening…';
+  ev.preventDefault(); e.textContent = ''; remember = document.getElementById('rem').checked; b.disabled = true; b.textContent = 'Opening…';
   try {
     const k = await keyFrom(c.value);
     try { await load() } catch (x) { e.textContent = 'The demo could not be loaded. Check your internet connection and try again.'; return }
-    try { const raw = await crypto.subtle.exportKey('raw', k); await open(k); try { sessionStorage.setItem(SK, toB64(raw)) } catch (x) { } }
+    try { const raw = await crypto.subtle.exportKey('raw', k); await open(k); try { sessionStorage.setItem(SK, toB64(raw)); if (remember) localStorage.setItem(LK, JSON.stringify({ k: toB64(raw), exp: Date.now() + 30 * 864e5 })) } catch (x) { } }
     catch (x) { e.textContent = 'That code is not right. Please check it and try again.'; c.select() }
   } finally { b.disabled = false; b.textContent = 'Open the demo' }
 });
