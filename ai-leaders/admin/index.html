@@ -130,7 +130,9 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px 10px
  </section>
 
  <section class="panel" id="p-runs" hidden>
-  <div class="card"><div class="row"><b>The daily job</b><span class="muted small">Runs every morning at about 8:00 IST: finishes any pending matches, closes market roles older than 45 days, searches one region (in turn), matches new roles against your pool, finds hiring contacts and AI leaders on RocketReach (free searches only), and emails you a digest.</span><button class="btn" id="cronNow">Run it now</button></div></div>
+  <div class="card"><div class="row"><b>The daily job</b><span class="muted small">Runs every morning at about 8:00 IST: finishes any pending matches, closes market roles older than 45 days, searches one region (in turn), matches new roles against your pool, finds hiring contacts and AI leaders on RocketReach, reveals a few emails within your limit, and emails you the morning brief with a ready draft for each person.</span><button class="btn" id="cronNow">Run it now</button></div></div>
+  <div class="card"><div class="row"><b>Emails to reveal each morning</b><input type="number" id="autoN" min="0" max="20" style="width:80px"><button class="btn ghost small" id="autoSave">Save</button><span class="muted small">RocketReach credits the morning job may use to get email addresses for drafts: first the best hiring contact for each new role, then the strongest candidate matches. It never goes over the daily limit you share with the webinar app. 0 turns it off.</span></div></div>
+  <div class="card"><div class="row"><b>Drafts waiting for tomorrow's brief</b><button class="btn ghost small" id="drPrev">Preview</button><span class="muted small">Every morning the brief to ashish@ashishduacorporation.com lists one ready draft per person, with an Open draft link and an Outlook draft file. Nothing is ever sent for you.</span></div><div id="drList"></div></div>
   <div id="runList"></div>
  </section>
 </main>
@@ -163,6 +165,7 @@ function show(j){D=j;
   opts($('aRole'),j.roles.map(function(r){return {v:r.id,t:r.ref+' '+r.title};}),'<option value="">All roles</option><option value="general">General profiles</option>');
   $('nSrc').textContent=(j.sourced||[]).length;
   var rr=j.rocketreach||{};$('rrInfo').textContent=rr.connected?('RocketReach connected · '+rr.used_today+' of '+rr.limit+' reveals used today'):'RocketReach is not connected: add the key in the webinar admin Settings.';
+  $('autoN').value=rr.auto_reveals==null?10:rr.auto_reveals;
   opts($('sRegion'),j.regions);opts($('sRegionF'),j.regions,'<option value="">All regions</option>');
   renderApps();renderRoles();renderPool();renderRuns();renderSrc();}
 var roleById=function(id){return (D.roles||[]).filter(function(r){return r.id===id;})[0];};
@@ -267,6 +270,8 @@ function renderPool(){
 function renderRuns(){
   $('runList').innerHTML=D.runs.length?'<div class="card"><table><thead><tr><th>Started</th><th>Kind</th><th>Result</th></tr></thead><tbody>'+D.runs.map(function(r){return '<tr><td class="small">'+when(r.started_at)+'</td><td>'+esc(r.kind)+'</td><td class="small">'+esc(JSON.stringify(r.result||{}))+'</td></tr>';}).join('')+'</tbody></table></div>':'<p class="muted">The job has not run yet.</p>';
 }
+$('autoSave').onclick=function(){call('auto_reveals',{value:$('autoN').value}).then(function(j){msg('Saved: up to '+j.value+' reveals each morning.');}).catch(function(x){msg(x.message);});};
+$('drPrev').onclick=function(){call('drafts_preview').then(function(j){$('drList').innerHTML=j.drafts.length?j.drafts.map(function(d){return '<div class="card" style="margin:10px 0 0"><div class="small muted">'+esc(d.kind)+' · '+esc(d.about)+'</div><b>'+esc(d.name||'')+'</b> <span class="muted small">'+esc(d.who)+' · '+esc(d.to)+'</span><div class="small" style="margin:4px 0"><b>Subject:</b> '+esc(d.subject)+'</div><details><summary>Read</summary><pre style="white-space:pre-wrap;font:13px/1.5 Inter,sans-serif">'+esc(d.body)+'</pre></details><a class="btn small" href="'+esc(d.mailto)+'">Open draft</a></div>';}).join(''):'<p class="muted small">No drafts waiting. Drafts appear once people have revealed emails: hiring contacts for open roles, candidates suggested for a role, and applicants who scored 70 or more.</p>';}).catch(function(x){msg(x.message);});};
 $('cronNow').onclick=function(){var b=this;b.disabled=true;msg('Running the daily job… up to 4 minutes.');call('cron_now').then(function(j){b.disabled=false;load('Done: '+(j.radar?j.radar.added+' new role(s), ':'')+j.matched+' match(es), '+j.pool+' pool match(es)'+(j.errors&&j.errors.length?'. Errors: '+j.errors.join('; '):'.'));}).catch(function(x){b.disabled=false;msg(x.message);});};
 
 if(KEY)call('desk').then(start).catch(function(){logout();});

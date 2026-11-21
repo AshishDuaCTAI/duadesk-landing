@@ -118,12 +118,12 @@ async function cvRemove(paths) {
 }
 
 /* ---------- email (Resend) ---------- */
-async function mail({ to, subject, html, idem, replyTo }) {
+async function mail({ to, subject, html, idem, replyTo, attachments }) {
   const { RESEND_KEY, FROM, REPLY_TO } = ENV();
   if (!RESEND_KEY) { console.warn('ail: RESEND_API_KEY missing, email skipped:', subject); return null; }
   const headers = { Authorization: 'Bearer ' + RESEND_KEY, 'Content-Type': 'application/json' };
   if (idem) headers['Idempotency-Key'] = String(idem).slice(0, 256);
-  const res = await fetch('https://api.resend.com/emails', { method: 'POST', headers, body: JSON.stringify({ from: FROM, to: [to], subject, html, reply_to: replyTo || REPLY_TO }) });
+  const res = await fetch('https://api.resend.com/emails', { method: 'POST', headers, body: JSON.stringify({ from: FROM, to: [to], subject, html, reply_to: replyTo || REPLY_TO, ...(attachments && attachments.length ? { attachments } : {}) }) });
   const d = await res.json().catch(() => ({}));
   if (!res.ok) { console.error('ail mail', res.status, d); return null; }
   return d;
@@ -579,22 +579,140 @@ async function cronRun() {
   for (const r of fresh) { if (left() < 40000) break; try { out.pool.push(...await poolMatch(r)); } catch (e) { out.errors.push('pool ' + r.ref + ': ' + e.message); } }
   // 5. RocketReach (free searches): hiring contacts for open roles, and AI leaders in today's region
   try { await rrDaily(out, left); } catch (e) { out.errors.push('rocketreach: ' + e.message); }
-  // 6. one short digest for Ashish, only when something happened
-  if (out.radar && out.radar.added || out.pool.length || out.contacts || (out.sourced && out.sourced.added) || out.errors.length) await digest(out);
-  return { ok: true, matched: out.matched, closed: out.closed, radar: out.radar, pool: out.pool.length, contacts: out.contacts, sourced: out.sourced, sourced_fits: out.sourced_fits, errors: out.errors };
+  // 6. reveal emails for the best people (a small daily budget of RocketReach credits), then write the drafts
+  try { out.revealed = await autoReveal(out, left); } catch (e) { out.errors.push('reveals: ' + e.message); }
+  let drafts = [];
+  try { drafts = await buildDrafts(); } catch (e) { out.errors.push('drafts: ' + e.message); }
+  // 7. the morning brief to Ashish, every day
+  await digest(out, drafts);
+  return { ok: true, matched: out.matched, closed: out.closed, radar: out.radar, pool: out.pool.length, contacts: out.contacts, sourced: out.sourced, sourced_fits: out.sourced_fits, revealed: out.revealed || 0, drafts: drafts.length, errors: out.errors };
 }
-async function digest(out) {
+
+/* ---------- the morning drafts: one email per person, for Ashish to open and send from his own mailbox ---------- */
+const SIGN = `Warm regards,
+
+Ashish Dua
+Founder, DuaDesk · AI Leaders by DuaDesk
+ashish@ashishduacorporation.com · +91 98995 73717
+duadesk.com/ai-leaders`;
+const firstName = n => (clean(n, 120).split(' ')[0] || '').replace(/[^\p{L}\-']/gu, '') || 'there';
+const HIRE_RANK = t => /talent|recruit|executive search/i.test(t || '') ? 0 : /chro|human|people|\bhr\b/i.test(t || '') ? 1 : /technology|cto|information|cio|digital|data/i.test(t || '') ? 2 : 3;
+async function autoSettings() {
+  const rows = await sb(`settings?select=key,value&key=eq.ail_auto_reveals`).catch(() => []);
+  const v = rows[0] ? rows[0].value : '10';
+  return Math.max(0, Math.min(20, v === '' || v == null ? 10 : +v || 0));
+}
+// reveal: first the best hiring contact for each open role, then the strongest sourced candidates
+async function autoReveal(out, left) {
+  const want = await autoSettings(); if (!want) return 0;
+  const s = await rrSettings(); if (!s.key) return 0;
+  let room = Math.min(want, s.limit - await rrUsedToday()); if (room <= 0) return 0;
+  const queue = [];
+  const contacts = await sb('ail_contacts?select=id,role_id,title,status,revealed_at,ail_roles!inner(status,found_at)&status=eq.found&revealed_at=is.null&ail_roles.status=eq.open&order=created_at.desc&limit=200');
+  const best = new Map();
+  for (const c of contacts) { const cur = best.get(c.role_id); if (!cur || HIRE_RANK(c.title) < HIRE_RANK(cur.title)) best.set(c.role_id, c); }
+  const revealedRoles = new Set((await sb('ail_contacts?select=role_id&revealed_at=not.is.null&limit=1000')).map(x => x.role_id));
+  for (const c of best.values()) if (!revealedRoles.has(c.role_id)) queue.push(['ail_contacts', c.id]);
+  const sourced = await sb('ail_sourced?select=id,fits&status=eq.found&revealed_at=is.null&fits=not.is.null&limit=300');
+  sourced.map(p => [p, Math.max(0, ...(p.fits || []).map(f => f.score || 0))]).filter(([, sc]) => sc >= 70).sort((x, y) => y[1] - x[1]).forEach(([p]) => queue.push(['ail_sourced', p.id]));
+  let n = 0;
+  for (const [t, id] of queue) {
+    if (room <= 0 || left() < 30000) break;
+    try { await rrRevealRow(t, id); n++; room--; } catch (e) { out.errors.push('reveal: ' + e.message); if (e.status === 429 || e.status === 400) break; }
+  }
+  return n;
+}
+function contactDraft(c, r) {
+  const where = r.location ? ` in ${r.location.split(',')[0]}` : '';
+  return { kind: 'Hiring contact', table: 'ail_contacts', id: c.id, to: c.email, name: c.name, who: `${c.title || ''} · ${c.company || r.company || ''}`, about: `${r.ref} ${r.title}`,
+    subject: `Your ${r.title} search`,
+    body: `Dear ${firstName(c.name)},
+
+I noticed ${r.company || 'your company'} is looking for a ${r.title}${where}.
+
+I run AI Leaders by DuaDesk, a search practice focused only on senior AI leadership. We build AI products ourselves, for finance, procurement, audit and leadership teams, so we assess AI leaders on what they have actually delivered: systems in production, value created, teams built and risks managed.
+
+If it would help, I would be glad to share a short, confidential slate of people who have done this role at scale, or simply compare notes on what the role needs to achieve in its first year.
+
+Would a 20-minute call next week be useful?
+
+${SIGN}
+
+P.S. If this is not relevant, just let me know and I will not follow up.` };
+}
+function candidateDraft(p, r, fit) {
+  const at = [p.title, p.company].filter(Boolean).join(' at ');
+  return { kind: 'Possible candidate', table: 'ail_sourced', id: p.id, to: p.email, name: p.name, who: `${p.title || ''} · ${p.company || ''}`, about: `${r.ref} ${r.title} (fit ${fit.score}/100)`,
+    subject: `A confidential ${r.title} role`,
+    body: `Dear ${firstName(p.name)},
+
+${at ? `Your work as ${at} stood out to me. ` : ''}I am working on a confidential search for a ${r.title} with ${(r.company_masked || 'a leading company').replace(/^A /, 'a ')}${r.location ? `, based in ${r.location}` : ''}, and I think your background could be a strong fit.
+
+${r.summary ? `The role in brief: ${r.summary}\n\n` : ''}If you are open to a conversation, I would be glad to share more in confidence. You can also see the role (reference ${r.ref}) at duadesk.com/ai-leaders.
+
+Would you have 20 minutes for a call this week or next?
+
+${SIGN}
+
+P.S. If you would rather not hear from me about roles, just say so and I will not write again.` };
+}
+function applicantDraft(a, c, r) {
+  return { kind: 'Applicant (strong match)', table: 'ail_applications', id: a.id, to: c.email, name: c.name, who: `${c.current_title || ''} · ${c.current_company || ''}`, about: `${r.ref} ${r.title} (fit ${a.score}/100)`,
+    subject: `Your application: ${r.title} (${r.ref})`,
+    body: `Dear ${firstName(c.name)},
+
+Thank you for applying for the ${r.title} role with ${(r.company_masked || 'our client').replace(/^A /, 'a ')}. I have read your profile and would like to talk it through with you before anything goes further.
+
+Could we have a 30-minute call this week? Please send me two or three times that suit you.
+
+${SIGN}` };
+}
+async function buildDrafts() {
+  const roles = new Map((await sb('ail_roles?select=id,ref,title,company,company_masked,location,summary,status&limit=1000')).map(r => [r.id, r]));
+  const byRef = new Map([...roles.values()].map(r => [r.ref, r]));
+  const out = [];
+  for (const c of await sb('ail_contacts?select=*&revealed_at=not.is.null&drafted_at=is.null&email=not.is.null&status=eq.revealed&limit=20')) {
+    const r = roles.get(c.role_id); if (r && r.status === 'open') out.push(contactDraft(c, r));
+  }
+  for (const p of await sb('ail_sourced?select=*&revealed_at=not.is.null&drafted_at=is.null&email=not.is.null&status=eq.revealed&limit=20')) {
+    const fit = (p.fits || []).filter(f => byRef.has(f.ref) && byRef.get(f.ref).status === 'open').sort((x, y) => y.score - x.score)[0];
+    if (fit) out.push(candidateDraft(p, byRef.get(fit.ref), fit));
+  }
+  for (const a of await sb('ail_applications?select=id,score,role_id,status,ail_candidates(name,email,current_title,current_company)&match_state=eq.done&drafted_at=is.null&status=eq.new&score=gte.70&limit=20')) {
+    const r = roles.get(a.role_id); if (r && a.ail_candidates && a.ail_candidates.email) out.push(applicantDraft(a, a.ail_candidates, r));
+  }
+  return out.slice(0, 25);
+}
+const mailtoLink = d => `mailto:${encodeURIComponent(d.to)}?subject=${encodeURIComponent(d.subject)}&body=${encodeURIComponent(d.body.replace(/\n/g, '\r\n'))}`;
+// an Outlook-ready draft file: X-Unsent makes Outlook open it as a new message ready to send
+const emlFile = d => Buffer.from(`To: ${d.name ? `"${String(d.name).replace(/"/g, '')}" ` : ''}<${d.to}>\r\nSubject: =?UTF-8?B?${Buffer.from(d.subject).toString('base64')}?=\r\nX-Unsent: 1\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${Buffer.from(d.body.replace(/\n/g, '\r\n')).toString('base64').replace(/.{76}/g, '$&\r\n')}\r\n`).toString('base64');
+async function digest(out, drafts = []) {
   const { OWNER, SITE } = ENV();
   const newRoles = out.radar && out.radar.ids && out.radar.ids.length ? await sb(`ail_roles?select=ref,title,company,company_masked,location,source_url&id=in.(${out.radar.ids.join(',')})`) : [];
-  const html = shell('Today on the AI Leaders desk', `
+  const openRoles = (await sb('ail_roles?select=id&status=eq.open&limit=1000')).length;
+  const newApps = (await sb(`ail_applications?select=id&created_at=gte.${new Date(Date.now() - 86400000).toISOString()}&limit=1000`)).length;
+  const draftHtml = drafts.length ? `<h2 style="font:700 18px Georgia,serif;margin:18px 0 6px">${drafts.length} draft email${drafts.length === 1 ? '' : 's'} ready</h2>
+<p style="font-size:13px;color:#7a7394;margin:0 0 10px">Click <b>Open draft</b> to open it in your email, ready to send from your address. Each is also attached as a file that opens in Outlook as a draft. Nothing has been sent.</p>
+${drafts.map((d, i) => `<div style="border:1px solid #e4def7;border-radius:10px;padding:12px 14px;margin:0 0 10px">
+<div style="font-size:12px;color:#6b4fe0;font-weight:700;text-transform:uppercase;letter-spacing:1px">${i + 1}. ${esc(d.kind)} · ${esc(d.about)}</div>
+<div style="margin:4px 0"><b>${esc(d.name || '')}</b> <span style="color:#7a7394">${esc(d.who)}</span> · ${esc(d.to)}</div>
+<div style="font-size:14px;margin:0 0 6px"><b>Subject:</b> ${esc(d.subject)}</div>
+<details><summary style="cursor:pointer;color:#6b4fe0;font-size:13px">Read the draft</summary><pre style="white-space:pre-wrap;font:13px/1.5 Arial,sans-serif;background:#f7f5fd;border-radius:8px;padding:10px;margin:6px 0 0">${esc(d.body)}</pre></details>
+<a href="${esc(mailtoLink(d))}" style="display:inline-block;margin-top:8px;background:#8b6cff;color:#fff;text-decoration:none;border-radius:999px;padding:7px 14px;font-weight:700;font-size:13px">Open draft</a></div>`).join('')}` : '<p style="color:#7a7394">No new drafts today.</p>';
+  const html = shell('Your AI Leaders morning brief', `
+<p style="margin:0 0 12px">${openRoles} open role${openRoles === 1 ? '' : 's'} on the board · ${newApps} new application${newApps === 1 ? '' : 's'} in the last day${out.revealed ? ` · ${out.revealed} email${out.revealed === 1 ? '' : 's'} revealed on RocketReach today` : ''}.</p>
 ${newRoles.length ? `<b>${newRoles.length} new role${newRoles.length > 1 ? 's' : ''} found (${esc(out.radar.region)}) and now live, company masked</b>
 <ul style="margin:6px 0 14px;padding-left:20px">${newRoles.map(r => `<li>${esc(r.ref)} <b>${esc(r.title)}</b> · ${esc(r.company)} <span style="color:#7a7394">(shown as “${esc(r.company_masked)}”)</span> · ${esc(r.location || '')}${r.source_url ? ` · <a href="${esc(r.source_url)}" style="color:#6b4fe0">source</a>` : ''}</li>`).join('')}</ul>
 <p style="font-size:13px;color:#7a7394;margin:-6px 0 14px">If any should not be shown, hide it on the desk.</p>` : (out.radar ? `<p>No new roles found in ${esc(out.radar.region)} today.</p>` : '')}
 ${out.pool.length ? `<b>People already in your pool who fit new roles</b><ul style="margin:6px 0 14px;padding-left:20px">${out.pool.map(x => `<li>${esc(x.person.name)} → ${esc(x.role.ref)} ${esc(x.role.title)} ${scoreChip(x.score)} ${esc(x.why)}</li>`).join('')}</ul>` : ''}
-${out.contacts || (out.sourced && out.sourced.added) ? `<b>From RocketReach (free searches, no credits used)</b><ul style="margin:6px 0 14px;padding-left:20px">${out.contacts ? `<li>${out.contacts} hiring contact${out.contacts === 1 ? '' : 's'} found at companies with open roles</li>` : ''}${out.sourced && out.sourced.added ? `<li>${out.sourced.added} new AI leader${out.sourced.added === 1 ? '' : 's'} sourced in ${esc(out.sourced.region)}${out.sourced_fits ? `, ${out.sourced_fits} of them suggested for open roles` : ''}</li>` : ''}</ul><p style="font-size:13px;color:#7a7394;margin:-6px 0 14px">Reveal emails on the desk when you want to reach someone (1 credit each).</p>` : ''}
+${out.contacts || (out.sourced && out.sourced.added) ? `<b>From RocketReach</b><ul style="margin:6px 0 14px;padding-left:20px">${out.contacts ? `<li>${out.contacts} hiring contact${out.contacts === 1 ? '' : 's'} found at companies with open roles</li>` : ''}${out.sourced && out.sourced.added ? `<li>${out.sourced.added} new AI leader${out.sourced.added === 1 ? '' : 's'} sourced in ${esc(out.sourced.region)}${out.sourced_fits ? `, ${out.sourced_fits} suggested for open roles` : ''}</li>` : ''}</ul>` : ''}
+${draftHtml}
 ${out.errors.length ? `<b>Needs a look</b>${ul(out.errors)}` : ''}
 <p style="margin:16px 0 0"><a href="${esc(SITE)}/ai-leaders/admin/" style="display:inline-block;background:#8b6cff;color:#fff;text-decoration:none;border-radius:999px;padding:10px 18px;font-weight:700">Open the AI Leaders desk</a></p>`);
-  await mail({ to: OWNER, subject: `AI Leaders: ${newRoles.length} new role${newRoles.length === 1 ? '' : 's'}, ${out.pool.length} pool match${out.pool.length === 1 ? '' : 'es'}${out.contacts ? `, ${out.contacts} hiring contacts` : ''}${out.sourced && out.sourced.added ? `, ${out.sourced.added} leaders sourced` : ''}`, html, idem: 'ail-digest-' + new Date().toISOString().slice(0, 10) });
+  const attachments = drafts.map((d, i) => ({ filename: `${String(i + 1).padStart(2, '0')} ${String(d.name || 'draft').replace(/[^\w\- ]+/g, '').slice(0, 40)}.eml`, content: emlFile(d) }));
+  const sent = await mail({ to: OWNER, subject: `AI Leaders morning brief: ${drafts.length} draft${drafts.length === 1 ? '' : 's'} ready, ${newRoles.length} new role${newRoles.length === 1 ? '' : 's'}`, html, attachments, idem: 'ail-brief-' + new Date(Date.now() + 5.5 * 3600000).toISOString().slice(0, 10) + '-' + drafts.length });
+  if (sent && drafts.length) { const now = new Date().toISOString(); for (const d of drafts) await sb(`${d.table}?id=eq.${d.id}`, { method: 'PATCH', body: { drafted_at: now } }).catch(() => {}); }
+  return sent;
 }
 
 /* ---------- the admin desk ---------- */
@@ -609,7 +727,7 @@ const admin = {
       sb('ail_sourced?select=*&order=created_at.desc&limit=600'),
       rrSettings(), rrUsedToday().catch(() => 0),
     ]);
-    return { roles, apps, runs, pool, contacts, sourced, rocketreach: { connected: !!rr.key, limit: rr.limit, used_today: used }, regions: REGIONS, levels: LEVELS, statuses: APP_STATUS, ai: !!ENV().AI_KEY, email: !!ENV().RESEND_KEY };
+    return { roles, apps, runs, pool, contacts, sourced, rocketreach: { connected: !!rr.key, limit: rr.limit, used_today: used, auto_reveals: await autoSettings() }, regions: REGIONS, levels: LEVELS, statuses: APP_STATUS, ai: !!ENV().AI_KEY, email: !!ENV().RESEND_KEY };
   },
   async role_save(b) {
     const id = +b.id || null;
@@ -646,6 +764,8 @@ const admin = {
     return { ok: true };
   },
   async cron_now() { return cronRun(); },
+  async auto_reveals(b) { const n = Math.max(0, Math.min(20, Math.round(+b.value) || 0)); await sb('settings?on_conflict=key', { method: 'POST', body: [{ key: 'ail_auto_reveals', value: String(n) }], prefer: 'resolution=merge-duplicates,return=minimal' }); return { value: n }; },
+  async drafts_preview() { return { drafts: (await buildDrafts()).map(d => ({ ...d, mailto: mailtoLink(d) })) }; },
   async rr_contacts(b) { const s = await rrSettings(); if (!s.key) throw E('Add your RocketReach API key in the webinar admin Settings first.'); const [r] = await sb(`ail_roles?select=id,ref,company&id=eq.${+b.role_id}`); if (!r) throw E('Role not found', 404); if (undisclosed(r.company)) throw E('The company is not named for this role, so there is no one to search for.'); return { found: await findContacts(r, s.key) }; },
   async rr_source(b) { const s = await rrSettings(); if (!s.key) throw E('Add your RocketReach API key in the webinar admin Settings first.'); const region = REGIONS.includes(b.region) ? b.region : REGIONS[0]; const r = await sourceLeaders(region, s.key); let fits = 0; if (ENV().AI_KEY) { try { fits = await fitSourced(); } catch (e) { r.note = 'Role suggestions need the AI: ' + e.message; } } return { ...r, fits }; },
   async rr_fits() { return { suggested: await fitSourced() }; },
