@@ -497,6 +497,8 @@ function rrPhone(p, mode) {
 }
 const digits = n => String(n || '').replace(/[^\d]/g, '');
 const telLink = n => 'tel:+' + digits(n);
+const waApp = (n, text) => 'whatsapp://send?phone=' + digits(n) + (text ? '&text=' + encodeURIComponent(text) : '');
+const waWeb = (n, text) => 'https://web.whatsapp.com/send?phone=' + digits(n) + (text ? '&text=' + encodeURIComponent(text) : '');
 const waLink = (n, text) => 'https://wa.me/' + digits(n) + (text ? '?text=' + encodeURIComponent(text) : '');
 // short WhatsApp messages, opened ready to send (the role only for candidates, never the employer)
 const city = r => r.location ? String(r.location).split(',')[0].trim() : '';
@@ -868,7 +870,7 @@ const owaLink = d => `https://outlook.office.com/mail/deeplink/compose?to=${enco
 const mailtoLink = d => `mailto:${encodeURIComponent(d.to)}?subject=${encodeURIComponent(d.subject)}&body=${encodeURIComponent(d.body.replace(/\n/g, '\r\n'))}`;
 // an Outlook-ready draft file: X-Unsent makes Outlook open it as a new message ready to send
 const emlFile = d => Buffer.from(`To: ${d.name ? `"${String(d.name).replace(/"/g, '')}" ` : ''}<${d.to}>\r\nSubject: =?UTF-8?B?${Buffer.from(d.subject).toString('base64')}?=\r\nX-Unsent: 1\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${Buffer.from(d.body.replace(/\n/g, '\r\n')).toString('base64').replace(/.{76}/g, '$&\r\n')}\r\n`).toString('base64');
-const phoneLine = d => d.phone ? `<div style="font-size:13px;margin:2px 0 4px">📞 <a href="${esc(telLink(d.phone))}" style="color:#1f1d2b;text-decoration:none"><b>${esc(d.phone)}</b></a>${d.phone_type && d.phone_type !== 'other' ? ` <span style="color:#7a7394">(${esc(d.phone_type)})</span>` : ''}${d.phone_type !== 'work' ? ` · <a href="${esc(waLink(d.phone, d.wa))}" style="color:#1a8f4c;font-weight:700">${d.wa ? 'WhatsApp (message ready, just press Send)' : 'WhatsApp'}</a>` : ''}</div>` : '';
+const phoneLine = d => d.phone ? `<div style="font-size:13px;margin:2px 0 4px">📞 <a href="${esc(telLink(d.phone))}" style="color:#1f1d2b;text-decoration:none"><b>${esc(d.phone)}</b></a>${d.phone_type && d.phone_type !== 'other' ? ` <span style="color:#7a7394">(${esc(d.phone_type)})</span>` : ''}${d.phone_type !== 'work' ? ` · WhatsApp, message ready: <a href="${esc(waApp(d.phone, d.wa))}" style="color:#1a8f4c;font-weight:700">app</a> · <a href="${esc(waWeb(d.phone, d.wa))}" target="duadesk_whatsapp" style="color:#1a8f4c;font-weight:700">web</a>` : ''}</div>` : '';
 async function digest(out, drafts = [], lis = []) {
   const { OWNER, SITE } = ENV();
   const newRoles = await sb(`ail_roles?select=ref,title,company,company_masked,location,source_url,source&status=eq.open&found_at=gte.${new Date(Date.now() - 26 * 3600000).toISOString()}&order=found_at.desc&limit=50`); // every role added since yesterday's brief: by the radar, by Claude's morning research or by hand
