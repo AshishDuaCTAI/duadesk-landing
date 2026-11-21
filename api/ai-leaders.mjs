@@ -754,7 +754,10 @@ const MS = () => ({ tenant: process.env.MS_TENANT_ID || '', client: process.env.
   login: process.env.MS_LOGIN_BASE || 'https://login.microsoftonline.com', graph: process.env.MS_GRAPH_BASE || 'https://graph.microsoft.com/v1.0',
   mailbox: process.env.AIL_DRAFTS_MAILBOX || process.env.AIL_OWNER_EMAIL || process.env.WEBINAR_OWNER_EMAIL || 'ashish@ashishduacorporation.com' });
 let msTok = { v: '', exp: 0 };
-async function msGraph(path, { method = 'GET', body } = {}) {
+async function msGraph(path, opts = {}) {
+  try { return await msGraph1(path, opts); } catch (e) { if (e.status !== 403) throw e; msTok = { v: '', exp: 0 }; return msGraph1(path, opts); } // a new permission needs a fresh token
+}
+async function msGraph1(path, { method = 'GET', body } = {}) {
   const m = MS(); if (!m.tenant || !m.client || !m.secret) throw E('Microsoft 365 is not connected (MS_TENANT_ID, MS_CLIENT_ID, MS_CLIENT_SECRET).', 503);
   if (!msTok.v || Date.now() > msTok.exp - 60000) {
     const r = await fetch(`${m.login}/${encodeURIComponent(m.tenant)}/oauth2/v2.0/token`, { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' },
