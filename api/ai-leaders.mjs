@@ -691,7 +691,7 @@ function candidateDraft(p, r, fit) {
     subject: `A confidential ${r.title} role`,
     body: `Dear ${firstName(p.name)},
 
-${at ? `Your work as ${at} stood out to me. ` : ''}I am working on a confidential search for a ${r.title}${r.location ? `, based in ${r.location}` : ''}, and I think your background could be a strong fit.
+I run AI Leaders by DuaDesk, a search practice that focuses only on senior AI leadership roles. ${at ? `Your work as ${at} stood out to me, and ` : ''}I am working on a confidential search for a ${r.title}${r.location ? `, based in ${r.location}` : ''} that I think could be a strong fit for your background.
 
 ${r.summary ? `The role in brief: ${r.summary}\n\n` : ''}If you are open to a conversation, I would be glad to share more in confidence. You can also see the role (reference ${r.ref}) at duadesk.com/ai-leaders.
 
