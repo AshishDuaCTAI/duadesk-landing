@@ -312,9 +312,9 @@ async function apply(req, b) {
   else [app] = await sb('ail_applications', { method: 'POST', body: { role_id: role ? role.id : null, candidate_id: cand.id, note }, prefer: 'return=representation' });
   await mail({
     to: email, idem: `ail-ack-${app.id}-${again ? Date.now() : 0}`,
-    subject: role ? `We have your application: ${role.title} (${role.ref})` : 'We have your profile',
+    subject: role ? `We have your application: ${role.title} (${role.ref})` : 'We have your profile', // candidates see the role, never the employer
     html: shell(role ? 'Thank you for applying' : 'Thank you for sharing your profile', `<p>Dear ${esc(c.name.split(' ')[0])},</p>
-<p>${role ? `We have received your application for <b>${esc(role.title)}</b> with ${esc(role.company_masked || 'a confidential company')} (reference ${esc(role.ref)}).` : 'We have received your profile.'}</p>
+<p>${role ? `We have received your application for the <b>${esc(role.title)}</b> role (reference ${esc(role.ref)}).` : 'We have received your profile.'}</p>
 <p>A person reads every application. If there is a good fit, we will contact you to talk it through before anything is shared with an employer. We never share your profile without your agreement.</p>
 ${c.open_to_other ? '<p>You asked us to consider you for other suitable roles too, so we will keep your profile in mind as new roles open.</p>' : ''}
 <p>With best wishes,<br>Ashish Dua<br>AI Leaders by DuaDesk</p>`),
@@ -654,7 +654,7 @@ const liPeople = q => `https://www.linkedin.com/search/results/people/?keywords=
 const liClip = (t, n = 300) => t.length <= n ? t : t.slice(0, n - 1).replace(/[\s,.;:]+\S*$/, '') + '…';
 const short = s => String(s || '').replace(/^A /, 'a ').replace(/\s*\(.*?\)\s*/g, ' ').trim();
 const contactNote = (c, r) => liClip(`Hi ${firstName(c.name)}, I run AI Leaders by DuaDesk, a search practice for senior AI leaders. I saw ${r.company ? r.company.replace(/\s+(GmbH|AG|SE|Inc\.?|Ltd\.?|plc|& Co\.? KG|GmbH & Co\.? KG)\b.*$/i, '') : 'your team'} is hiring a ${r.title}. Happy to share a short, confidential slate of proven candidates if useful. Ashish Dua`);
-const candidateNote = (p, r) => liClip(`Hi ${firstName(p.name)}, I'm running a confidential ${r.title} search (${short(r.company_masked) || 'a leading company'}${r.location ? ', ' + r.location.split(',')[0] : ''}) and your background stood out. Open to a short call? Ashish Dua, AI Leaders by DuaDesk`);
+const candidateNote = (p, r) => liClip(`Hi ${firstName(p.name)}, I'm running a confidential search for a ${r.title}${r.location ? ' in ' + r.location.split(',')[0] : ''} and your background stood out. Open to a short call? Ashish Dua, AI Leaders by DuaDesk`); // the role only, never the employer
 const applicantNote = (c, r) => liClip(`Hi ${firstName(c.name)}, thank you for applying for the ${r.title} role (${r.ref}). I'd like to talk it through with you; could we find 30 minutes this week? Ashish Dua, AI Leaders by DuaDesk`);
 function contactDraft(c, r) {
   const where = r.location ? ` in ${r.location.split(',')[0]}` : '';
@@ -680,7 +680,7 @@ function candidateDraft(p, r, fit) {
     subject: `A confidential ${r.title} role`,
     body: `Dear ${firstName(p.name)},
 
-${at ? `Your work as ${at} stood out to me. ` : ''}I am working on a confidential search for a ${r.title} with ${(r.company_masked || 'a leading company').replace(/^A /, 'a ')}${r.location ? `, based in ${r.location}` : ''}, and I think your background could be a strong fit.
+${at ? `Your work as ${at} stood out to me. ` : ''}I am working on a confidential search for a ${r.title}${r.location ? `, based in ${r.location}` : ''}, and I think your background could be a strong fit.
 
 ${r.summary ? `The role in brief: ${r.summary}\n\n` : ''}If you are open to a conversation, I would be glad to share more in confidence. You can also see the role (reference ${r.ref}) at duadesk.com/ai-leaders.
 
@@ -695,7 +695,7 @@ function applicantDraft(a, c, r) {
     subject: `Your application: ${r.title} (${r.ref})`,
     body: `Dear ${firstName(c.name)},
 
-Thank you for applying for the ${r.title} role with ${(r.company_masked || 'our client').replace(/^A /, 'a ')}. I have read your profile and would like to talk it through with you before anything goes further.
+Thank you for applying for the ${r.title} role (${r.ref}). I have read your profile and would like to talk it through with you before anything goes further.
 
 Could we have a 30-minute call this week? Please send me two or three times that suit you.
 
