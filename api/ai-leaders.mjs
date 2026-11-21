@@ -482,8 +482,22 @@ async function rrReveal(key, rrId) {
 function rrBest(p, mode) { // mode: 'work' for hiring contacts, 'personal' for candidates (never contact a candidate at their employer)
   const score = e => { const g = String(e.grade || '').toUpperCase(); return g === 'A' ? 3 : g === 'A-' ? 2 : String(e.smtp_valid || '').toLowerCase() === 'valid' ? 1 : 0; };
   const ok = (p.emails || []).filter(e => e && e.email && score(e) > 0 && (mode === 'personal' ? e.type === 'personal' : e.type !== 'personal')).sort((a, b) => (b.type === 'professional') - (a.type === 'professional') || score(b) - score(a));
-  return { email: ok[0] ? String(ok[0].email).toLowerCase() : null, grade: ok[0] ? (ok[0].grade || 'valid') : null, phone: (p.phones || []).map(x => x.number).find(Boolean) || null };
+  const ph = rrPhone(p, mode);
+  return { email: ok[0] ? String(ok[0].email).toLowerCase() : null, grade: ok[0] ? (ok[0].grade || 'valid') : null, phone: ph.phone, phone_type: ph.type };
 }
+// the best phone: a mobile first; for candidates never an office or company line
+function rrPhone(p, mode) {
+  const kind = x => { const t = String(x.type || x.phone_type || '').toLowerCase(); return /mobile|cell/.test(t) ? 'mobile' : /personal|home/.test(t) ? 'personal' : /work|professional|office|hq|company|direct|business|landline/.test(t) ? 'work' : 'other'; };
+  const rank = { mobile: 0, personal: 1, other: 2, work: 3 };
+  const list = (p.phones || []).filter(x => x && x.number && !(x.validity && /invalid/i.test(String(x.validity))))
+    .map(x => ({ number: clean(String(x.number), 40), k: kind(x), rec: !!x.recommended }))
+    .filter(x => mode !== 'personal' || x.k !== 'work')
+    .sort((a, b) => rank[a.k] - rank[b.k] || b.rec - a.rec);
+  return list[0] ? { phone: list[0].number, type: list[0].k } : { phone: null, type: null };
+}
+const digits = n => String(n || '').replace(/[^\d]/g, '');
+const telLink = n => 'tel:+' + digits(n);
+const waLink = n => 'https://wa.me/' + digits(n);
 const companyKey = c => String(c || '').toLowerCase().replace(/&/g, ' and ').replace(/\b(pvt|private|ltd|limited|llp|inc|co|kg|ag|se|gmbh|plc|company|corp|corporation|group|the)\b\.?/g, ' ').replace(/[^a-z0-9]+/g, ' ').trim();
 function sameCompany(a, b) {
   const x = companyKey(a), y = companyKey(b); if (!x || !y) return false;
@@ -571,12 +585,26 @@ async function rrRevealRow(table, id) {
   if (row.revealed_at) return { row, left: Math.max(0, s.limit - used) };
   if (used >= s.limit) throw E(`Today's RocketReach limit (${s.limit} reveals) is used up. Change it in the webinar admin Settings.`, 429);
   const r = await rrReveal(s.key, row.rr_id);
-  await sb('interactions', { method: 'POST', body: { kind: 'rr_lookup', data: { ail: table, id: row.id, status: r && r.status, emails: (r && r.emails || []).length, grades: (r && r.emails || []).map(e => `${e.type || ''}:${e.grade || e.smtp_valid || ''}`).slice(0, 6), phones: (r && r.phones || []).length, keys: Object.keys(r || {}).slice(0, 30) } }, prefer: 'return=minimal' });
+  await sb('interactions', { method: 'POST', body: { kind: 'rr_lookup', data: { ail: table, id: row.id, status: r && r.status, emails: (r && r.emails || []).length, grades: (r && r.emails || []).map(e => `${e.type || ''}:${e.grade || e.smtp_valid || ''}`).slice(0, 6), phones: (r && r.phones || []).length, phone_types: (r && r.phones || []).map(x => String(x.type || '') + (x.recommended ? '*' : '')).slice(0, 10), keys: Object.keys(r || {}).slice(0, 30) } }, prefer: 'return=minimal' });
   const st = String(r && r.status || '').toLowerCase();
   if (['searching', 'progress', 'waiting', 'pending', 'queued', 'not queued'].includes(st)) throw E('RocketReach is still looking this person up. Try Reveal again in a minute.', 202);
   const best = rrBest(r, table === 'ail_sourced' ? 'personal' : 'work'); // candidates: personal email only; hiring contacts: work email only
-  const [upd] = await sb(`${table}?id=eq.${row.id}`, { method: 'PATCH', body: { email: best.email, phone: best.phone, grade: best.grade, status: best.email || best.phone ? 'revealed' : 'no_email', revealed_at: new Date().toISOString(), linkedin_url: row.linkedin_url || (validUrl(r.linkedin_url) ? r.linkedin_url : null) }, prefer: 'return=representation' });
+  const [upd] = await sb(`${table}?id=eq.${row.id}`, { method: 'PATCH', body: { email: best.email, phone: best.phone, phone_type: best.phone_type, grade: best.grade, status: best.email || best.phone ? 'revealed' : 'no_email', revealed_at: new Date().toISOString(), linkedin_url: row.linkedin_url || (validUrl(r.linkedin_url) ? r.linkedin_url : null) }, prefer: 'return=representation' });
   return { row: upd, left: s.limit - used - 1 };
+}
+async function rrPhonesRefresh(table, limit = 25) {
+  const s = await rrSettings(); if (!s.key) throw E('Add your RocketReach API key in the webinar admin Settings first.');
+  const rows = await sb(`${table}?select=id,rr_id,phone,phone_type&revealed_at=not.is.null&phone_type=is.null&rr_id=not.is.null&order=revealed_at.desc&limit=${limit}`);
+  let updated = 0, mobiles = 0;
+  for (const row of rows) {
+    const r = await rrReveal(s.key, row.rr_id);
+    await sb('interactions', { method: 'POST', body: { kind: 'rr_relookup', data: { ail: table, id: row.id, status: r && r.status, phones: (r && r.phones || []).length, phone_types: (r && r.phones || []).map(x => String(x.type || '') + (x.recommended ? '*' : '')).slice(0, 10) } }, prefer: 'return=minimal' });
+    if (!r || !Array.isArray(r.phones)) continue;
+    const ph = rrPhone(r, table === 'ail_sourced' ? 'personal' : 'work');
+    await sb(`${table}?id=eq.${row.id}`, { method: 'PATCH', body: { phone: ph.phone, phone_type: ph.type || 'none' }, prefer: 'return=minimal' });
+    updated++; if (ph.type === 'mobile') mobiles++;
+  }
+  return { checked: rows.length, updated, mobiles };
 }
 async function rrDaily(out, left) {
   const s = await rrSettings(); if (!s.key) return;
@@ -701,7 +729,7 @@ const coName = r => String(r.company || '').replace(/\s*\|.*$/, '').replace(/\s+
 function contactDraft(c, r) {
   const where = r.location ? ` in ${r.location.split(',')[0]}` : '';
   const co = coName(r) || 'your company';
-  return { kind: 'Hiring contact', table: 'ail_contacts', id: c.id, to: c.email, li: c.linkedin_url, note: contactNote(c, r), name: c.name, who: `${c.title || ''} · ${c.company || r.company || ''}`, about: `${r.ref} ${r.title}`,
+  return { kind: 'Hiring contact', table: 'ail_contacts', id: c.id, to: c.email, phone: c.phone, phone_type: c.phone_type, li: c.linkedin_url, note: contactNote(c, r), name: c.name, who: `${c.title || ''} · ${c.company || r.company || ''}`, about: `${r.ref} ${r.title}`,
     subject: `${r.title}: a shortlist of proven AI leaders`,
     ...fmt(`Dear ${firstName(c.name)},
 
@@ -728,7 +756,7 @@ P.S. If this is not relevant, just let me know and I will not follow up.`) };
 }
 function candidateDraft(p, r, fit) { // the role only, never the employer's name
   const at = [p.title, p.company].filter(Boolean).join(' at ');
-  return { kind: 'Possible candidate', table: 'ail_sourced', id: p.id, to: p.email, li: p.linkedin_url, note: candidateNote(p, r), name: p.name, who: `${p.title || ''} · ${p.company || ''}`, about: `${r.ref} ${r.title} (fit ${fit.score}/100)`,
+  return { kind: 'Possible candidate', table: 'ail_sourced', id: p.id, to: p.email, phone: p.phone, phone_type: p.phone_type, li: p.linkedin_url, note: candidateNote(p, r), name: p.name, who: `${p.title || ''} · ${p.company || ''}`, about: `${r.ref} ${r.title} (fit ${fit.score}/100)`,
     subject: `A confidential ${r.title} role`,
     ...fmt(`Dear ${firstName(p.name)},
 
@@ -749,7 +777,7 @@ ${SIGN}
 P.S. If you would rather not hear from me about roles, just say so and I will not write again.`) };
 }
 function applicantDraft(a, c, r) {
-  return { kind: 'Applicant (strong match)', table: 'ail_applications', id: a.id, to: c.email, li: c.linkedin, note: applicantNote(c, r), name: c.name, who: `${c.current_title || ''} · ${c.current_company || ''}`, about: `${r.ref} ${r.title} (fit ${a.score}/100)`,
+  return { kind: 'Applicant (strong match)', table: 'ail_applications', id: a.id, to: c.email, phone: c.phone, li: c.linkedin, note: applicantNote(c, r), name: c.name, who: `${c.current_title || ''} · ${c.current_company || ''}`, about: `${r.ref} ${r.title} (fit ${a.score}/100)`,
     subject: `Your application: ${r.title} (${r.ref})`,
     ...fmt(`Dear ${firstName(c.name)},
 
@@ -774,7 +802,7 @@ async function buildDrafts() {
     const fit = (p.fits || []).filter(f => byRef.has(f.ref) && byRef.get(f.ref).status === 'open').sort((x, y) => y.score - x.score)[0];
     if (fit) out.push(candidateDraft(p, byRef.get(fit.ref), fit));
   }
-  for (const a of await sb('ail_applications?select=id,score,role_id,status,ail_candidates(name,email,linkedin,current_title,current_company)&match_state=eq.done&drafted_at=is.null&status=eq.new&score=gte.70&limit=20')) {
+  for (const a of await sb('ail_applications?select=id,score,role_id,status,ail_candidates(name,email,phone,linkedin,current_title,current_company)&match_state=eq.done&drafted_at=is.null&status=eq.new&score=gte.70&limit=20')) {
     const r = roles.get(a.role_id); if (r && a.ail_candidates && a.ail_candidates.email) out.push(applicantDraft(a, a.ail_candidates, r));
   }
   return out.slice(0, 25);
@@ -790,11 +818,11 @@ async function buildLinkedIn(emailDrafts) {
     if (!roles.has(c.role_id) || covered.has(c.role_id)) continue;
     const cur = best.get(c.role_id); if (!cur || HIRE_RANK(c.title) < HIRE_RANK(cur.title)) best.set(c.role_id, c);
   }
-  const out = [...best.values()].slice(0, 10).map(c => { const r = roles.get(c.role_id); return { kind: 'Hiring contact', table: 'ail_contacts', id: c.id, li: c.linkedin_url, name: c.name, who: `${c.title || ''} · ${c.company || ''}`, about: `${r.ref} ${r.title}`, note: contactNote(c, r) }; });
+  const out = [...best.values()].slice(0, 10).map(c => { const r = roles.get(c.role_id); return { kind: 'Hiring contact', table: 'ail_contacts', id: c.id, li: c.linkedin_url, phone: c.phone, phone_type: c.phone_type, name: c.name, who: `${c.title || ''} · ${c.company || ''}`, about: `${r.ref} ${r.title}`, note: contactNote(c, r) }; });
   const emailed = new Set(emailDrafts.filter(d => d.table === 'ail_sourced').map(d => d.id));
   const people = (await sb('ail_sourced?select=*&linkedin_url=not.is.null&email=is.null&li_drafted_at=is.null&status=in.(found,no_email)&fits=not.is.null&limit=300'))
     .filter(p => !emailed.has(p.id)).map(p => [p, (p.fits || []).filter(f => byRef.has(f.ref)).sort((x, y) => y.score - x.score)[0]]).filter(([, f]) => f && f.score >= 60).sort((x, y) => y[1].score - x[1].score).slice(0, 10);
-  for (const [p, f] of people) { const r = byRef.get(f.ref); out.push({ kind: 'Possible candidate', table: 'ail_sourced', id: p.id, li: p.linkedin_url, name: p.name, who: `${p.title || ''} · ${p.company || ''}`, about: `${r.ref} ${r.title} (fit ${f.score}/100)`, note: candidateNote(p, r) }); }
+  for (const [p, f] of people) { const r = byRef.get(f.ref); out.push({ kind: 'Possible candidate', table: 'ail_sourced', id: p.id, li: p.linkedin_url, phone: p.phone, phone_type: p.phone_type, name: p.name, who: `${p.title || ''} · ${p.company || ''}`, about: `${r.ref} ${r.title} (fit ${f.score}/100)`, note: candidateNote(p, r) }); }
   return out;
 }
 /* Outlook: put each draft straight into Ashish's Drafts folder (Microsoft Graph, the "DuaDesk Webinars" app; needs the Mail.ReadWrite application permission) */
@@ -836,6 +864,7 @@ const owaLink = d => `https://outlook.office.com/mail/deeplink/compose?to=${enco
 const mailtoLink = d => `mailto:${encodeURIComponent(d.to)}?subject=${encodeURIComponent(d.subject)}&body=${encodeURIComponent(d.body.replace(/\n/g, '\r\n'))}`;
 // an Outlook-ready draft file: X-Unsent makes Outlook open it as a new message ready to send
 const emlFile = d => Buffer.from(`To: ${d.name ? `"${String(d.name).replace(/"/g, '')}" ` : ''}<${d.to}>\r\nSubject: =?UTF-8?B?${Buffer.from(d.subject).toString('base64')}?=\r\nX-Unsent: 1\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${Buffer.from(d.body.replace(/\n/g, '\r\n')).toString('base64').replace(/.{76}/g, '$&\r\n')}\r\n`).toString('base64');
+const phoneLine = d => d.phone ? `<div style="font-size:13px;margin:2px 0 4px">📞 <a href="${esc(telLink(d.phone))}" style="color:#1f1d2b;text-decoration:none"><b>${esc(d.phone)}</b></a>${d.phone_type && d.phone_type !== 'other' ? ` <span style="color:#7a7394">(${esc(d.phone_type)})</span>` : ''}${d.phone_type !== 'work' ? ` · <a href="${esc(waLink(d.phone))}" style="color:#1a8f4c;font-weight:700">WhatsApp</a>` : ''}</div>` : '';
 async function digest(out, drafts = [], lis = []) {
   const { OWNER, SITE } = ENV();
   const newRoles = await sb(`ail_roles?select=ref,title,company,company_masked,location,source_url,source&status=eq.open&found_at=gte.${new Date(Date.now() - 26 * 3600000).toISOString()}&order=found_at.desc&limit=50`); // every role added since yesterday's brief: by the radar, by Claude's morning research or by hand
@@ -848,7 +877,7 @@ ${inOutlook ? `<p style="margin:0 0 10px;padding:10px 12px;background:#e8f5ec;bo
 <p style="font-size:13px;color:#7a7394;margin:0 0 10px">Click <b>Open in Outlook</b>: a new message opens in Outlook on the web (signed in as ashish@ashishduacorporation.com), already addressed and written. Check it and click <b>Send</b>. <b>Open in mail app</b> does the same in your computer's email app, if one is set up. Each draft is also attached as a file. Nothing has been sent.</p>
 ${drafts.map((d, i) => `<div style="border:1px solid #e4def7;border-radius:10px;padding:12px 14px;margin:0 0 10px">
 <div style="font-size:12px;color:#6b4fe0;font-weight:700;text-transform:uppercase;letter-spacing:1px">${i + 1}. ${esc(d.kind)} · ${esc(d.about)}</div>
-<div style="margin:4px 0"><b>${esc(d.name || '')}</b> <span style="color:#7a7394">${esc(d.who)}</span> · ${esc(d.to)}</div>
+<div style="margin:4px 0"><b>${esc(d.name || '')}</b> <span style="color:#7a7394">${esc(d.who)}</span> · ${esc(d.to)}</div>${phoneLine(d)}
 <div style="font-size:14px;margin:0 0 6px"><b>Subject:</b> ${esc(d.subject)}</div>
 <details><summary style="cursor:pointer;color:#6b4fe0;font-size:13px">Read the draft</summary><pre style="white-space:pre-wrap;font:13px/1.5 Arial,sans-serif;background:#f7f5fd;border-radius:8px;padding:10px;margin:6px 0 0">${esc(d.body)}</pre></details>
 <a href="${esc(owaLink(d))}" style="display:inline-block;margin-top:8px;background:#0f6cbd;color:#fff;text-decoration:none;border-radius:999px;padding:7px 14px;font-weight:700;font-size:13px">Open in Outlook</a> <a href="${esc(mailtoLink(d))}" style="display:inline-block;margin-top:8px;border:1px solid #8b6cff;color:#6b4fe0;text-decoration:none;border-radius:999px;padding:6px 13px;font-weight:700;font-size:13px">Open in mail app</a>${d.li ? ` <a href="${esc(d.li)}" style="display:inline-block;margin-top:8px;border:1px solid #0a66c2;color:#0a66c2;text-decoration:none;border-radius:999px;padding:6px 13px;font-weight:700;font-size:13px">LinkedIn profile</a>
@@ -863,7 +892,7 @@ ${(RR_PLACES[region] || []).slice(0, 2).map(p => `<li><a href="${esc(liPeople(`"
 ${lis.length ? `<b>${lis.length} ${lis.length === 1 ? 'person' : 'people'} to reach on LinkedIn (no RocketReach credit used)</b>
 ${lis.map((d, i) => `<div style="border:1px solid #d6e4f5;border-radius:10px;padding:10px 14px;margin:8px 0">
 <div style="font-size:12px;color:#0a66c2;font-weight:700;text-transform:uppercase;letter-spacing:1px">${i + 1}. ${esc(d.kind)} · ${esc(d.about)}</div>
-<div style="margin:4px 0"><b>${esc(d.name || '')}</b> <span style="color:#7a7394">${esc(d.who)}</span></div>
+<div style="margin:4px 0"><b>${esc(d.name || '')}</b> <span style="color:#7a7394">${esc(d.who)}</span></div>${phoneLine(d)}
 <div style="font-size:13px;background:#eef4fb;border-radius:8px;padding:8px 10px;margin:4px 0">${esc(d.note)}</div>
 <a href="${esc(d.li)}" style="display:inline-block;margin-top:4px;background:#0a66c2;color:#fff;text-decoration:none;border-radius:999px;padding:6px 13px;font-weight:700;font-size:13px">Open LinkedIn profile</a></div>`).join('')}` : ''}
 ${newRoles.filter(r => r.company && !/^(undisclosed|confidential)/i.test(r.company)).length ? `<b>Hiring teams for today's new roles</b><ul style="margin:6px 0 12px;padding-left:20px">${newRoles.filter(r => r.company && !/^(undisclosed|confidential)/i.test(r.company)).map(r => `<li><a href="${esc(liPeople(r.company.replace(/\s+(GmbH|AG|SE|Inc\.?|Ltd\.?|plc)\b.*$/i, '') + ' talent acquisition'))}" style="color:#0a66c2">${esc(r.ref)} ${esc(r.company)}: talent and HR people</a></li>`).join('')}</ul>` : ''}`;
@@ -953,6 +982,7 @@ const admin = {
   async rr_source(b) { const s = await rrSettings(); if (!s.key) throw E('Add your RocketReach API key in the webinar admin Settings first.'); const region = REGIONS.includes(b.region) ? b.region : REGIONS[0]; const r = await sourceLeaders(region, s.key); let fits = 0; if (ENV().AI_KEY) { try { fits = await fitSourced(); } catch (e) { r.note = 'Role suggestions need the AI: ' + e.message; } } return { ...r, fits }; },
   async rr_account() { const s = await rrSettings(); if (!s.key) throw E('Not connected'); const a = await rrReq(s.key, 'account'); const pick = {}; for (const k of Object.keys(a || {})) if (/credit|lookup|plan|state|status|limit|remaining|balance/i.test(k)) pick[k] = a[k]; return { account: pick }; },
   async rr_fits() { return { suggested: await fitSourced() }; },
+  async rr_phones(b) { return rrPhonesRefresh(b.list === 'contacts' ? 'ail_contacts' : 'ail_sourced', Math.min(25, +b.limit || 1)); },
   async rr_reveal(b) { return rrRevealRow(b.list === 'sourced' ? 'ail_sourced' : 'ail_contacts', b.id); },
   async rr_status(b) { const t = b.list === 'sourced' ? 'ail_sourced' : 'ail_contacts'; if (!['found', 'revealed', 'no_email', 'contacted', 'dismissed'].includes(b.status)) throw E('Unknown status'); const [row] = await sb(`${t}?id=eq.${+b.id}`, { method: 'PATCH', body: { status: b.status }, prefer: 'return=representation' }); return { row }; },
 };
