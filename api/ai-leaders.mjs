@@ -467,7 +467,7 @@ const rrProfiles = d => (Array.isArray(d) ? d : d.profiles || d.data || d.result
 const rrPerson = x => ({ rr_id: Number(x.id), name: clean(x.name || [x.first_name, x.last_name].filter(Boolean).join(' '), 120) || null, title: clean(x.current_title, 160) || null,
   company: clean(x.current_employer, 160) || null, location: clean(x.location || [x.city, x.region, x.country_code || x.country].filter(Boolean).join(', '), 120) || null, linkedin_url: validUrl(x.linkedin_url) ? clean(x.linkedin_url, 300) : null });
 async function rrReveal(key, rrId) {
-  let r = await rrReq(key, 'reveal', { query: '?id=' + enc(rrId) });
+  let r = await rrReq(key, 'reveal', { query: '?id=' + enc(rrId) + '&lookup_type=' + enc(process.env.RR_LOOKUP_TYPE || 'premium') });
   for (let k = 0; k < 8 && r && ['searching', 'progress', 'waiting', 'pending', 'queued', 'not queued'].includes(String(r.status).toLowerCase()); k++) {
     await new Promise(x => setTimeout(x, +(process.env.RR_POLL_MS || 3000)));
     const st = await rrReq(key, 'status', { query: '?ids=' + enc(r.id || rrId) });
@@ -562,7 +562,7 @@ async function rrRevealRow(table, id) {
   if (row.revealed_at) return { row, left: Math.max(0, s.limit - used) };
   if (used >= s.limit) throw E(`Today's RocketReach limit (${s.limit} reveals) is used up. Change it in the webinar admin Settings.`, 429);
   const r = await rrReveal(s.key, row.rr_id);
-  await sb('interactions', { method: 'POST', body: { kind: 'rr_lookup', data: { ail: table, id: row.id, status: r && r.status } }, prefer: 'return=minimal' });
+  await sb('interactions', { method: 'POST', body: { kind: 'rr_lookup', data: { ail: table, id: row.id, status: r && r.status, emails: (r && r.emails || []).length, grades: (r && r.emails || []).map(e => `${e.type || ''}:${e.grade || e.smtp_valid || ''}`).slice(0, 6), phones: (r && r.phones || []).length, keys: Object.keys(r || {}).slice(0, 30) } }, prefer: 'return=minimal' });
   const st = String(r && r.status || '').toLowerCase();
   if (['searching', 'progress', 'waiting', 'pending', 'queued', 'not queued'].includes(st)) throw E('RocketReach is still looking this person up. Try Reveal again in a minute.', 202);
   const best = rrBest(r, table === 'ail_sourced'); // candidates: a personal email is fine; hiring contacts: work email only
