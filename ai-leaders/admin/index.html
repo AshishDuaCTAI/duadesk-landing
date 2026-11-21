@@ -90,12 +90,13 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px 10px
   <div class="card">
    <div class="row"><b>Run the AI radar now</b><select id="rRegion"></select><button class="btn" id="rRun">Search for roles</button><span class="muted small">Takes 1–3 minutes. New roles go live with the company masked.</span></div>
   </div>
-  <details class="card" id="roleFormBox"><summary id="rfTitle">Add a client search (a role you hold the mandate for)</summary>
+  <details class="card" id="roleFormBox"><summary id="rfTitle">Add a role (a client search, or one you found on LinkedIn)</summary>
    <form id="rf">
     <input type="hidden" name="id">
     <div class="grid3" style="margin-top:10px">
      <label class="f">Title *<input name="title" required maxlength="160"></label>
      <label class="f">Level<select name="level"></select></label>
+     <label class="f">Type<select name="source"><option value="manual">Client search (you hold the mandate)</option><option value="radar">Market opportunity (found on LinkedIn or elsewhere)</option></select></label>
      <label class="f">Status<select name="status"><option value="open">Open (shown)</option><option value="hidden">Hidden</option><option value="closed">Closed</option></select></label>
      <label class="f">Company (private)<input name="company" maxlength="120"></label>
      <label class="f">Shown as (public)<input name="company_masked" maxlength="120" placeholder="A global automotive group, HQ in Germany"></label>
@@ -107,7 +108,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px 10px
     <label class="f" style="margin-top:10px">Public summary (never name the company)<textarea name="summary" rows="3" maxlength="700"></textarea></label>
     <label class="f" style="margin-top:10px">Must-haves (one per line, public)<textarea name="must_haves" rows="3"></textarea></label>
     <div class="grid2" style="margin-top:10px">
-     <label class="f">Source link (private)<input name="source_url" maxlength="600"></label>
+     <label class="f">Source link, e.g. the LinkedIn job (private)<input name="source_url" maxlength="600"></label>
      <label class="f">Private notes<input name="notes" maxlength="1000"></label>
     </div>
     <div class="row" style="margin-top:12px"><button class="btn" type="submit">Save role</button><button class="btn ghost" type="button" id="rfReset">Clear</button></div>
@@ -132,7 +133,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px 10px
  <section class="panel" id="p-runs" hidden>
   <div class="card"><div class="row"><b>The daily job</b><span class="muted small">Runs every morning at about 8:00 IST: finishes any pending matches, closes market roles older than 45 days, searches one region (in turn), matches new roles against your pool, finds hiring contacts and AI leaders on RocketReach, reveals a few emails within your limit, and emails you the morning brief with a ready draft for each person.</span><button class="btn" id="cronNow">Run it now</button></div></div>
   <div class="card"><div class="row"><b>Emails to reveal each morning</b><input type="number" id="autoN" min="0" max="20" style="width:80px"><button class="btn ghost small" id="autoSave">Save</button><span class="muted small">RocketReach credits the morning job may use to get email addresses for drafts: first the best hiring contact for each new role, then the strongest candidate matches. It never goes over the daily limit you share with the webinar app. 0 turns it off.</span></div></div>
-  <div class="card"><div class="row"><b>Drafts waiting for tomorrow's brief</b><button class="btn ghost small" id="drPrev">Preview</button><span class="muted small">Every morning the brief to ashish@ashishduacorporation.com lists one ready draft per person, with an Open draft link and an Outlook draft file. Nothing is ever sent for you.</span></div><div id="drList"></div></div>
+  <div class="card"><div class="row"><b>Drafts waiting for tomorrow's brief</b><button class="btn ghost small" id="drPrev">Preview</button><span class="muted small">Every morning the brief to ashish@ashishduacorporation.com lists one ready draft per person (Open draft link plus an Outlook draft file), a short LinkedIn note for each, people to reach on LinkedIn without a credit, and LinkedIn job searches for the day. Nothing is ever sent for you.</span></div><div id="drList"></div></div>
   <div id="runList"></div>
  </section>
 </main>
@@ -208,7 +209,7 @@ document.addEventListener('click',function(e){var t=e.target.closest('button');i
   if(t.dataset.rm){t.disabled=true;msg('Matching… this takes up to a minute.');call('rematch',{id:+t.dataset.rm}).then(function(){load('Matched again.');}).catch(function(x){msg(x.message);t.disabled=false;});}
   if(t.dataset.savenote){call('app_update',{id:+t.dataset.savenote,admin_note:document.querySelector('[data-note="'+t.dataset.savenote+'"]').value}).then(function(){msg('Note saved.');}).catch(function(x){msg(x.message);});}
   if(t.dataset.del){if(!confirm('Delete this person, their CV and all their applications? This cannot be undone.'))return;call('candidate_delete',{candidate_id:+t.dataset.del}).then(function(){load('Deleted.');}).catch(function(x){msg(x.message);});}
-  if(t.dataset.edit){var r=roleById(+t.dataset.edit),f=$('rf');['id','title','level','status','company','company_masked','industry','location','region','work_mode','summary','source_url','notes'].forEach(function(k){if(f[k])f[k].value=r[k]==null?'':r[k];});f.must_haves.value=(r.must_haves||[]).join('\n');$('roleFormBox').open=true;$('rfTitle').textContent='Edit '+r.ref;$('roleFormBox').scrollIntoView({behavior:'smooth'});}
+  if(t.dataset.edit){var r=roleById(+t.dataset.edit),f=$('rf');['id','title','level','status','company','company_masked','industry','location','region','work_mode','summary','source_url','notes'].forEach(function(k){if(f[k])f[k].value=r[k]==null?'':r[k];});f.must_haves.value=(r.must_haves||[]).join('\n');f.source.value=r.source;$('roleFormBox').open=true;$('rfTitle').textContent='Edit '+r.ref;$('roleFormBox').scrollIntoView({behavior:'smooth'});}
   if(t.dataset.rdel){if(!confirm('Delete this role? Applications stay, without the role link.'))return;call('role_delete',{id:+t.dataset.rdel}).then(function(){load('Role deleted.');}).catch(function(x){msg(x.message);});}
 });
 
@@ -226,9 +227,9 @@ function renderRoles(){
       '<p style="margin:8px 0 4px">'+esc(r.summary||'')+'</p>'+(r.source_url?'<a class="small" href="'+esc(r.source_url)+'" target="_blank" rel="noopener">Source: '+esc(r.source_title||r.source_url)+'</a>':'')+contactsBox(r)+'</div>';
   }).join(''):'<p class="muted">No roles here yet. Run the radar or add a client search.</p>';
 }
-$('rf').onsubmit=function(e){e.preventDefault();var f=e.target,b={};['id','title','level','status','company','company_masked','industry','location','region','work_mode','summary','source_url','notes'].forEach(function(k){b[k]=f[k].value;});b.id=+b.id||undefined;b.must_haves=f.must_haves.value.split('\n').map(function(x){return x.trim();}).filter(Boolean);
-  call('role_save',b).then(function(j){f.reset();$('rfTitle').textContent='Add a client search (a role you hold the mandate for)';load('Saved '+j.role.ref+'.');}).catch(function(x){msg(x.message);});};
-$('rfReset').onclick=function(){$('rf').reset();$('rf').id.value='';$('rfTitle').textContent='Add a client search (a role you hold the mandate for)';};
+$('rf').onsubmit=function(e){e.preventDefault();var f=e.target,b={};['id','title','level','status','source','company','company_masked','industry','location','region','work_mode','summary','source_url','notes'].forEach(function(k){b[k]=f[k].value;});b.id=+b.id||undefined;b.must_haves=f.must_haves.value.split('\n').map(function(x){return x.trim();}).filter(Boolean);
+  call('role_save',b).then(function(j){f.reset();$('rfTitle').textContent='Add a role (a client search, or one you found on LinkedIn)';load('Saved '+j.role.ref+'.');}).catch(function(x){msg(x.message);});};
+$('rfReset').onclick=function(){$('rf').reset();$('rf').id.value='';$('rfTitle').textContent='Add a role (a client search, or one you found on LinkedIn)';};
 $('rRun').onclick=function(){var b=this;b.disabled=true;msg('Searching '+$('rRegion').value+'… this takes 1–3 minutes.');call('radar_run',{region:$('rRegion').value}).then(function(j){b.disabled=false;load('Radar finished: '+j.added+' new role(s) added, '+j.skipped+' skipped, '+j.pool+' pool match(es).');}).catch(function(x){b.disabled=false;msg(x.message);});};
 
 /* RocketReach: hiring contacts and sourcing */
@@ -244,7 +245,7 @@ function contactsBox(r){
   var cs=(D.contacts||[]).filter(function(c){return c.role_id===r.id;});
   var undisclosed=!r.company||/^(undisclosed|confidential)/i.test(r.company);
   return '<details style="margin-top:8px"><summary>Hiring contacts ('+cs.length+')</summary>'+(cs.length?'<table><tbody>'+cs.map(function(c){return personLine(c,'contacts');}).join('')+'</tbody></table>':'<p class="muted small">'+(undisclosed?'The company is not named for this role.':(r.contacts_searched_at?'No HR, talent or technology leaders found on RocketReach for this company.':'Not searched yet.'))+'</p>')+
-    (undisclosed?'':'<button class="btn ghost small" data-findc="'+r.id+'">'+(r.contacts_searched_at?'Search again':'Find hiring contacts (free)')+'</button>')+'</details>';
+    (undisclosed?'':'<button class="btn ghost small" data-findc="'+r.id+'">'+(r.contacts_searched_at?'Search again':'Find hiring contacts (free)')+'</button> <a class="btn ghost small" target="_blank" rel="noopener" href="https://www.linkedin.com/search/results/people/?keywords='+encodeURIComponent(r.company.replace(/\s+(GmbH|AG|SE|Inc\.?|Ltd\.?|plc)\b.*$/i,'')+' talent acquisition')+'">Hiring team on LinkedIn ↗</a>')+'</details>';
 }
 ['sStatus','sRegionF','sFitOnly'].forEach(function(id){$(id).onchange=renderSrc;});
 function renderSrc(){
@@ -271,7 +272,8 @@ function renderRuns(){
   $('runList').innerHTML=D.runs.length?'<div class="card"><table><thead><tr><th>Started</th><th>Kind</th><th>Result</th></tr></thead><tbody>'+D.runs.map(function(r){return '<tr><td class="small">'+when(r.started_at)+'</td><td>'+esc(r.kind)+'</td><td class="small">'+esc(JSON.stringify(r.result||{}))+'</td></tr>';}).join('')+'</tbody></table></div>':'<p class="muted">The job has not run yet.</p>';
 }
 $('autoSave').onclick=function(){call('auto_reveals',{value:$('autoN').value}).then(function(j){msg('Saved: up to '+j.value+' reveals each morning.');}).catch(function(x){msg(x.message);});};
-$('drPrev').onclick=function(){call('drafts_preview').then(function(j){$('drList').innerHTML=j.drafts.length?j.drafts.map(function(d){return '<div class="card" style="margin:10px 0 0"><div class="small muted">'+esc(d.kind)+' · '+esc(d.about)+'</div><b>'+esc(d.name||'')+'</b> <span class="muted small">'+esc(d.who)+' · '+esc(d.to)+'</span><div class="small" style="margin:4px 0"><b>Subject:</b> '+esc(d.subject)+'</div><details><summary>Read</summary><pre style="white-space:pre-wrap;font:13px/1.5 Inter,sans-serif">'+esc(d.body)+'</pre></details><a class="btn small" href="'+esc(d.mailto)+'">Open draft</a></div>';}).join(''):'<p class="muted small">No drafts waiting. Drafts appear once people have revealed emails: hiring contacts for open roles, candidates suggested for a role, and applicants who scored 70 or more.</p>';}).catch(function(x){msg(x.message);});};
+$('drPrev').onclick=function(){call('drafts_preview').then(function(j){$('drList').innerHTML=j.drafts.length?j.drafts.map(function(d){return '<div class="card" style="margin:10px 0 0"><div class="small muted">'+esc(d.kind)+' · '+esc(d.about)+'</div><b>'+esc(d.name||'')+'</b> <span class="muted small">'+esc(d.who)+' · '+esc(d.to)+'</span><div class="small" style="margin:4px 0"><b>Subject:</b> '+esc(d.subject)+'</div><details><summary>Read</summary><pre style="white-space:pre-wrap;font:13px/1.5 Inter,sans-serif">'+esc(d.body)+'</pre></details><a class="btn small" href="'+esc(d.mailto)+'">Open draft</a></div>';}).join(''):'<p class="muted small">No email drafts waiting. Drafts appear once people have revealed emails: hiring contacts for open roles, candidates suggested for a role, and applicants who scored 70 or more.</p>';
+  $('drList').innerHTML+=(j.linkedin&&j.linkedin.length)?'<h4 style="margin:14px 0 4px">LinkedIn (no credit used)</h4>'+j.linkedin.map(function(d){return '<div class="card" style="margin:8px 0 0"><div class="small muted">'+esc(d.kind)+' · '+esc(d.about)+'</div><b>'+esc(d.name||'')+'</b> <span class="muted small">'+esc(d.who)+'</span><div class="small" style="margin:6px 0;background:#0e2440;border-radius:8px;padding:8px">'+esc(d.note)+'</div><a class="btn small" target="_blank" rel="noopener" href="'+esc(d.li)+'">LinkedIn profile ↗</a></div>';}).join(''):'';}).catch(function(x){msg(x.message);});};
 $('cronNow').onclick=function(){var b=this;b.disabled=true;msg('Running the daily job… up to 4 minutes.');call('cron_now').then(function(j){b.disabled=false;load('Done: '+(j.radar?j.radar.added+' new role(s), ':'')+j.matched+' match(es), '+j.pool+' pool match(es)'+(j.errors&&j.errors.length?'. Errors: '+j.errors.join('; '):'.'));}).catch(function(x){b.disabled=false;msg(x.message);});};
 
 if(KEY)call('desk').then(start).catch(function(){logout();});
