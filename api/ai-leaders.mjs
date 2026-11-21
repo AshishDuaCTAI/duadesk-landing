@@ -625,11 +625,34 @@ async function cronRun() {
 /* ---------- the morning drafts: one email per person, for Ashish to open and send from his own mailbox ---------- */
 const SIGN = `Warm regards,
 
-Ashish Dua
+**Ashish Dua**
 Founder, DuaDesk · AI Leaders by DuaDesk
 Ashish Dua Consulting Corporation (Canada)
 ashish@ashishduacorporation.com · +91 98995 73717
 duadesk.com/ai-leaders`;
+/* drafts are written once with light markup ("## Heading", "**bold**", "• bullet") and come out as a formatted Outlook email plus a plain-text copy */
+const mdText = s => s.replace(/^## (.+)$/gm, (_, h) => h.toUpperCase()).replace(/\*\*(.+?)\*\*/g, '$1');
+const mdInline = t => esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+  .replace(/ashish@ashishduacorporation\.com/g, '<a href="mailto:ashish@ashishduacorporation.com" style="color:#5b3fd0">ashish@ashishduacorporation.com</a>')
+  .replace(/duadesk\.com\/ai-leaders/g, '<a href="https://duadesk.com/ai-leaders" style="color:#5b3fd0">duadesk.com/ai-leaders</a>');
+function mdHtml(src) {
+  const out = []; let para = [], list = [];
+  const flush = () => {
+    if (para.length) { out.push(`<p style="margin:0 0 12px">${para.map(mdInline).join('<br>')}</p>`); para = []; }
+    if (list.length) { out.push(`<ul style="margin:0 0 12px;padding-left:22px">${list.map(x => `<li style="margin:0 0 6px">${mdInline(x)}</li>`).join('')}</ul>`); list = []; }
+  };
+  for (const line of src.split('\n')) {
+    if (!line.trim()) { flush(); continue; }
+    if (line.startsWith('## ')) { flush(); out.push(`<p style="margin:18px 0 6px;padding-bottom:3px;border-bottom:1px solid #e3ddf7;color:#4b2fb5;font-weight:bold;font-size:12pt">${esc(line.slice(3))}</p>`); continue; }
+    if (line.startsWith('• ')) { if (para.length) { const p = para; para = []; out.push(`<p style="margin:0 0 6px">${p.map(mdInline).join('<br>')}</p>`); } list.push(line.slice(2)); continue; }
+    if (list.length) flush();
+    para.push(line);
+  }
+  flush();
+  return `<div style="font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:11pt;line-height:1.45;color:#1f1d2b">${out.join('')}</div>`;
+}
+const fmt = src => ({ body: mdText(src), html: mdHtml(src) });
+const aOr = t => /^[aeiou]/i.test(String(t || '').trim()) ? 'an' : 'a';
 const firstName = n => (clean(n, 120).split(' ')[0] || '').replace(/[^\p{L}\-']/gu, '') || 'there';
 const HIRE_RANK = t => /talent|recruit|executive search/i.test(t || '') ? 0 : /chro|human|people|\bhr\b|personal/i.test(t || '') ? 1 : /technology|cto|information|cio|digital|data/i.test(t || '') ? 2 : 3;
 async function autoSettings() {
@@ -664,12 +687,12 @@ const liPeople = q => `https://www.linkedin.com/search/results/people/?keywords=
 const liClip = (t, n = 300) => t.length <= n ? t : t.slice(0, n - 1).replace(/[\s,.;:]+\S*$/, '') + '…';
 const short = s => String(s || '').replace(/^A /, 'a ').replace(/\s*\(.*?\)\s*/g, ' ').trim();
 const contactNote = (c, r) => {
-  const head = `Hi ${firstName(c.name)}, I saw ${coName(r) || 'your team'} is hiring a ${r.title}. I run AI Leaders by DuaDesk, a search practice only for senior AI leadership roles.`;
+  const head = `Hi ${firstName(c.name)}, I saw ${coName(r) || 'your team'} is hiring ${aOr(r.title)} ${r.title}. I run AI Leaders by DuaDesk, a search practice only for senior AI leadership roles.`;
   const full = `${head} Having built AI products myself (ex-Head of IT, Microsoft India), I assess candidates on what they have delivered. Happy to share a confidential slate.`;
   return full.length <= 300 ? full : liClip(`${head} Happy to share a confidential slate of proven candidates.`);
 };
 const candidateNote = (p, r) => { // the role only, never the employer
-  const base = `Hi ${firstName(p.name)}, I'm running a confidential search for a ${r.title}${r.location ? ' in ' + r.location.split(',')[0] : ''} and your background stood out.`;
+  const base = `Hi ${firstName(p.name)}, I'm running a confidential search for ${aOr(r.title)} ${r.title}${r.location ? ' in ' + r.location.split(',')[0] : ''} and your background stood out.`;
   const full = `${base} I build AI products myself (ex-Head of IT, Microsoft India), so I understand the work. Open to a short call? Ashish Dua, AI Leaders by DuaDesk`;
   return full.length <= 300 ? full : liClip(`${base} Open to a short call? Ashish Dua, AI Leaders by DuaDesk`);
 };
@@ -680,52 +703,65 @@ function contactDraft(c, r) {
   const co = coName(r) || 'your company';
   return { kind: 'Hiring contact', table: 'ail_contacts', id: c.id, to: c.email, li: c.linkedin_url, note: contactNote(c, r), name: c.name, who: `${c.title || ''} · ${c.company || r.company || ''}`, about: `${r.ref} ${r.title}`,
     subject: `${r.title}: a shortlist of proven AI leaders`,
-    body: `Dear ${firstName(c.name)},
+    ...fmt(`Dear ${firstName(c.name)},
 
-I saw that ${co} is hiring a ${r.title}${where}. I run AI Leaders by DuaDesk, a search practice that focuses only on senior AI leadership roles, and I would like to help you fill it.
+I saw that **${co} is hiring ${aOr(r.title)} ${r.title}**${where}. I run **AI Leaders by DuaDesk**, a search practice that focuses only on senior AI leadership roles, and I would like to help you fill it.
 
-Roles like this are hard to hire for. Many candidates have AI on their CV; far fewer have taken AI into production, shown measurable value, built a team and kept it well governed. That is what we look for, and how we work:
-• Role first: we start by agreeing what the ${r.title} must achieve in the first 12 to 24 months.
-• Evidence, not titles: every candidate is assessed on systems delivered, value created, teams built and risk managed.
-• A short, confidential slate, with a written view of each candidate's strengths and risks.
-• Reach across India, Europe, the Middle East and North America, including strong people who are not actively looking.
+## About the role
+Roles like this are hard to hire for. Many candidates have AI on their CV; far fewer have **taken AI into production, shown measurable value, built a team and kept it well governed**. That is what we look for.
 
-What makes our assessment different is that I build AI myself. Over the last three years I have designed and shipped 13 live AI products at DuaDesk, across finance, procurement, audit and banking. Before that I led enterprise technology as Head of IT at Microsoft India and Technical Director at KPMG India, and I hold an Executive PG Certification in Generative AI and Machine Learning from IIT Roorkee. So when a candidate describes their work, I can tell real delivery from slideware. I am a Canadian citizen, and we work through my firm, Ashish Dua Consulting Corporation, registered in Canada.
+## How we work
+• **Role first:** we start by agreeing what the ${r.title} must achieve in the first 12 to 24 months.
+• **Evidence, not titles:** every candidate is assessed on systems delivered, value created, teams built and risk managed.
+• **A short, confidential slate**, with a written view of each candidate's strengths and risks.
+• **Global reach:** India, Europe, the Middle East and North America, including strong people who are not actively looking and leaders open to relocation.
 
-Would a 20-minute call next week be useful to talk through the role? There is no commitment in that first conversation.
+## About AI Leaders by DuaDesk
+What makes our assessment different is that **I build AI myself**. Over the last three years I have designed and shipped **13 live AI products at DuaDesk**, across finance, procurement, audit and banking. Before that I led enterprise technology as **Head of IT at Microsoft India** and **Technical Director at KPMG India**, and I hold an **Executive PG Certification in Generative AI and Machine Learning from IIT Roorkee**. So when a candidate describes their work, I can tell real delivery from slideware. I am a Canadian citizen, and we work through my firm, **Ashish Dua Consulting Corporation, registered in Canada**.
+
+## Next step
+Would a **20-minute call next week** be useful to talk through the role? There is no commitment in that first conversation.
 
 ${SIGN}
 
-P.S. If this is not relevant, just let me know and I will not follow up.` };
+P.S. If this is not relevant, just let me know and I will not follow up.`) };
 }
-function candidateDraft(p, r, fit) {
+function candidateDraft(p, r, fit) { // the role only, never the employer's name
   const at = [p.title, p.company].filter(Boolean).join(' at ');
   return { kind: 'Possible candidate', table: 'ail_sourced', id: p.id, to: p.email, li: p.linkedin_url, note: candidateNote(p, r), name: p.name, who: `${p.title || ''} · ${p.company || ''}`, about: `${r.ref} ${r.title} (fit ${fit.score}/100)`,
     subject: `A confidential ${r.title} role`,
-    body: `Dear ${firstName(p.name)},
+    ...fmt(`Dear ${firstName(p.name)},
 
-I run AI Leaders by DuaDesk, a search practice that focuses only on senior AI leadership roles. ${at ? `Your work as ${at} stood out to me, and ` : ''}I am working on a confidential search for a ${r.title}${r.location ? `, based in ${r.location},` : ''} that I think could be a strong fit for your background.
+I run **AI Leaders by DuaDesk**, a search practice that focuses only on senior AI leadership roles. ${at ? `Your work as ${at} stood out to me, and ` : ''}I am working on a confidential search that I think could be a strong fit for your background.
 
-${r.summary ? `The role in brief: ${r.summary}\n\n` : ''}A little about me: I build AI myself. Over the last three years I have designed and shipped 13 live AI products at DuaDesk, across finance, procurement, audit and banking. Before that I led enterprise technology as Head of IT at Microsoft India and Technical Director at KPMG India, and I hold an Executive PG Certification in Generative AI and Machine Learning from IIT Roorkee. So I understand the work you have done, and I can present it to employers for what it is: real delivery, not just a title. I am a Canadian citizen, and we work through my firm, Ashish Dua Consulting Corporation, registered in Canada.
+## About the role
+**${r.title}**${r.location ? `, based in **${r.location}**` : ''} (reference ${r.ref})${r.summary ? `
+${r.summary}` : ''}
 
-If you are open to a conversation, I would be glad to share more in confidence. You can also see the role (reference ${r.ref}) at duadesk.com/ai-leaders.
+## About me and AI Leaders by DuaDesk
+**I build AI myself.** Over the last three years I have designed and shipped **13 live AI products at DuaDesk**, across finance, procurement, audit and banking. Before that I led enterprise technology as **Head of IT at Microsoft India** and **Technical Director at KPMG India**, and I hold an **Executive PG Certification in Generative AI and Machine Learning from IIT Roorkee**. So I understand the work you have done, and I can present it to employers for what it is: real delivery, not just a title. I am a Canadian citizen, and we work through my firm, **Ashish Dua Consulting Corporation, registered in Canada**.
 
-Would you have 20 minutes for a call this week or next?
+## Next step
+If you are open to a conversation, I would be glad to share more **in confidence**. Would you have **20 minutes for a call** this week or next? You can also see the role (reference ${r.ref}) at duadesk.com/ai-leaders.
 
 ${SIGN}
 
-P.S. If you would rather not hear from me about roles, just say so and I will not write again.` };
+P.S. If you would rather not hear from me about roles, just say so and I will not write again.`) };
 }
 function applicantDraft(a, c, r) {
   return { kind: 'Applicant (strong match)', table: 'ail_applications', id: a.id, to: c.email, li: c.linkedin, note: applicantNote(c, r), name: c.name, who: `${c.current_title || ''} · ${c.current_company || ''}`, about: `${r.ref} ${r.title} (fit ${a.score}/100)`,
     subject: `Your application: ${r.title} (${r.ref})`,
-    body: `Dear ${firstName(c.name)},
+    ...fmt(`Dear ${firstName(c.name)},
 
-Thank you for applying for the ${r.title} role (${r.ref}). I have read your profile and would like to talk it through with you before anything goes further.
+Thank you for applying through **AI Leaders by DuaDesk**. I have read your profile and would like to talk it through with you before anything goes further.
 
-Could we have a 30-minute call this week? Please send me two or three times that suit you.
+## About the role
+**${r.title}** (reference ${r.ref})
 
-${SIGN}` };
+## Next step
+Could we have a **30-minute call this week**? Please send me two or three times that suit you.
+
+${SIGN}`) };
 }
 async function buildDrafts() {
   const roles = new Map((await sb('ail_roles?select=id,ref,title,company,company_masked,location,summary,status&limit=1000')).map(r => [r.id, r]));
@@ -789,7 +825,7 @@ async function outlookDrafts(drafts) {
   const box = encodeURIComponent(MS().mailbox);
   for (const d of drafts) {
     try {
-      await msGraph(`/users/${box}/messages`, { method: 'POST', body: { subject: d.subject, body: { contentType: 'Text', content: d.body }, toRecipients: [{ emailAddress: { address: d.to, ...(d.name ? { name: d.name } : {}) } }], categories: ['AI Leaders'] } });
+      await msGraph(`/users/${box}/messages`, { method: 'POST', body: { subject: d.subject, body: d.html ? { contentType: 'HTML', content: d.html } : { contentType: 'Text', content: d.body }, toRecipients: [{ emailAddress: { address: d.to, ...(d.name ? { name: d.name } : {}) } }], categories: ['AI Leaders'] } });
       out.created++;
     } catch (e) { out.error = e.message; if (e.status === 403 || e.status === 503) break; }
   }
