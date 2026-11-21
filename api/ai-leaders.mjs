@@ -475,9 +475,9 @@ async function rrReveal(key, rrId) {
   }
   return r || {};
 }
-function rrBest(p, personal) {
+function rrBest(p, mode) { // mode: 'work' for hiring contacts, 'personal' for candidates (never contact a candidate at their employer)
   const score = e => { const g = String(e.grade || '').toUpperCase(); return g === 'A' ? 3 : g === 'A-' ? 2 : String(e.smtp_valid || '').toLowerCase() === 'valid' ? 1 : 0; };
-  const ok = (p.emails || []).filter(e => e && e.email && score(e) > 0 && (personal || e.type !== 'personal')).sort((a, b) => (b.type === 'professional') - (a.type === 'professional') || score(b) - score(a));
+  const ok = (p.emails || []).filter(e => e && e.email && score(e) > 0 && (mode === 'personal' ? e.type === 'personal' : e.type !== 'personal')).sort((a, b) => (b.type === 'professional') - (a.type === 'professional') || score(b) - score(a));
   return { email: ok[0] ? String(ok[0].email).toLowerCase() : null, grade: ok[0] ? (ok[0].grade || 'valid') : null, phone: (p.phones || []).map(x => x.number).find(Boolean) || null };
 }
 const companyKey = c => String(c || '').toLowerCase().replace(/&/g, ' and ').replace(/\b(pvt|private|ltd|limited|llp|inc|co|kg|ag|se|gmbh|plc|company|corp|corporation|group|the)\b\.?/g, ' ').replace(/[^a-z0-9]+/g, ' ').trim();
@@ -565,7 +565,7 @@ async function rrRevealRow(table, id) {
   await sb('interactions', { method: 'POST', body: { kind: 'rr_lookup', data: { ail: table, id: row.id, status: r && r.status, emails: (r && r.emails || []).length, grades: (r && r.emails || []).map(e => `${e.type || ''}:${e.grade || e.smtp_valid || ''}`).slice(0, 6), phones: (r && r.phones || []).length, keys: Object.keys(r || {}).slice(0, 30) } }, prefer: 'return=minimal' });
   const st = String(r && r.status || '').toLowerCase();
   if (['searching', 'progress', 'waiting', 'pending', 'queued', 'not queued'].includes(st)) throw E('RocketReach is still looking this person up. Try Reveal again in a minute.', 202);
-  const best = rrBest(r, table === 'ail_sourced'); // candidates: a personal email is fine; hiring contacts: work email only
+  const best = rrBest(r, table === 'ail_sourced' ? 'personal' : 'work'); // candidates: personal email only; hiring contacts: work email only
   const [upd] = await sb(`${table}?id=eq.${row.id}`, { method: 'PATCH', body: { email: best.email, phone: best.phone, grade: best.grade, status: best.email || best.phone ? 'revealed' : 'no_email', revealed_at: new Date().toISOString(), linkedin_url: row.linkedin_url || (validUrl(r.linkedin_url) ? r.linkedin_url : null) }, prefer: 'return=representation' });
   return { row: upd, left: s.limit - used - 1 };
 }
@@ -744,7 +744,7 @@ async function buildLinkedIn(emailDrafts) {
   }
   const out = [...best.values()].slice(0, 10).map(c => { const r = roles.get(c.role_id); return { kind: 'Hiring contact', table: 'ail_contacts', id: c.id, li: c.linkedin_url, name: c.name, who: `${c.title || ''} · ${c.company || ''}`, about: `${r.ref} ${r.title}`, note: contactNote(c, r) }; });
   const emailed = new Set(emailDrafts.filter(d => d.table === 'ail_sourced').map(d => d.id));
-  const people = (await sb('ail_sourced?select=*&linkedin_url=not.is.null&email=is.null&li_drafted_at=is.null&status=eq.found&fits=not.is.null&limit=300'))
+  const people = (await sb('ail_sourced?select=*&linkedin_url=not.is.null&email=is.null&li_drafted_at=is.null&status=in.(found,no_email)&fits=not.is.null&limit=300'))
     .filter(p => !emailed.has(p.id)).map(p => [p, (p.fits || []).filter(f => byRef.has(f.ref)).sort((x, y) => y.score - x.score)[0]]).filter(([, f]) => f && f.score >= 60).sort((x, y) => y[1].score - x[1].score).slice(0, 10);
   for (const [p, f] of people) { const r = byRef.get(f.ref); out.push({ kind: 'Possible candidate', table: 'ail_sourced', id: p.id, li: p.linkedin_url, name: p.name, who: `${p.title || ''} · ${p.company || ''}`, about: `${r.ref} ${r.title} (fit ${f.score}/100)`, note: candidateNote(p, r) }); }
   return out;
@@ -891,6 +891,14 @@ const admin = {
   async cron_now() { return cronRun(); },
   async auto_reveals(b) { const n = Math.max(0, Math.min(20, Math.round(+b.value) || 0)); await sb('settings?on_conflict=key', { method: 'POST', body: [{ key: 'ail_auto_reveals', value: String(n) }], prefer: 'resolution=merge-duplicates,return=minimal' }); return { value: n }; },
   async brief_now() { const d = await buildDrafts(); const l = await buildLinkedIn(d); const sent = await digest({ matched: 0, radar: null, pool: [], closed: 0, contacts: 0, sourced: null, sourced_fits: 0, errors: [] }, d, l); return { sent: !!sent, id: sent && sent.id, drafts: d.length, linkedin: l.length }; },
+  async outlook_remove(b) {
+    const to = new Set((Array.isArray(b.to) ? b.to : []).map(normEmail).filter(Boolean)); if (!to.size) throw E('Say which addresses.');
+    const box = encodeURIComponent(MS().mailbox);
+    const list = await msGraph(`/users/${box}/mailFolders/drafts/messages?$select=id,subject,toRecipients,categories&$top=100`);
+    let removed = 0;
+    for (const m of list.value || []) if ((m.categories || []).includes('AI Leaders') && (m.toRecipients || []).some(r => to.has(normEmail(r.emailAddress && r.emailAddress.address)))) { await msGraph(`/users/${box}/messages/${encodeURIComponent(m.id)}`, { method: 'DELETE' }); removed++; }
+    return { removed };
+  },
   async outlook_test() { const f = await msGraph(`/users/${encodeURIComponent(MS().mailbox)}/mailFolders/drafts?$select=displayName,totalItemCount`); return { ok: true, mailbox: MS().mailbox, folder: f.displayName, items: f.totalItemCount }; },
   async drafts_preview() { const d = await buildDrafts(); return { drafts: d.map(x => ({ ...x, mailto: mailtoLink(x), owa: owaLink(x) })), linkedin: await buildLinkedIn(d) }; },
   async rr_contacts(b) { if (b.refresh) await sb(`ail_contacts?role_id=eq.${+b.role_id}&revealed_at=is.null&status=eq.found`, { method: 'DELETE' }); const s = await rrSettings(); if (!s.key) throw E('Add your RocketReach API key in the webinar admin Settings first.'); const [r] = await sb(`ail_roles?select=id,ref,company,location&id=eq.${+b.role_id}`); if (!r) throw E('Role not found', 404); if (undisclosed(r.company)) throw E('The company is not named for this role, so there is no one to search for.'); return { found: await findContacts(r, s.key) }; },
