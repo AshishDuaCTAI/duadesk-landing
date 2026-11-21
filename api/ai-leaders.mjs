@@ -424,10 +424,142 @@ ${people.map(p => `#${p.id}: ${p.current_title || ''} at ${p.current_company || 
   return out;
 }
 
+/* ---------- RocketReach: hiring contacts for each role, and AI leaders to source ----------
+   Uses the key and daily reveal limit saved in the webinar app's Settings (table "settings").
+   Searching is free; revealing an email costs 1 credit and only happens when Ashish clicks Reveal.
+   Reveals are logged as interactions kind 'rr_lookup', so they share the webinar app's daily limit. */
+const RR = 'https://api.rocketreach.co';
+const RR_PATHS = {
+  search: ['/v2/api/search', '/api/v2/person/search'],
+  reveal: ['/v2/api/lookupProfile', '/api/v2/person/lookup'],
+  status: ['/v2/api/checkStatus', '/api/v2/person/checkStatus'] };
+const HIRING_TITLES = ['Chief Human Resources Officer', 'CHRO', 'Chief People Officer', 'Global Head of Talent Acquisition', 'Head of Talent Acquisition', 'Head of Executive Search', 'Chief Technology Officer', 'Chief Information Officer', 'Chief Digital Officer', 'Chief Data Officer'];
+const LEADER_TITLES = ['Chief AI Officer', 'Chief Artificial Intelligence Officer', 'Chief Data and AI Officer', 'Head of AI', 'Head of Artificial Intelligence', 'Head of Generative AI', 'VP Artificial Intelligence', 'VP AI', 'Director of AI', 'Head of AI Platform', 'Head of Machine Learning'];
+const RR_PLACES = {
+  'India': ['India'], 'Germany, the Netherlands and wider Europe': ['Germany', 'Netherlands', 'Switzerland', 'France'], 'the United Kingdom': ['United Kingdom'],
+  'the UAE and Saudi Arabia': ['United Arab Emirates', 'Saudi Arabia'], 'Singapore, Japan and Asia-Pacific': ['Singapore', 'Japan', 'Australia'], 'the United States and Canada': ['United States', 'Canada'] };
+async function rrSettings() {
+  const rows = await sb(`settings?select=key,value&key=in.(rocketreach_api_key,rocketreach_daily_limit)`).catch(() => []);
+  const s = Object.fromEntries(rows.map(r => [r.key, r.value || '']));
+  return { key: s.rocketreach_api_key || '', limit: s.rocketreach_daily_limit === '' || s.rocketreach_daily_limit == null ? 20 : Math.max(0, +s.rocketreach_daily_limit || 0) };
+}
+const istMidnight = () => { const d = new Date(Date.now() + 5.5 * 3600000); return new Date(d.toISOString().slice(0, 10) + 'T00:00:00+05:30').toISOString(); };
+async function rrUsedToday() { return (await sb(`interactions?select=id&kind=eq.rr_lookup&created_at=gte.${istMidnight()}&limit=1000`)).length; }
+async function rrReq(key, kind, { query = '', body } = {}) {
+  let last = '';
+  for (const p of RR_PATHS[kind]) {
+    let res;
+    try {
+      res = await fetch(RR + p + query, { method: body ? 'POST' : 'GET', signal: AbortSignal.timeout(20000),
+        headers: { 'Api-Key': key, Accept: 'application/json', ...(body ? { 'content-type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined });
+    } catch { throw E('RocketReach did not answer in time. Try again.', 504); }
+    if (res.status === 404 || res.status === 405) { last = res.status; continue; }
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 429) throw E('RocketReach is busy. Try again in a minute.', 429);
+    if (!res.ok) throw E('RocketReach: ' + (data.detail || data.message || data.error || res.status), res.status === 401 || res.status === 403 ? 400 : 502);
+    return data;
+  }
+  if (kind === 'reveal') return { status: 'failed', emails: [] };
+  throw E('RocketReach endpoint not found (' + last + ')', 502);
+}
+const rrProfiles = d => (Array.isArray(d) ? d : d.profiles || d.data || d.results || []).filter(x => x && x.id);
+const rrPerson = x => ({ rr_id: Number(x.id), name: clean(x.name || [x.first_name, x.last_name].filter(Boolean).join(' '), 120) || null, title: clean(x.current_title, 160) || null,
+  company: clean(x.current_employer, 160) || null, location: clean(x.location || [x.city, x.region, x.country_code || x.country].filter(Boolean).join(', '), 120) || null, linkedin_url: validUrl(x.linkedin_url) ? clean(x.linkedin_url, 300) : null });
+async function rrReveal(key, rrId) {
+  let r = await rrReq(key, 'reveal', { query: '?id=' + enc(rrId) });
+  for (let k = 0; k < 4 && r && ['searching', 'progress', 'waiting', 'pending'].includes(String(r.status)); k++) {
+    await new Promise(x => setTimeout(x, +(process.env.RR_POLL_MS || 3000)));
+    const st = await rrReq(key, 'status', { query: '?ids=' + enc(r.id || rrId) });
+    r = Array.isArray(st) ? st[0] : (st.profiles ? st.profiles[0] : st);
+  }
+  return r || {};
+}
+function rrBest(p, personal) {
+  const score = e => { const g = String(e.grade || '').toUpperCase(); return g === 'A' ? 3 : g === 'A-' ? 2 : String(e.smtp_valid || '').toLowerCase() === 'valid' ? 1 : 0; };
+  const ok = (p.emails || []).filter(e => e && e.email && score(e) > 0 && (personal || e.type !== 'personal')).sort((a, b) => (b.type === 'professional') - (a.type === 'professional') || score(b) - score(a));
+  return { email: ok[0] ? String(ok[0].email).toLowerCase() : null, grade: ok[0] ? (ok[0].grade || 'valid') : null, phone: (p.phones || []).map(x => x.number).find(Boolean) || null };
+}
+const companyKey = c => String(c || '').toLowerCase().replace(/&/g, ' and ').replace(/\b(pvt|private|ltd|limited|llp|inc|co|kg|ag|se|gmbh|plc|company|corp|corporation|group|the)\b\.?/g, ' ').replace(/[^a-z0-9]+/g, ' ').trim();
+function sameCompany(a, b) {
+  const x = companyKey(a), y = companyKey(b); if (!x || !y) return false;
+  if (x === y) return true;
+  const [s, l] = x.length < y.length ? [x, y] : [y, x];
+  return (l.startsWith(s + ' ') && s.length >= 4);
+}
+const undisclosed = c => !c || /^(undisclosed|confidential)\b/i.test(c);
+
+// hiring contacts at a role's company (free search)
+async function findContacts(role, key) {
+  await sb(`ail_roles?id=eq.${role.id}`, { method: 'PATCH', body: { contacts_searched_at: new Date().toISOString() } });
+  if (undisclosed(role.company)) return 0;
+  const name = role.company.replace(/\b(GmbH\s*&\s*Co\.?\s*KG|GmbH|AG|SE|Inc\.?|Ltd\.?|plc)\b/gi, '').replace(/\s+/g, ' ').trim();
+  let res = rrProfiles(await rrReq(key, 'search', { body: { query: { current_employer: ['"' + name + '"'], current_title: HIRING_TITLES }, order_by: 'popularity', page_size: 10, start: 1 } }));
+  const people = res.map(rrPerson).filter(p => sameCompany(p.company, role.company)).slice(0, 4);
+  if (!people.length) return 0;
+  const rows = await sb('ail_contacts?on_conflict=role_id,rr_id', { method: 'POST', body: people.map(p => ({ ...p, role_id: role.id })), prefer: 'resolution=ignore-duplicates,return=representation' });
+  return rows.length;
+}
+// AI leaders in a region (free search, a page at a time)
+async function sourceLeaders(region, key) {
+  const places = RR_PLACES[region] || ['India'];
+  const qkey = 'ail|src|' + sha(region).slice(0, 16);
+  const [prev] = await sb(`rr_searched?select=*&key=eq.${qkey}`);
+  const start = prev && prev.next_start ? prev.next_start : 1;
+  if (start > 2000) return { region, found: 0, added: 0, note: 'All results for this region have been seen.' };
+  const data = await rrReq(key, 'search', { body: { query: { current_title: LEADER_TITLES, location: places }, order_by: 'popularity', page_size: 25, start } });
+  const people = rrProfiles(data).map(rrPerson).filter(p => p.name);
+  const rows = people.length ? await sb('ail_sourced?on_conflict=rr_id', { method: 'POST', body: people.map(p => ({ ...p, region })), prefer: 'resolution=ignore-duplicates,return=representation' }) : [];
+  const pg = data.pagination || {};
+  await sb('rr_searched?on_conflict=key', { method: 'POST', body: [{ key: qkey, found: ((prev && prev.found) || 0) + people.length, next_start: people.length ? (pg.next || start + 25) : 2001, searched_at: new Date().toISOString() }], prefer: 'resolution=merge-duplicates,return=minimal' });
+  return { region, found: people.length, added: rows.length };
+}
+// which open roles each newly sourced leader may fit (AI, from title, employer and location only)
+async function fitSourced(limit = 40) {
+  const people = await sb(`ail_sourced?select=id,name,title,company,location&fits=is.null&status=neq.dismissed&order=created_at.desc&limit=${limit}`);
+  if (!people.length) return 0;
+  const roles = await sb('ail_roles?select=ref,title,level,industry,location,must_haves&status=eq.open&order=found_at.desc&limit=40');
+  if (!roles.length) return 0;
+  const system = `You are the research desk of "AI Leaders by DuaDesk". You prepare; a person decides. From each person's current title, employer and location only, suggest which open roles they could plausibly be approached for. Be conservative: seniority and scope must fit, and location must be workable. Ignore protected characteristics.
+Answer with ONE JSON object and nothing else: {"fits":[{"id":0,"roles":[{"ref":"AIL-…","score":0-100,"why":"one short sentence"}]}]} with at most 2 roles per person, only scores of 60 or more; give an empty roles list when nothing fits.`;
+  const content = `OPEN ROLES\n${roles.map(r => `${r.ref}: ${r.title} · ${r.level || ''} · ${r.industry || ''} · ${r.location || ''} · needs: ${(r.must_haves || []).join('; ')}`).join('\n')}\n\nPEOPLE\n${people.map(p => `#${p.id}: ${p.title || ''} at ${p.company || ''}, ${p.location || ''}`).join('\n')}`;
+  const j = await ai({ system, content, maxTokens: 3000 });
+  const refs = new Set(roles.map(r => r.ref)); let n = 0;
+  const byId = new Map((Array.isArray(j.fits) ? j.fits : []).map(f => [+f.id, f]));
+  for (const p of people) {
+    const f = byId.get(p.id);
+    const fits = (f && Array.isArray(f.roles) ? f.roles : []).filter(x => refs.has(clean(x.ref, 20)) && int(x.score, 0, 100) >= 60).slice(0, 2).map(x => ({ ref: clean(x.ref, 20), score: int(x.score, 0, 100), why: clean(x.why, 200) }));
+    await sb(`ail_sourced?id=eq.${p.id}`, { method: 'PATCH', body: { fits } });
+    if (fits.length) n++;
+  }
+  return n;
+}
+async function rrRevealRow(table, id) {
+  if (!['ail_contacts', 'ail_sourced'].includes(table)) throw E('Unknown list');
+  const s = await rrSettings(); if (!s.key) throw E('Add your RocketReach API key in the webinar admin Settings first.');
+  const [row] = await sb(`${table}?select=*&id=eq.${+id}`); if (!row) throw E('Not found', 404);
+  const used = await rrUsedToday();
+  if (row.revealed_at) return { row, left: Math.max(0, s.limit - used) };
+  if (used >= s.limit) throw E(`Today's RocketReach limit (${s.limit} reveals) is used up. Change it in the webinar admin Settings.`, 429);
+  const r = await rrReveal(s.key, row.rr_id);
+  await sb('interactions', { method: 'POST', body: { kind: 'rr_lookup', data: { ail: table, id: row.id, status: r && r.status } }, prefer: 'return=minimal' });
+  const best = rrBest(r, table === 'ail_sourced'); // candidates: a personal email is fine; hiring contacts: work email only
+  const [upd] = await sb(`${table}?id=eq.${row.id}`, { method: 'PATCH', body: { email: best.email, phone: best.phone, grade: best.grade, status: best.email || best.phone ? 'revealed' : 'no_email', revealed_at: new Date().toISOString(), linkedin_url: row.linkedin_url || (validUrl(r.linkedin_url) ? r.linkedin_url : null) }, prefer: 'return=representation' });
+  return { row: upd, left: s.limit - used - 1 };
+}
+async function rrDaily(out, left) {
+  const s = await rrSettings(); if (!s.key) return;
+  const roles = await sb('ail_roles?select=id,ref,company&status=eq.open&contacts_searched_at=is.null&order=found_at.desc&limit=6');
+  let contacts = 0;
+  for (const r of roles) { if (left() < 60000) break; try { contacts += await findContacts(r, s.key); } catch (e) { out.errors.push('contacts ' + r.ref + ': ' + e.message); if (e.status === 400 || e.status === 429) return; } }
+  out.contacts = contacts;
+  if (left() > 50000) { const region = REGIONS[Math.floor(Date.now() / 86400000) % REGIONS.length]; try { out.sourced = await sourceLeaders(region, s.key); } catch (e) { out.errors.push('sourcing: ' + e.message); } }
+  if (left() > 40000 && ENV().AI_KEY) { try { out.sourced_fits = await fitSourced(); } catch (e) { out.errors.push('sourcing fits: ' + e.message); } }
+}
+
 /* ---------- the daily job ---------- */
 async function cronRun() {
   const t0 = Date.now(), left = () => 270000 - (Date.now() - t0);
-  const out = { matched: 0, radar: null, pool: [], closed: 0, errors: [] };
+  const out = { matched: 0, radar: null, pool: [], closed: 0, contacts: 0, sourced: null, sourced_fits: 0, errors: [] };
   // 1. applications whose matching did not finish
   const stale = new Date(Date.now() - 15 * 60000).toISOString(), wait = new Date(Date.now() - 3 * 60000).toISOString();
   await sb(`ail_applications?match_state=eq.running&updated_at=lt.${stale}`, { method: 'PATCH', body: { match_state: 'failed' } }).catch(() => {});
@@ -445,9 +577,11 @@ async function cronRun() {
   // 4. new roles × the candidate pool
   const fresh = await sb(`ail_roles?select=*&status=eq.open&pool_matched_at=is.null&order=found_at.desc&limit=4`);
   for (const r of fresh) { if (left() < 40000) break; try { out.pool.push(...await poolMatch(r)); } catch (e) { out.errors.push('pool ' + r.ref + ': ' + e.message); } }
-  // 5. one short digest for Ashish, only when something happened
-  if (out.radar && out.radar.added || out.pool.length || out.errors.length) await digest(out);
-  return { ok: true, matched: out.matched, closed: out.closed, radar: out.radar, pool: out.pool.length, errors: out.errors };
+  // 5. RocketReach (free searches): hiring contacts for open roles, and AI leaders in today's region
+  try { await rrDaily(out, left); } catch (e) { out.errors.push('rocketreach: ' + e.message); }
+  // 6. one short digest for Ashish, only when something happened
+  if (out.radar && out.radar.added || out.pool.length || out.contacts || (out.sourced && out.sourced.added) || out.errors.length) await digest(out);
+  return { ok: true, matched: out.matched, closed: out.closed, radar: out.radar, pool: out.pool.length, contacts: out.contacts, sourced: out.sourced, sourced_fits: out.sourced_fits, errors: out.errors };
 }
 async function digest(out) {
   const { OWNER, SITE } = ENV();
@@ -457,21 +591,25 @@ ${newRoles.length ? `<b>${newRoles.length} new role${newRoles.length > 1 ? 's' :
 <ul style="margin:6px 0 14px;padding-left:20px">${newRoles.map(r => `<li>${esc(r.ref)} <b>${esc(r.title)}</b> · ${esc(r.company)} <span style="color:#7a7394">(shown as “${esc(r.company_masked)}”)</span> · ${esc(r.location || '')}${r.source_url ? ` · <a href="${esc(r.source_url)}" style="color:#6b4fe0">source</a>` : ''}</li>`).join('')}</ul>
 <p style="font-size:13px;color:#7a7394;margin:-6px 0 14px">If any should not be shown, hide it on the desk.</p>` : (out.radar ? `<p>No new roles found in ${esc(out.radar.region)} today.</p>` : '')}
 ${out.pool.length ? `<b>People already in your pool who fit new roles</b><ul style="margin:6px 0 14px;padding-left:20px">${out.pool.map(x => `<li>${esc(x.person.name)} → ${esc(x.role.ref)} ${esc(x.role.title)} ${scoreChip(x.score)} ${esc(x.why)}</li>`).join('')}</ul>` : ''}
+${out.contacts || (out.sourced && out.sourced.added) ? `<b>From RocketReach (free searches, no credits used)</b><ul style="margin:6px 0 14px;padding-left:20px">${out.contacts ? `<li>${out.contacts} hiring contact${out.contacts === 1 ? '' : 's'} found at companies with open roles</li>` : ''}${out.sourced && out.sourced.added ? `<li>${out.sourced.added} new AI leader${out.sourced.added === 1 ? '' : 's'} sourced in ${esc(out.sourced.region)}${out.sourced_fits ? `, ${out.sourced_fits} of them suggested for open roles` : ''}</li>` : ''}</ul><p style="font-size:13px;color:#7a7394;margin:-6px 0 14px">Reveal emails on the desk when you want to reach someone (1 credit each).</p>` : ''}
 ${out.errors.length ? `<b>Needs a look</b>${ul(out.errors)}` : ''}
 <p style="margin:16px 0 0"><a href="${esc(SITE)}/ai-leaders/admin/" style="display:inline-block;background:#8b6cff;color:#fff;text-decoration:none;border-radius:999px;padding:10px 18px;font-weight:700">Open the AI Leaders desk</a></p>`);
-  await mail({ to: OWNER, subject: `AI Leaders: ${newRoles.length} new role${newRoles.length === 1 ? '' : 's'}, ${out.pool.length} pool match${out.pool.length === 1 ? '' : 'es'}`, html, idem: 'ail-digest-' + new Date().toISOString().slice(0, 10) });
+  await mail({ to: OWNER, subject: `AI Leaders: ${newRoles.length} new role${newRoles.length === 1 ? '' : 's'}, ${out.pool.length} pool match${out.pool.length === 1 ? '' : 'es'}${out.contacts ? `, ${out.contacts} hiring contacts` : ''}${out.sourced && out.sourced.added ? `, ${out.sourced.added} leaders sourced` : ''}`, html, idem: 'ail-digest-' + new Date().toISOString().slice(0, 10) });
 }
 
 /* ---------- the admin desk ---------- */
 const admin = {
   async desk() {
-    const [roles, apps, runs, pool] = await Promise.all([
+    const [roles, apps, runs, pool, contacts, sourced, rr, used] = await Promise.all([
       sb('ail_roles?select=*&order=found_at.desc&limit=300'),
       sb('ail_applications?select=id,role_id,candidate_id,note,status,match_state,match_error,score,match,matched_at,admin_note,created_at,updated_at,ail_candidates(id,name,email,phone,linkedin,current_title,current_company,years,location,cv_path,open_to_other)&order=created_at.desc&limit=500'),
       sb('ail_runs?select=*&order=started_at.desc&limit=12'),
       sb('ail_matches?select=role_id,candidate_id,source,score,match,created_at,ail_candidates(name,current_title,current_company,email)&source=eq.pool&order=created_at.desc&limit=300'),
+      sb('ail_contacts?select=*&order=created_at.desc&limit=600'),
+      sb('ail_sourced?select=*&order=created_at.desc&limit=600'),
+      rrSettings(), rrUsedToday().catch(() => 0),
     ]);
-    return { roles, apps, runs, pool, regions: REGIONS, levels: LEVELS, statuses: APP_STATUS, ai: !!ENV().AI_KEY, email: !!ENV().RESEND_KEY };
+    return { roles, apps, runs, pool, contacts, sourced, rocketreach: { connected: !!rr.key, limit: rr.limit, used_today: used }, regions: REGIONS, levels: LEVELS, statuses: APP_STATUS, ai: !!ENV().AI_KEY, email: !!ENV().RESEND_KEY };
   },
   async role_save(b) {
     const id = +b.id || null;
@@ -508,6 +646,11 @@ const admin = {
     return { ok: true };
   },
   async cron_now() { return cronRun(); },
+  async rr_contacts(b) { const s = await rrSettings(); if (!s.key) throw E('Add your RocketReach API key in the webinar admin Settings first.'); const [r] = await sb(`ail_roles?select=id,ref,company&id=eq.${+b.role_id}`); if (!r) throw E('Role not found', 404); if (undisclosed(r.company)) throw E('The company is not named for this role, so there is no one to search for.'); return { found: await findContacts(r, s.key) }; },
+  async rr_source(b) { const s = await rrSettings(); if (!s.key) throw E('Add your RocketReach API key in the webinar admin Settings first.'); const region = REGIONS.includes(b.region) ? b.region : REGIONS[0]; const r = await sourceLeaders(region, s.key); let fits = 0; if (ENV().AI_KEY) { try { fits = await fitSourced(); } catch (e) { r.note = 'Role suggestions need the AI: ' + e.message; } } return { ...r, fits }; },
+  async rr_fits() { return { suggested: await fitSourced() }; },
+  async rr_reveal(b) { return rrRevealRow(b.list === 'sourced' ? 'ail_sourced' : 'ail_contacts', b.id); },
+  async rr_status(b) { const t = b.list === 'sourced' ? 'ail_sourced' : 'ail_contacts'; if (!['found', 'revealed', 'no_email', 'contacted', 'dismissed'].includes(b.status)) throw E('Unknown status'); const [row] = await sb(`${t}?id=eq.${+b.id}`, { method: 'PATCH', body: { status: b.status }, prefer: 'return=representation' }); return { row }; },
 };
 
 /* ---------- the handler ---------- */

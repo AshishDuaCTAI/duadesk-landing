@@ -67,6 +67,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px 10px
   <button class="tab" data-p="apps" aria-selected="true">Applications<span class="n" id="nApps"></span></button>
   <button class="tab" data-p="roles" aria-selected="false">Roles<span class="n" id="nRoles"></span></button>
   <button class="tab" data-p="pool" aria-selected="false">Pool matches<span class="n" id="nPool"></span></button>
+  <button class="tab" data-p="src" aria-selected="false">Candidate sourcing<span class="n" id="nSrc"></span></button>
   <button class="tab" data-p="runs" aria-selected="false">Daily job</button>
  </nav>
  <div class="right"><button class="btn ghost small" id="refresh">Refresh</button><button class="btn ghost small" id="logout">Sign out</button></div>
@@ -121,8 +122,15 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px 10px
   <div id="poolList"></div>
  </section>
 
+ <section class="panel" id="p-src" hidden>
+  <div class="card"><div class="row"><b>Find AI leaders on RocketReach</b><select id="sRegion"></select><button class="btn" id="sRun">Search (free)</button><button class="btn ghost" id="sFits">Suggest roles with AI</button><span class="muted small" id="rrInfo"></span></div>
+  <p class="muted small" style="margin:8px 0 0">Searches Chief AI Officers, Heads of AI, VPs and Directors of AI in the region, 25 at a time. Searching is free; revealing an email costs 1 RocketReach credit and counts toward the same daily limit as the webinar app. These people have not applied: contact them personally before sharing anything about them.</p></div>
+  <div class="bar"><select id="sStatus"><option value="">All</option><option value="found">Not revealed</option><option value="revealed">Revealed</option><option value="contacted">Contacted</option><option value="no_email">No email found</option><option value="dismissed">Dismissed</option></select><select id="sRegionF"><option value="">All regions</option></select><label class="small"><input type="checkbox" id="sFitOnly"> Only people suggested for a role</label><span class="muted small" id="sCount"></span></div>
+  <div id="srcList"></div>
+ </section>
+
  <section class="panel" id="p-runs" hidden>
-  <div class="card"><div class="row"><b>The daily job</b><span class="muted small">Runs every morning at about 8:00 IST: finishes any pending matches, closes market roles older than 45 days, searches one region (in turn), matches new roles against your pool, and emails you a digest.</span><button class="btn" id="cronNow">Run it now</button></div></div>
+  <div class="card"><div class="row"><b>The daily job</b><span class="muted small">Runs every morning at about 8:00 IST: finishes any pending matches, closes market roles older than 45 days, searches one region (in turn), matches new roles against your pool, finds hiring contacts and AI leaders on RocketReach (free searches only), and emails you a digest.</span><button class="btn" id="cronNow">Run it now</button></div></div>
   <div id="runList"></div>
  </section>
 </main>
@@ -153,7 +161,10 @@ function show(j){D=j;
   $('warns').innerHTML=w.map(function(x){return '<div class="warn">'+esc(x)+'</div>';}).join('');
   $('nApps').textContent=j.apps.length;$('nRoles').textContent=j.roles.filter(function(r){return r.status==='open';}).length;$('nPool').textContent=j.pool.length;
   opts($('aRole'),j.roles.map(function(r){return {v:r.id,t:r.ref+' '+r.title};}),'<option value="">All roles</option><option value="general">General profiles</option>');
-  renderApps();renderRoles();renderPool();renderRuns();}
+  $('nSrc').textContent=(j.sourced||[]).length;
+  var rr=j.rocketreach||{};$('rrInfo').textContent=rr.connected?('RocketReach connected · '+rr.used_today+' of '+rr.limit+' reveals used today'):'RocketReach is not connected: add the key in the webinar admin Settings.';
+  opts($('sRegion'),j.regions);opts($('sRegionF'),j.regions,'<option value="">All regions</option>');
+  renderApps();renderRoles();renderPool();renderRuns();renderSrc();}
 var roleById=function(id){return (D.roles||[]).filter(function(r){return r.id===id;})[0];};
 
 /* applications */
@@ -209,13 +220,44 @@ function renderRoles(){
       '<h3 style="margin-top:6px">'+esc(r.title)+'</h3><div><b>'+esc(r.company||'(no company)')+'</b> <span class="muted">shown as “'+esc(r.company_masked)+'”</span></div>'+
       '<div class="muted small">'+esc([r.level,r.location,r.region,r.work_mode,r.industry].filter(Boolean).join(' · '))+'</div></div>'+
       '<div class="row"><span class="muted small">'+(cnt[r.id]||0)+' applied</span><select data-rstatus="'+r.id+'">'+['open','hidden','closed'].map(function(s){return '<option'+(s===r.status?' selected':'')+'>'+s+'</option>';}).join('')+'</select><button class="btn ghost small" data-edit="'+r.id+'">Edit</button><button class="btn danger small" data-rdel="'+r.id+'">Delete</button></div></div>'+
-      '<p style="margin:8px 0 4px">'+esc(r.summary||'')+'</p>'+(r.source_url?'<a class="small" href="'+esc(r.source_url)+'" target="_blank" rel="noopener">Source: '+esc(r.source_title||r.source_url)+'</a>':'')+'</div>';
+      '<p style="margin:8px 0 4px">'+esc(r.summary||'')+'</p>'+(r.source_url?'<a class="small" href="'+esc(r.source_url)+'" target="_blank" rel="noopener">Source: '+esc(r.source_title||r.source_url)+'</a>':'')+contactsBox(r)+'</div>';
   }).join(''):'<p class="muted">No roles here yet. Run the radar or add a client search.</p>';
 }
 $('rf').onsubmit=function(e){e.preventDefault();var f=e.target,b={};['id','title','level','status','company','company_masked','industry','location','region','work_mode','summary','source_url','notes'].forEach(function(k){b[k]=f[k].value;});b.id=+b.id||undefined;b.must_haves=f.must_haves.value.split('\n').map(function(x){return x.trim();}).filter(Boolean);
   call('role_save',b).then(function(j){f.reset();$('rfTitle').textContent='Add a client search (a role you hold the mandate for)';load('Saved '+j.role.ref+'.');}).catch(function(x){msg(x.message);});};
 $('rfReset').onclick=function(){$('rf').reset();$('rf').id.value='';$('rfTitle').textContent='Add a client search (a role you hold the mandate for)';};
 $('rRun').onclick=function(){var b=this;b.disabled=true;msg('Searching '+$('rRegion').value+'… this takes 1–3 minutes.');call('radar_run',{region:$('rRegion').value}).then(function(j){b.disabled=false;load('Radar finished: '+j.added+' new role(s) added, '+j.skipped+' skipped, '+j.pool+' pool match(es).');}).catch(function(x){b.disabled=false;msg(x.message);});};
+
+/* RocketReach: hiring contacts and sourcing */
+function personLine(p,list){
+  var st=['found','revealed','contacted','no_email','dismissed'].map(function(s){return '<option value="'+s+'"'+(s===p.status?' selected':'')+'>'+({found:'not revealed',revealed:'revealed',contacted:'contacted',no_email:'no email found',dismissed:'dismissed'})[s]+'</option>';}).join('');
+  return '<tr><td><b>'+esc(p.name||'')+'</b><div class="muted small">'+esc(p.title||'')+(p.company?' · '+esc(p.company):'')+(p.location?' · '+esc(p.location):'')+'</div></td>'+
+    '<td class="small">'+(p.linkedin_url?'<a href="'+esc(p.linkedin_url)+'" target="_blank" rel="noopener">LinkedIn</a>':'')+'</td>'+
+    '<td class="small">'+(p.email?'<a href="mailto:'+esc(p.email)+'">'+esc(p.email)+'</a> <span class="muted">'+esc(p.grade||'')+'</span>':'')+(p.phone?'<div>'+esc(p.phone)+'</div>':'')+(!p.revealed_at?'<button class="btn small" data-reveal="'+list+':'+p.id+'">Reveal (1 credit)</button>':(!p.email&&!p.phone?'<span class="muted">nothing found</span>':''))+'</td>'+
+    (list==='sourced'?'<td class="small">'+((p.fits||[]).map(function(f){return esc(f.ref)+' '+chip(f.score)+'<div class="muted">'+esc(f.why)+'</div>';}).join('')||(p.fits?'<span class="muted">no fit yet</span>':'<span class="muted">not checked</span>'))+'</td>':'')+
+    '<td><select data-pstatus="'+list+':'+p.id+'">'+st+'</select></td></tr>';
+}
+function contactsBox(r){
+  var cs=(D.contacts||[]).filter(function(c){return c.role_id===r.id;});
+  var undisclosed=!r.company||/^(undisclosed|confidential)/i.test(r.company);
+  return '<details style="margin-top:8px"><summary>Hiring contacts ('+cs.length+')</summary>'+(cs.length?'<table><tbody>'+cs.map(function(c){return personLine(c,'contacts');}).join('')+'</tbody></table>':'<p class="muted small">'+(undisclosed?'The company is not named for this role.':(r.contacts_searched_at?'No HR, talent or technology leaders found on RocketReach for this company.':'Not searched yet.'))+'</p>')+
+    (undisclosed?'':'<button class="btn ghost small" data-findc="'+r.id+'">'+(r.contacts_searched_at?'Search again':'Find hiring contacts (free)')+'</button>')+'</details>';
+}
+['sStatus','sRegionF','sFitOnly'].forEach(function(id){$(id).onchange=renderSrc;});
+function renderSrc(){
+  var st=$('sStatus').value,rg=$('sRegionF').value,fo=$('sFitOnly').checked;
+  var list=(D.sourced||[]).filter(function(p){return (!st||p.status===st)&&(!rg||p.region===rg)&&(!fo||(p.fits&&p.fits.length));});
+  list.sort(function(a,b){return ((b.fits||[])[0]||{score:0}).score-((a.fits||[])[0]||{score:0}).score;});
+  $('sCount').textContent=list.length+' shown';
+  $('srcList').innerHTML=list.length?'<div class="card"><table><thead><tr><th>Person</th><th>Profile</th><th>Contact</th><th>Suggested for</th><th>Status</th></tr></thead><tbody>'+list.map(function(p){return personLine(p,'sourced');}).join('')+'</tbody></table></div>':'<p class="muted">No one here yet. Pick a region and press Search.</p>';
+}
+$('sRun').onclick=function(){var b=this;b.disabled=true;msg('Searching RocketReach in '+$('sRegion').value+'…');call('rr_source',{region:$('sRegion').value}).then(function(j){b.disabled=false;load('Found '+j.found+', '+j.added+' new'+(j.fits?', '+j.fits+' suggested for open roles':'')+(j.note?'. '+j.note:'.'));}).catch(function(x){b.disabled=false;msg(x.message);});};
+$('sFits').onclick=function(){var b=this;b.disabled=true;msg('Asking the AI which roles fit…');call('rr_fits').then(function(j){b.disabled=false;load(j.suggested+' people suggested for open roles.');}).catch(function(x){b.disabled=false;msg(x.message);});};
+document.addEventListener('click',function(e){var t=e.target.closest('button');if(!t)return;
+  if(t.dataset.reveal){var p=t.dataset.reveal.split(':');t.disabled=true;msg('Revealing… this uses 1 RocketReach credit.');call('rr_reveal',{list:p[0],id:+p[1]}).then(function(j){load(j.row&&(j.row.email||j.row.phone)?'Revealed. '+j.left+' reveals left today.':'RocketReach had no good email or phone for this person. '+j.left+' reveals left today.');}).catch(function(x){t.disabled=false;msg(x.message);});}
+  if(t.dataset.findc){t.disabled=true;msg('Searching RocketReach for hiring contacts…');call('rr_contacts',{role_id:+t.dataset.findc}).then(function(j){load(j.found+' contact(s) found.');}).catch(function(x){t.disabled=false;msg(x.message);});}
+});
+document.addEventListener('change',function(e){var t=e.target;if(t.dataset.pstatus){var p=t.dataset.pstatus.split(':');call('rr_status',{list:p[0],id:+p[1],status:t.value}).then(function(){msg('Saved.');}).catch(function(x){msg(x.message);});}});
 
 /* pool and runs */
 function renderPool(){
