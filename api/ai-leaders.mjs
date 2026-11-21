@@ -125,7 +125,7 @@ async function mail({ to, subject, html, idem, replyTo, attachments }) {
   if (idem) headers['Idempotency-Key'] = String(idem).slice(0, 256);
   const res = await fetch('https://api.resend.com/emails', { method: 'POST', headers, body: JSON.stringify({ from: FROM, to: [to], subject, html, reply_to: replyTo || REPLY_TO, ...(attachments && attachments.length ? { attachments } : {}) }) });
   const d = await res.json().catch(() => ({}));
-  if (!res.ok) { console.error('ail mail', res.status, d); return null; }
+  if (!res.ok) { console.error('ail mail', res.status, d); const e = E('Email was not sent: ' + (d.message || res.status), 502); if (to === ENV().OWNER) throw e; return null; }
   return d;
 }
 const shell = (title, body) => `<!doctype html><html><body style="margin:0;background:#f4f2fb;font:15px/1.55 Arial,Helvetica,sans-serif;color:#1b1535">
@@ -609,7 +609,7 @@ async function cronRun() {
   let lis = [];
   try { lis = await buildLinkedIn(drafts); } catch (e) { out.errors.push('linkedin: ' + e.message); }
   // 7. the morning brief to Ashish, every day
-  await digest(out, drafts, lis);
+  try { await digest(out, drafts, lis); } catch (e) { out.errors.push('brief: ' + e.message); }
   return { ok: true, matched: out.matched, closed: out.closed, radar: out.radar, pool: out.pool.length, contacts: out.contacts, sourced: out.sourced, sourced_fits: out.sourced_fits, revealed: out.revealed || 0, drafts: drafts.length, linkedin: lis.length, errors: out.errors };
 }
 
@@ -792,7 +792,7 @@ ${liHtml}
 ${out.errors.length ? `<b>Needs a look</b>${ul(out.errors)}` : ''}
 <p style="margin:16px 0 0"><a href="${esc(SITE)}/ai-leaders/admin/" style="display:inline-block;background:#8b6cff;color:#fff;text-decoration:none;border-radius:999px;padding:10px 18px;font-weight:700">Open the AI Leaders desk</a></p>`);
   const attachments = drafts.map((d, i) => ({ filename: `${String(i + 1).padStart(2, '0')} ${String(d.name || 'draft').replace(/[^\w\- ]+/g, '').slice(0, 40)}.eml`, content: emlFile(d) }));
-  const sent = await mail({ to: OWNER, subject: `AI Leaders morning brief: ${drafts.length} email draft${drafts.length === 1 ? '' : 's'}, ${lis.length} LinkedIn, ${newRoles.length} new role${newRoles.length === 1 ? '' : 's'}`, html, attachments, idem: 'ail-brief-' + new Date(Date.now() + 5.5 * 3600000).toISOString().slice(0, 10) + '-' + drafts.length + '-' + lis.length });
+  const sent = await mail({ to: OWNER, subject: `AI Leaders morning brief: ${drafts.length} email draft${drafts.length === 1 ? '' : 's'}, ${lis.length} LinkedIn, ${newRoles.length} new role${newRoles.length === 1 ? '' : 's'}`, html, attachments, idem: 'ail-brief-' + new Date(Date.now() + 5.5 * 3600000).toISOString().slice(0, 10) + '-' + sha(html).slice(0, 16) }); // same content is never sent twice; changed content always goes out
   if (sent) {
     const now = new Date().toISOString();
     for (const d of drafts) await sb(`${d.table}?id=eq.${d.id}`, { method: 'PATCH', body: d.table === 'ail_applications' ? { drafted_at: now } : { drafted_at: now, li_drafted_at: now } }).catch(() => {});
@@ -851,7 +851,7 @@ const admin = {
   },
   async cron_now() { return cronRun(); },
   async auto_reveals(b) { const n = Math.max(0, Math.min(20, Math.round(+b.value) || 0)); await sb('settings?on_conflict=key', { method: 'POST', body: [{ key: 'ail_auto_reveals', value: String(n) }], prefer: 'resolution=merge-duplicates,return=minimal' }); return { value: n }; },
-  async brief_now() { const d = await buildDrafts(); const l = await buildLinkedIn(d); await digest({ matched: 0, radar: null, pool: [], closed: 0, contacts: 0, sourced: null, sourced_fits: 0, errors: [] }, d, l); return { drafts: d.length, linkedin: l.length }; },
+  async brief_now() { const d = await buildDrafts(); const l = await buildLinkedIn(d); const sent = await digest({ matched: 0, radar: null, pool: [], closed: 0, contacts: 0, sourced: null, sourced_fits: 0, errors: [] }, d, l); return { sent: !!sent, id: sent && sent.id, drafts: d.length, linkedin: l.length }; },
   async drafts_preview() { const d = await buildDrafts(); return { drafts: d.map(x => ({ ...x, mailto: mailtoLink(x) })), linkedin: await buildLinkedIn(d) }; },
   async rr_contacts(b) { if (b.refresh) await sb(`ail_contacts?role_id=eq.${+b.role_id}&revealed_at=is.null&status=eq.found`, { method: 'DELETE' }); const s = await rrSettings(); if (!s.key) throw E('Add your RocketReach API key in the webinar admin Settings first.'); const [r] = await sb(`ail_roles?select=id,ref,company,location&id=eq.${+b.role_id}`); if (!r) throw E('Role not found', 404); if (undisclosed(r.company)) throw E('The company is not named for this role, so there is no one to search for.'); return { found: await findContacts(r, s.key) }; },
   async rr_source(b) { const s = await rrSettings(); if (!s.key) throw E('Add your RocketReach API key in the webinar admin Settings first.'); const region = REGIONS.includes(b.region) ? b.region : REGIONS[0]; const r = await sourceLeaders(region, s.key); let fits = 0; if (ENV().AI_KEY) { try { fits = await fitSourced(); } catch (e) { r.note = 'Role suggestions need the AI: ' + e.message; } } return { ...r, fits }; },
