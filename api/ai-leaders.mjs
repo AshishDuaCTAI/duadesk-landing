@@ -677,7 +677,7 @@ Roles like this are hard to hire for. Many candidates have AI on their CV; far f
 • A short, confidential slate, with a written view of each candidate's strengths and risks.
 • Reach across India, Europe, the Middle East and North America, including strong people who are not actively looking.
 
-What makes our assessment different is that I build AI myself. Over the last three years I have designed and shipped 13 live AI products at DuaDesk, across finance, procurement, audit and banking. Before that I led enterprise technology as Head of IT at Microsoft India and Technical Director at KPMG India, and I hold an Executive PG Certification in Generative AI and Machine Learning from IIT Roorkee. So when a candidate describes their work, I can tell real delivery from slideware.
+What makes our assessment different is that I build AI myself. Over the last three years I have designed and shipped 13 live AI products at DuaDesk, across finance, procurement, audit and banking. Before that I led enterprise technology as Head of IT at Microsoft India and Technical Director at KPMG India, and I hold an Executive PG Certification in Generative AI and Machine Learning from IIT Roorkee. So when a candidate describes their work, I can tell real delivery from slideware. I am a Canadian citizen, and we work through my firm, Ashish Dua Consulting Corporation, registered in Canada.
 
 Would a 20-minute call next week be useful to talk through the role? There is no commitment in that first conversation.
 
