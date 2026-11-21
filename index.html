@@ -1346,10 +1346,17 @@ ol.pf-start li b,ol.pf-phases li b{display:block;color:#fff}
 .navlinks a.nav-new .new-badge{position:absolute;top:-11px;right:-10px;margin:0;font-size:8.5px;padding:3px 6px;box-shadow:0 2px 8px rgba(0,0,0,.45)}
 .nav.open .navlinks a.nav-new .new-badge{position:static;margin-left:10px;font-size:9.5px}
 @media(min-width:901px){.navin{gap:14px}.navlinks{gap:10px}.navlinks a{font-size:12.5px}.navlinks .wpill{padding:6px 10px 6px 20px}.navlinks .wpill:before{left:8px}}
+@media(min-width:901px) and (max-width:960px){.navlinks a[href="webinars.html"]{display:none}}
+@media(min-width:901px) and (max-width:1000px){.navcta .btn{padding:9px 12px;font-size:12.5px}.navin{padding-left:14px;padding-right:14px}.brand{font-size:19px}}
 @media(min-width:901px) and (max-width:1080px){.navin{gap:8px}.navlinks{gap:6px}}
 @media(min-width:901px) and (max-width:1000px){.navbot{display:none!important}}
 @keyframes ddBlink{0%,100%{opacity:1}50%{opacity:.3}}
 @keyframes ddNewGlow{0%,100%{box-shadow:0 0 0 0 rgba(23,182,164,0)}50%{box-shadow:0 0 16px 2px rgba(23,182,164,.6)}}
+.navlinks a.nav-ai{color:#ddd3ff;animation-name:ddNewGlowAi}.navlinks a.nav-ai:hover{border-color:#cbbcff}
+@media(min-width:901px) and (max-width:1500px){.navbot{display:none!important}}
+@media(min-width:901px) and (max-width:1180px){.navlinks a[href="#how"]{display:none}}
+@media(min-width:901px) and (max-width:1080px){.navlinks a{font-size:12px}.navlinks .wpill{padding:6px 8px 6px 18px}.navlinks .wpill:before{left:7px}}
+@keyframes ddNewGlowAi{0%,100%{box-shadow:0 0 0 0 rgba(139,108,255,0)}50%{box-shadow:0 0 16px 2px rgba(139,108,255,.65)}}
 @media(prefers-reduced-motion:reduce){.navlinks a.nav-new,.new-badge{animation:none}}
 </style>
 </head>
@@ -1384,7 +1391,7 @@ ol.pf-start li b,ol.pf-phases li b{display:block;color:#fff}
    <g><ellipse cx="140" cy="26.6" rx="12.5" ry="3.4" fill="#16273f" stroke="#f0d18a" stroke-width="1"/><circle cx="140" cy="17.5" r="8.5" fill="#f0d18a" stroke="#d6ae55" stroke-width="1.2"/><text x="140" y="21.2" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="700" fill="#3a2c07">₹</text><animateTransform attributeName="transform" type="translate" values="0 0;0 -1.6;0 0" dur="1.9s" repeatCount="indefinite"/></g>
    <text x="158" y="16" text-anchor="middle" font-family="Georgia,serif" font-size="8" font-weight="700" fill="#50d69a">+₹<animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.7;1" dur="2.6s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" values="0 5;0 -6" dur="2.6s" repeatCount="indefinite"/></text>
   </svg></div>
-  <div class="navlinks" id="navLinks"><a href="#how">The story</a><a href="webinars.html">Webinars</a><a href="#enterprise" class="wpill w-ent" data-w="ent">Organisation</a><a href="#community" class="wpill w-com" data-w="com">Social Leadership</a><a href="#life" class="wpill w-fam" data-w="fam">Life Journey</a><a href="/banking/" class="wpill nav-new" style="--w:#17b6a4">Banking<span class="new-badge">New addition</span></a><a href="#value" class="ent-only" data-w="ent">Value Lab</a><a href="#" class="pl-menu-link">All product links</a></div>
+  <div class="navlinks" id="navLinks"><a href="#how">The story</a><a href="webinars.html">Webinars</a><a href="#enterprise" class="wpill w-ent" data-w="ent">Organisation</a><a href="#community" class="wpill w-com" data-w="com">Social Leadership</a><a href="#life" class="wpill w-fam" data-w="fam">Life Journey</a><a href="/banking/" class="wpill nav-new" style="--w:#17b6a4">Banking<span class="new-badge">New addition</span></a><a href="/ai-leaders/" class="wpill nav-new nav-ai" style="--w:#8b6cff">AI Leaders<span class="new-badge">New addition</span></a><a href="#value" class="ent-only" data-w="ent">Value Lab</a><a href="#" class="pl-menu-link">All product links</a></div>
   <!-- Language selector hidden for now: translations for the new sections are not ready. The selector and all translation code (DD_T, DD_I18N, ddTranslate) are kept; to restore, put the langbox markup back here and set DD_LANG_ENABLED to true. -->
 <div class="navcta"><button id="assessTop" class="btn gold ent-only" onclick="goTo('assessment')">Free assessment</button><button id="demoTop" class="btn ghost" onclick="openDemo()">Request a demo →</button></div>
 <button class="menubtn" id="menuBtn" type="button" aria-expanded="false" aria-controls="navLinks">Menu</button>
@@ -2582,6 +2589,12 @@ ol.pf-start li b,ol.pf-phases li b{display:block;color:#fff}
   <li><a class="pl-link" href="https://fscpo.duadesk.com" target="_blank" rel="noopener"><b>DuaDesk FS Procurement</b><span>The AI CPO</span><em>fscpo.duadesk.com</em></a></li>
   <li><a class="pl-link" href="https://fsassets.duadesk.com" target="_blank" rel="noopener"><b>DuaDesk FS Assets</b><span>Assets and collateral</span><em>fsassets.duadesk.com</em></a></li>
   <li><a class="pl-link" href="https://fsaudit.duadesk.com" target="_blank" rel="noopener"><b>DuaDesk FS Pramaan</b><span>Audit and compliance</span><em>fsaudit.duadesk.com</em></a></li>
+ </ul></section>
+ <section class="pl-group w-ai" style="--w:#8b6cff;--w2:#cbbcff"><h3>AI leadership placement <span class="new-badge">New addition</span></h3><ul>
+  <li><a class="pl-link" href="/ai-leaders/"><b>AI Leaders by DuaDesk</b><span>Chief AI Officers, CTOs and Heads of AI, placed on evidence</span><em>duadesk.com/ai-leaders</em></a></li>
+  <li><a class="pl-link" href="/ai-leaders/#employers"><b>Start a leadership search</b><span>For companies hiring their AI leader</span><em>For employers</em></a></li>
+  <li><a class="pl-link" href="/ai-leaders/#leaders"><b>Share your profile in confidence</b><span>For AI leaders ready for a global role</span><em>For AI leaders</em></a></li>
+  <li><a class="pl-link" href="/ai-leaders/#platform"><b>Opportunity Radar and placement journey</b><span>Roles, matching, interviews, offers: coming soon</span><em>Coming soon</em></a></li>
  </ul></section>
  <section class="pl-group w-com"><h3>Social Leadership</h3><ul>
   <li><a class="pl-link" href="https://philia.duadesk.com" target="_blank" rel="noopener"><b>Philia</b><span>RWAs, wards and societies</span><em>philia.duadesk.com</em></a></li>
