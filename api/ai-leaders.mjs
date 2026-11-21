@@ -717,7 +717,7 @@ const mailtoLink = d => `mailto:${encodeURIComponent(d.to)}?subject=${encodeURIC
 const emlFile = d => Buffer.from(`To: ${d.name ? `"${String(d.name).replace(/"/g, '')}" ` : ''}<${d.to}>\r\nSubject: =?UTF-8?B?${Buffer.from(d.subject).toString('base64')}?=\r\nX-Unsent: 1\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${Buffer.from(d.body.replace(/\n/g, '\r\n')).toString('base64').replace(/.{76}/g, '$&\r\n')}\r\n`).toString('base64');
 async function digest(out, drafts = [], lis = []) {
   const { OWNER, SITE } = ENV();
-  const newRoles = out.radar && out.radar.ids && out.radar.ids.length ? await sb(`ail_roles?select=ref,title,company,company_masked,location,source_url&id=in.(${out.radar.ids.join(',')})`) : [];
+  const newRoles = await sb(`ail_roles?select=ref,title,company,company_masked,location,source_url,source&status=eq.open&found_at=gte.${new Date(Date.now() - 26 * 3600000).toISOString()}&order=found_at.desc&limit=50`); // every role added since yesterday's brief: by the radar, by Claude's morning research or by hand
   const openRoles = (await sb('ail_roles?select=id&status=eq.open&limit=1000')).length;
   const newApps = (await sb(`ail_applications?select=id&created_at=gte.${new Date(Date.now() - 86400000).toISOString()}&limit=1000`)).length;
   const draftHtml = drafts.length ? `<h2 style="font:700 18px Georgia,serif;margin:18px 0 6px">${drafts.length} draft email${drafts.length === 1 ? '' : 's'} ready</h2>
@@ -745,7 +745,7 @@ ${lis.map((d, i) => `<div style="border:1px solid #d6e4f5;border-radius:10px;pad
 ${newRoles.filter(r => r.company && !/^(undisclosed|confidential)/i.test(r.company)).length ? `<b>Hiring teams for today's new roles</b><ul style="margin:6px 0 12px;padding-left:20px">${newRoles.filter(r => r.company && !/^(undisclosed|confidential)/i.test(r.company)).map(r => `<li><a href="${esc(liPeople(r.company.replace(/\s+(GmbH|AG|SE|Inc\.?|Ltd\.?|plc)\b.*$/i, '') + ' talent acquisition'))}" style="color:#0a66c2">${esc(r.ref)} ${esc(r.company)}: talent and HR people</a></li>`).join('')}</ul>` : ''}`;
   const html = shell('Your AI Leaders morning brief', `
 <p style="margin:0 0 12px">${openRoles} open role${openRoles === 1 ? '' : 's'} on the board · ${newApps} new application${newApps === 1 ? '' : 's'} in the last day${out.revealed ? ` · ${out.revealed} email${out.revealed === 1 ? '' : 's'} revealed on RocketReach today` : ''}.</p>
-${newRoles.length ? `<b>${newRoles.length} new role${newRoles.length > 1 ? 's' : ''} found (${esc(out.radar.region)}) and now live, company masked</b>
+${newRoles.length ? `<b>${newRoles.length} new role${newRoles.length > 1 ? 's' : ''} added since yesterday and now live, company masked</b>
 <ul style="margin:6px 0 14px;padding-left:20px">${newRoles.map(r => `<li>${esc(r.ref)} <b>${esc(r.title)}</b> · ${esc(r.company)} <span style="color:#7a7394">(shown as “${esc(r.company_masked)}”)</span> · ${esc(r.location || '')}${r.source_url ? ` · <a href="${esc(r.source_url)}" style="color:#6b4fe0">source</a>` : ''}</li>`).join('')}</ul>
 <p style="font-size:13px;color:#7a7394;margin:-6px 0 14px">If any should not be shown, hide it on the desk.</p>` : (out.radar ? `<p>No new roles found in ${esc(out.radar.region)} today.</p>` : '')}
 ${out.pool.length ? `<b>People already in your pool who fit new roles</b><ul style="margin:6px 0 14px;padding-left:20px">${out.pool.map(x => `<li>${esc(x.person.name)} → ${esc(x.role.ref)} ${esc(x.role.title)} ${scoreChip(x.score)} ${esc(x.why)}</li>`).join('')}</ul>` : ''}
