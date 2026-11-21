@@ -488,13 +488,33 @@ function sameCompany(a, b) {
 }
 const undisclosed = c => !c || /^(undisclosed|confidential)\b/i.test(c);
 
-// hiring contacts at a role's company (free search)
+// hiring contacts at a role's company (free search): the role's own country first, then anywhere; exact name first, then a looser one
+const HIRING_MORE = ['Head of Human Resources', 'Head of HR', 'HR Director', 'Director Human Resources', 'Head of People', 'Head of Recruiting', 'Talent Acquisition Director', 'Director Talent Acquisition', 'Head of IT', 'Personalleiter', 'Leiter Personal', 'Leiterin Personal', 'Head of Talent'];
+const COUNTRY_FIX = { usa: 'United States', us: 'United States', 'u.s.': 'United States', uk: 'United Kingdom', uae: 'United Arab Emirates', ksa: 'Saudi Arabia' };
+const roleCountry = r => { const p = String(r.location || '').split(',').map(x => x.trim()).filter(Boolean); const c = p[p.length - 1] || ''; return COUNTRY_FIX[c.toLowerCase()] || c; };
 async function findContacts(role, key) {
   await sb(`ail_roles?id=eq.${role.id}`, { method: 'PATCH', body: { contacts_searched_at: new Date().toISOString() } });
   if (undisclosed(role.company)) return 0;
-  const name = role.company.replace(/\b(GmbH\s*&\s*Co\.?\s*KG|GmbH|AG|SE|Inc\.?|Ltd\.?|plc)\b/gi, '').replace(/\s+/g, ' ').trim();
-  let res = rrProfiles(await rrReq(key, 'search', { body: { query: { current_employer: ['"' + name + '"'], current_title: HIRING_TITLES }, order_by: 'popularity', page_size: 10, start: 1 } }));
-  const people = res.map(rrPerson).filter(p => sameCompany(p.company, role.company)).slice(0, 4);
+  const name = role.company.replace(/\b(GmbH\s*&\s*Co\.?\s*KG|GmbH|AG|SE|KGaA|Inc\.?|Ltd\.?|plc|LLC)\b\.?/gi, '').replace(/\s+/g, ' ').trim();
+  const country = roleCountry(role);
+  const titles = [...HIRING_TITLES, ...HIRING_MORE];
+  const tries = [
+    { current_employer: ['"' + name + '"'], current_title: titles, ...(country ? { location: [country] } : {}) },
+    { current_employer: ['"' + name + '"'], current_title: titles },
+    { current_employer: [name], current_title: titles, ...(country ? { location: [country] } : {}) },
+    { current_employer: [name], current_title: titles },
+  ];
+  const iso = { india: ', in', germany: ', de', 'united kingdom': ', gb', 'united states': ', us', 'saudi arabia': ', sa', 'united arab emirates': ', ae', singapore: ', sg', netherlands: ', nl', japan: ', jp' }[country.toLowerCase()];
+  const inCountry = p => { const l = (p.location || '').toLowerCase(); return !!country && (l.includes(country.toLowerCase()) || (!!iso && l.endsWith(iso))); };
+  const seen = new Map();
+  for (const q of tries) {
+    let res = [];
+    try { res = rrProfiles(await rrReq(key, 'search', { body: { query: q, order_by: 'popularity', page_size: 15, start: 1 } })); }
+    catch (e) { if (e.status === 400 || e.status === 429) throw e; continue; }
+    for (const p of res.map(rrPerson)) if (p.rr_id && sameCompany(p.company, role.company) && !seen.has(p.rr_id)) seen.set(p.rr_id, p);
+    if ([...seen.values()].filter(inCountry).length >= 3) break;
+  }
+  const people = [...seen.values()].sort((x, y) => (inCountry(y) - inCountry(x)) || (HIRE_RANK(x.title) - HIRE_RANK(y.title))).slice(0, 4);
   if (!people.length) return 0;
   const rows = await sb('ail_contacts?on_conflict=role_id,rr_id', { method: 'POST', body: people.map(p => ({ ...p, role_id: role.id })), prefer: 'resolution=ignore-duplicates,return=representation' });
   return rows.length;
@@ -548,7 +568,7 @@ async function rrRevealRow(table, id) {
 }
 async function rrDaily(out, left) {
   const s = await rrSettings(); if (!s.key) return;
-  const roles = await sb('ail_roles?select=id,ref,company&status=eq.open&contacts_searched_at=is.null&order=found_at.desc&limit=6');
+  const roles = await sb('ail_roles?select=id,ref,company,location&status=eq.open&contacts_searched_at=is.null&order=found_at.desc&limit=6');
   let contacts = 0;
   for (const r of roles) { if (left() < 60000) break; try { contacts += await findContacts(r, s.key); } catch (e) { out.errors.push('contacts ' + r.ref + ': ' + e.message); if (e.status === 400 || e.status === 429) return; } }
   out.contacts = contacts;
@@ -598,7 +618,7 @@ Founder, DuaDesk · AI Leaders by DuaDesk
 ashish@ashishduacorporation.com · +91 98995 73717
 duadesk.com/ai-leaders`;
 const firstName = n => (clean(n, 120).split(' ')[0] || '').replace(/[^\p{L}\-']/gu, '') || 'there';
-const HIRE_RANK = t => /talent|recruit|executive search/i.test(t || '') ? 0 : /chro|human|people|\bhr\b/i.test(t || '') ? 1 : /technology|cto|information|cio|digital|data/i.test(t || '') ? 2 : 3;
+const HIRE_RANK = t => /talent|recruit|executive search/i.test(t || '') ? 0 : /chro|human|people|\bhr\b|personal/i.test(t || '') ? 1 : /technology|cto|information|cio|digital|data/i.test(t || '') ? 2 : 3;
 async function autoSettings() {
   const rows = await sb(`settings?select=key,value&key=eq.ail_auto_reveals`).catch(() => []);
   const v = rows[0] ? rows[0].value : '10';
@@ -815,7 +835,7 @@ const admin = {
   async cron_now() { return cronRun(); },
   async auto_reveals(b) { const n = Math.max(0, Math.min(20, Math.round(+b.value) || 0)); await sb('settings?on_conflict=key', { method: 'POST', body: [{ key: 'ail_auto_reveals', value: String(n) }], prefer: 'resolution=merge-duplicates,return=minimal' }); return { value: n }; },
   async drafts_preview() { const d = await buildDrafts(); return { drafts: d.map(x => ({ ...x, mailto: mailtoLink(x) })), linkedin: await buildLinkedIn(d) }; },
-  async rr_contacts(b) { const s = await rrSettings(); if (!s.key) throw E('Add your RocketReach API key in the webinar admin Settings first.'); const [r] = await sb(`ail_roles?select=id,ref,company&id=eq.${+b.role_id}`); if (!r) throw E('Role not found', 404); if (undisclosed(r.company)) throw E('The company is not named for this role, so there is no one to search for.'); return { found: await findContacts(r, s.key) }; },
+  async rr_contacts(b) { if (b.refresh) await sb(`ail_contacts?role_id=eq.${+b.role_id}&revealed_at=is.null&status=eq.found`, { method: 'DELETE' }); const s = await rrSettings(); if (!s.key) throw E('Add your RocketReach API key in the webinar admin Settings first.'); const [r] = await sb(`ail_roles?select=id,ref,company,location&id=eq.${+b.role_id}`); if (!r) throw E('Role not found', 404); if (undisclosed(r.company)) throw E('The company is not named for this role, so there is no one to search for.'); return { found: await findContacts(r, s.key) }; },
   async rr_source(b) { const s = await rrSettings(); if (!s.key) throw E('Add your RocketReach API key in the webinar admin Settings first.'); const region = REGIONS.includes(b.region) ? b.region : REGIONS[0]; const r = await sourceLeaders(region, s.key); let fits = 0; if (ENV().AI_KEY) { try { fits = await fitSourced(); } catch (e) { r.note = 'Role suggestions need the AI: ' + e.message; } } return { ...r, fits }; },
   async rr_fits() { return { suggested: await fitSourced() }; },
   async rr_reveal(b) { return rrRevealRow(b.list === 'sourced' ? 'ail_sourced' : 'ail_contacts', b.id); },

@@ -259,7 +259,7 @@ $('sRun').onclick=function(){var b=this;b.disabled=true;msg('Searching RocketRea
 $('sFits').onclick=function(){var b=this;b.disabled=true;msg('Asking the AI which roles fit…');call('rr_fits').then(function(j){b.disabled=false;load(j.suggested+' people suggested for open roles.');}).catch(function(x){b.disabled=false;msg(x.message);});};
 document.addEventListener('click',function(e){var t=e.target.closest('button');if(!t)return;
   if(t.dataset.reveal){var p=t.dataset.reveal.split(':');t.disabled=true;msg('Revealing… this uses 1 RocketReach credit.');call('rr_reveal',{list:p[0],id:+p[1]}).then(function(j){load(j.row&&(j.row.email||j.row.phone)?'Revealed. '+j.left+' reveals left today.':'RocketReach had no good email or phone for this person. '+j.left+' reveals left today.');}).catch(function(x){t.disabled=false;msg(x.message);});}
-  if(t.dataset.findc){t.disabled=true;msg('Searching RocketReach for hiring contacts…');call('rr_contacts',{role_id:+t.dataset.findc}).then(function(j){load(j.found+' contact(s) found.');}).catch(function(x){t.disabled=false;msg(x.message);});}
+  if(t.dataset.findc){t.disabled=true;msg('Searching RocketReach for hiring contacts…');call('rr_contacts',{role_id:+t.dataset.findc,refresh:true}).then(function(j){load(j.found+' contact(s) found.');}).catch(function(x){t.disabled=false;msg(x.message);});}
 });
 document.addEventListener('change',function(e){var t=e.target;if(t.dataset.pstatus){var p=t.dataset.pstatus.split(':');call('rr_status',{list:p[0],id:+p[1],status:t.value}).then(function(){msg('Saved.');}).catch(function(x){msg(x.message);});}});
 
