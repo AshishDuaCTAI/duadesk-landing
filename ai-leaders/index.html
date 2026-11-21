@@ -196,12 +196,59 @@ td{width:auto}tbody th{width:28%}
 .flow li{counter-increment:f;position:relative;border:1px dashed color-mix(in srgb,var(--w) 55%,transparent);background:color-mix(in srgb,var(--w) 6%,rgba(6,12,24,.5));border-radius:16px;padding:16px 16px 18px}
 .flow li:before{content:counter(f);display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;border:2px solid var(--w);color:var(--w2);font-weight:800;font-size:13px;margin-bottom:10px}
 .flow b{display:block;font:700 19px Georgia,serif;margin-bottom:4px}.flow li>span:last-child{color:var(--muted);font-size:14px}
+.flow li.on{border-style:solid;border-color:var(--w)}.soon.live2{background:#5be3a6;color:#04140c}
 .soon{position:absolute;top:16px;right:14px;font:800 9.5px/1 Inter,sans-serif;letter-spacing:.6px;text-transform:uppercase;color:#151006;background:linear-gradient(135deg,#f0d18a,#d6ae55);border-radius:999px;padding:4px 7px}
 h4.sub{margin:0 0 10px;font-size:12px;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold2)}
 .faqs{display:grid;gap:4px;max-width:900px}.faqs .wdw{margin-top:0}.faqs p{margin:4px 0 12px 30px;color:#d3dde8}
 @media(max-width:980px){.flow{grid-template-columns:repeat(2,minmax(0,1fr))}.steps6{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:860px){.chain{grid-template-columns:1fr}.chain .arr{transform:rotate(90deg);justify-self:center}.whys,.two,.sides{grid-template-columns:1fr}}
 @media(max-width:640px){.flow,.steps6{grid-template-columns:1fr}.side{padding:22px}}
+</style>
+<style>
+.live{display:inline-block;margin-left:8px;font:800 9.5px/1 Inter,sans-serif;letter-spacing:.6px;color:#04140c;background:#5be3a6;border-radius:999px;padding:4px 7px;vertical-align:2px}
+.live:before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#04140c;margin-right:5px;vertical-align:1px;animation:ddBlinkL 1.4s ease-in-out infinite}
+@keyframes ddBlinkL{50%{opacity:.25}}
+.rfilters{display:flex;gap:14px;flex-wrap:wrap;align-items:end;margin:0 0 18px}
+.rfilters label{display:grid;gap:4px;font-size:12px;letter-spacing:1.4px;text-transform:uppercase;color:var(--w2);font-weight:700}
+.rfilters select{background:#120f2b;color:var(--cream);border:1px solid color-mix(in srgb,var(--w) 40%,transparent);border-radius:12px;padding:9px 12px;font:15px Inter,sans-serif;min-width:200px}
+.rcount{margin-left:auto;color:var(--muted);font-size:14px}
+.rgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.rmsg{grid-column:1/-1;color:var(--muted);border:1px dashed var(--line);border-radius:16px;padding:22px;margin:0;text-align:center}
+.rcard{display:flex;flex-direction:column;border:1px solid var(--line);background:linear-gradient(170deg,color-mix(in srgb,var(--w) 9%,transparent),rgba(255,255,255,.02));border-radius:20px;padding:22px 22px 20px;min-width:0}
+.rtop{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+.rkind{font:800 10px/1 Inter,sans-serif;letter-spacing:.8px;text-transform:uppercase;border-radius:999px;padding:5px 9px}
+.rkind.client{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#151006}
+.rkind.market{border:1px solid color-mix(in srgb,var(--w) 55%,transparent);color:var(--w2)}
+.rref{font-size:12px;color:var(--muted);letter-spacing:.5px}
+.rco{margin:0 0 4px;font-size:13px;color:var(--w2);font-weight:600}
+.rcard h3{font:700 23px/1.18 Georgia,serif;margin:0 0 8px}
+.rmeta{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.rmeta span{font-size:12.5px;color:#dde7f0;background:rgba(255,255,255,.06);border-radius:999px;padding:4px 10px}
+.rsum{margin:0 0 10px;color:#d3dde8;font-size:15px}
+.rneeds{margin:0 0 14px;padding-left:18px;color:var(--muted);font-size:14px}.rneeds li{margin:2px 0}
+.rfoot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.rfoot small{color:var(--muted);font-size:12.5px}
+.rgen{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;margin-top:18px;border:1px solid color-mix(in srgb,var(--w) 45%,transparent);background:color-mix(in srgb,var(--w) 8%,rgba(6,12,24,.5));border-radius:20px;padding:20px 24px}
+.rgen b{display:block;font:700 20px Georgia,serif;margin-bottom:2px}.rgen span{color:var(--muted)}
+.amodal{position:fixed;inset:0;z-index:60;background:rgba(3,4,12,.78);backdrop-filter:blur(6px);display:grid;place-items:start center;overflow-y:auto;padding:28px 16px}
+.amodal[hidden]{display:none}
+.abox{position:relative;width:min(760px,100%);background:#0f0c26;border:1px solid color-mix(in srgb,var(--w) 45%,transparent);border-radius:24px;padding:28px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.abox h2{font:700 30px/1.1 Georgia,serif;margin:2px 0 6px}
+.arole{margin:0 0 18px;color:var(--w2)}
+.aclose{position:absolute;top:14px;right:16px;background:none;border:0;color:#cfd8e3;font-size:28px;cursor:pointer;line-height:1}
+.agrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px;margin-bottom:12px}
+#aForm label{display:grid;gap:5px;font-size:13px;color:#cfd8e3;font-weight:600}
+#aForm input:not([type=checkbox]),#aForm textarea{background:#08061a;color:var(--cream);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:10px 12px;font:15px Inter,sans-serif;width:100%;box-sizing:border-box}
+#aForm input:focus,#aForm textarea:focus{outline:2px solid var(--w);outline-offset:1px}
+#aForm .afile{margin-bottom:12px}#aForm .afile span{font-weight:400;color:var(--muted)}
+#aForm textarea{resize:vertical;margin-bottom:6px}
+#aForm .acheck{display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size:13.5px;color:#cfd8e3;margin:10px 0 0}
+#aForm .acheck input{margin-top:3px;accent-color:var(--w);width:16px;height:16px;flex:none}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.aerr{color:#ffb4a8;min-height:1.2em;margin:12px 0 10px;font-size:14px}
+.adone h3{font:700 26px Georgia,serif;margin:8px 0}.adone p{color:#d3dde8}
+@media(max-width:860px){.rgrid{grid-template-columns:1fr}}
+@media(max-width:640px){.agrid{grid-template-columns:1fr}.abox{padding:22px 18px}.rcount{margin-left:0;width:100%}.rfilters select{min-width:0;width:100%}.rfilters label{flex:1 1 140px}}
 </style>
 </head>
 <body>
@@ -223,11 +270,23 @@ h4.sub{margin:0 0 10px;font-size:12px;letter-spacing:1.6px;text-transform:upperc
     <div class="fact"><b>For employers</b><p>Global companies, capability centres and boards hiring their AI leadership.</p></div>
     <div class="fact"><b>For AI leaders</b><p>Proven technology and AI leaders ready for a larger, global role.</p></div>
    </div>
-   <div class="cta" style="margin-top:22px"><a class="btn world" href="mailto:ashish@ashishduacorporation.com?subject=AI%20Leaders%20by%20DuaDesk%20-%20leadership%20search">Start a leadership search</a><a class="btn ghost" href="mailto:ashish@ashishduacorporation.com?subject=AI%20Leaders%20by%20DuaDesk%20-%20my%20profile%20(in%20confidence)">I’m an AI leader, let’s talk</a></div>
+   <div class="cta" style="margin-top:22px"><a class="btn world" href="mailto:ashish@ashishduacorporation.com?subject=AI%20Leaders%20by%20DuaDesk%20-%20leadership%20search">Start a leadership search</a><a class="btn ghost" href="#open-roles">See open roles</a><button class="btn ghost" type="button" data-apply="general">I’m an AI leader, share my profile</button></div>
    <p class="trust">Confidential searches · Global reach · AI prepares; people decide.</p>
   </div>
   <div class="hero-art" aria-hidden="true"><span class="ring r2"></span><span class="ring"></span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="260" height="260" role="img" aria-label="P³: Present, Purpose, Possibility. A DuaDesk method." class="stamp"><defs><path id="s-top" d="M13,60 A47,47 0 0,1 107,60"/><path id="s-bot" d="M7.5,60 A52.5,52.5 0 0,0 112.5,60"/></defs><circle cx="60" cy="60" r="57" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="60" cy="60" r="38" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="12.5" cy="60" r="1.6" fill="currentColor"/><circle cx="107.5" cy="60" r="1.6" fill="currentColor"/><text font-family="'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif" font-size="8.6" font-weight="700" letter-spacing="1.6" fill="currentColor" text-anchor="middle"><textPath href="#s-top" startOffset="50%">PRESENT · PURPOSE</textPath></text><text font-family="'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif" font-size="8.6" font-weight="700" letter-spacing="1.6" fill="currentColor" text-anchor="middle"><textPath href="#s-bot" startOffset="50%">POSSIBILITY</textPath></text><text x="57" y="70" text-anchor="middle" font-family="'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif" font-size="34" font-weight="800" fill="currentColor">P</text><text x="73" y="54" text-anchor="middle" font-family="'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif" font-size="17" font-weight="800" fill="currentColor">3</text><text x="60" y="85" text-anchor="middle" font-family="'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif" font-size="6.6" font-weight="700" letter-spacing="1.4" fill="currentColor">DUADESK</text></svg></div>
  </header>
+
+ <section class="sec" id="open-roles">
+  <div class="sechead"><div><p class="kick">Open roles <span class="live">Live</span></p><h2>AI leadership roles open now</h2></div><p>Some are confidential client searches. Others are openings our AI radar has found in the market. Company names stay private until you are shortlisted and agree to go forward.</p></div>
+  <div class="rfilters" id="rFilters" hidden>
+   <label>Region <select id="fRegion"><option value="">All regions</option></select></label>
+   <label>Level <select id="fLevel"><option value="">All levels</option></select></label>
+   <span class="rcount" id="rCount"></span>
+  </div>
+  <div class="rgrid" id="rGrid" aria-live="polite"><p class="rmsg">Loading the latest roles…</p></div>
+  <div class="rgen"><div><b>Don’t see the right role?</b><span>Share your profile once. As new roles open, we match you automatically and a person gets in touch when there’s a real fit.</span></div><button class="btn world" type="button" data-apply="general">Share your profile</button></div>
+ </section>
+
 
  <section class="sec" id="why">
   <div class="sechead"><div><p class="kick">Why DuaDesk</p><h2>We build AI. So we know what good AI leadership looks like.</h2></div><p>Most placement firms meet AI through job titles. DuaDesk works with it every day, from the technology up to the product and the people who run it. That is a rare place to search from.</p></div>
@@ -296,7 +355,7 @@ h4.sub{margin:0 0 10px;font-size:12px;letter-spacing:1.6px;text-transform:upperc
      <li><b>Market and pay insight.</b> Realistic guidance on roles, locations and total pay, so you know where you stand.</li>
      <li><b>Guidance through the process.</b> Interview preparation, offer negotiation and transition support.</li>
     </ul>
-    <a class="btn ghost" href="mailto:ashish@ashishduacorporation.com?subject=AI%20Leaders%20by%20DuaDesk%20-%20my%20profile%20(in%20confidence)">Share your profile in confidence</a>
+    <button class="btn ghost" type="button" data-apply="general">Share your profile in confidence</button>
     <p class="small">Being considered for our searches is always free.</p>
    </article>
   </div>
@@ -315,12 +374,12 @@ h4.sub{margin:0 0 10px;font-size:12px;letter-spacing:1.6px;text-transform:upperc
  </section>
 
  <section class="sec" id="platform">
-  <div class="sechead"><div><p class="kick">Coming next on this page</p><h2>The whole placement journey, in one place</h2></div><p>We are building the placement platform step by step. Until each part goes live, that step runs personally, by email and phone.</p></div>
+  <div class="sechead"><div><p class="kick">The placement journey</p><h2>The whole placement journey, in one place</h2></div><p>The first four steps are live on this page. The rest are being built; until they go live, they run personally, by email and phone.</p></div>
   <ol class="flow">
-   <li><span class="soon">Coming soon</span><b>Opportunity Radar</b><span>New AI leadership openings found early, across companies and countries</span></li>
-   <li><span class="soon">Coming soon</span><b>Roles available</b><span>Open roles by level, industry and region</span></li>
-   <li><span class="soon">Coming soon</span><b>Profile submission</b><span>Candidates share their profile in confidence</span></li>
-   <li><span class="soon">Coming soon</span><b>Matching</b><span>Each requirement mapped to the right profiles, with the reasons shown</span></li>
+   <li class="on"><span class="soon live2">Live</span><b>Opportunity Radar</b><span>AI searches for new AI leadership openings every day, across regions</span></li>
+   <li class="on"><span class="soon live2">Live</span><b>Roles available</b><span>Open roles above, with the company kept confidential</span></li>
+   <li class="on"><span class="soon live2">Live</span><b>Profile submission</b><span>Candidates share their profile in confidence</span></li>
+   <li class="on"><span class="soon live2">Live</span><b>Matching</b><span>Each requirement mapped to the right profiles, with the reasons shown</span></li>
    <li><span class="soon">Coming soon</span><b>Interviews</b><span>Interview rounds set up and tracked with the client</span></li>
    <li><span class="soon">Coming soon</span><b>Selection</b><span>Feedback and the final choice, made by the client</span></li>
    <li><span class="soon">Coming soon</span><b>Salary and offer</b><span>Pay and terms finalised with both sides</span></li>
@@ -347,13 +406,115 @@ h4.sub{margin:0 0 10px;font-size:12px;letter-spacing:1.6px;text-transform:upperc
    <details class="wdw"><summary>Is my information kept confidential?</summary><p>Yes. We never share a candidate’s profile with a client without their agreement, and we keep client searches confidential. Candidates are never charged to be considered for a search.</p></details>
    <details class="wdw"><summary>Can you help us define the role before we hire?</summary><p>Yes. Many clients start with a role-definition session. It is often the most valuable part of the search.</p></details>
   </div>
-  <div class="endcta"><div><h3>The right AI leader changes everything that follows</h3><p>Whether you are hiring your first Chief AI Officer or ready to take the next step in your own career, let’s start with a conversation.</p></div><div class="cta"><a class="btn gold" href="mailto:ashish@ashishduacorporation.com?subject=AI%20Leaders%20by%20DuaDesk%20-%20leadership%20search">Start a leadership search</a><a class="btn ghost" href="mailto:ashish@ashishduacorporation.com?subject=AI%20Leaders%20by%20DuaDesk%20-%20my%20profile%20(in%20confidence)">Share your profile in confidence</a></div></div>
+  <div class="endcta"><div><h3>The right AI leader changes everything that follows</h3><p>Whether you are hiring your first Chief AI Officer or ready to take the next step in your own career, let’s start with a conversation.</p></div><div class="cta"><a class="btn gold" href="mailto:ashish@ashishduacorporation.com?subject=AI%20Leaders%20by%20DuaDesk%20-%20leadership%20search">Start a leadership search</a><button class="btn ghost" type="button" data-apply="general">Share your profile in confidence</button></div></div>
  </section>
+ <div class="amodal" id="aModal" hidden role="dialog" aria-modal="true" aria-labelledby="aTitle">
+  <div class="abox">
+   <button class="aclose" type="button" id="aClose" aria-label="Close">×</button>
+   <p class="kick" id="aKick">Apply in confidence</p>
+   <h2 id="aTitle">Share your profile</h2>
+   <p class="arole" id="aRole"></p>
+   <form id="aForm" novalidate>
+    <div class="agrid">
+     <label>Full name *<input name="name" required maxlength="120" autocomplete="name"></label>
+     <label>Email *<input name="email" type="email" required maxlength="254" autocomplete="email"></label>
+     <label>Phone<input name="phone" maxlength="40" autocomplete="tel" placeholder="+91 …"></label>
+     <label>LinkedIn profile<input name="linkedin" maxlength="300" placeholder="https://www.linkedin.com/in/…"></label>
+     <label>Current title<input name="current_title" maxlength="160" autocomplete="organization-title"></label>
+     <label>Current company<input name="current_company" maxlength="160" autocomplete="organization"></label>
+     <label>Years of experience<input name="years" type="number" min="0" max="60" inputmode="numeric"></label>
+     <label>Where you are based<input name="location" maxlength="120" placeholder="City, country"></label>
+    </div>
+    <label class="afile">Your CV * <span>PDF or Word (.docx), up to 3 MB</span><input name="cv" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"></label>
+    <label>Anything you’d like us to know<textarea name="note" rows="3" maxlength="1500" placeholder="The AI work you are proudest of, the kind of role you want next, notice period…"></textarea></label>
+    <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <label class="acheck"><input type="checkbox" name="open_to_other" checked> Also consider me for other suitable roles</label>
+    <label class="acheck"><input type="checkbox" name="consent"> I agree that DuaDesk may keep my details and CV to assess my fit for roles, using AI to prepare the assessment, with a person making every decision. My profile is never shared with an employer without my agreement, and I can ask for my data to be deleted at any time by writing to ashish@ashishduacorporation.com. *</label>
+    <p class="aerr" id="aErr" role="alert"></p>
+    <div class="cta"><button class="btn world" type="submit" id="aSubmit">Send in confidence</button><button class="btn ghost" type="button" id="aCancel">Cancel</button></div>
+   </form>
+   <div class="adone" id="aDone" hidden>
+    <h3>Thank you. We have it.</h3>
+    <p>A confirmation is on its way to your inbox. A person reads every application; if there’s a good fit, we’ll be in touch to talk it through before anything is shared with an employer.</p>
+    <button class="btn ghost" type="button" id="aDoneClose">Close</button>
+   </div>
+  </div>
+ </div>
 </main>
 <footer><div class="wrap foot">
  <div class="fl"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="54" height="54" role="img" aria-label="P³: Present, Purpose, Possibility. A DuaDesk method." class="stamp"><defs><path id="s-top" d="M13,60 A47,47 0 0,1 107,60"/><path id="s-bot" d="M7.5,60 A52.5,52.5 0 0,0 112.5,60"/></defs><circle cx="60" cy="60" r="57" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="60" cy="60" r="38" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="12.5" cy="60" r="1.6" fill="currentColor"/><circle cx="107.5" cy="60" r="1.6" fill="currentColor"/><text font-family="'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif" font-size="8.6" font-weight="700" letter-spacing="1.6" fill="currentColor" text-anchor="middle"><textPath href="#s-top" startOffset="50%">PRESENT · PURPOSE</textPath></text><text font-family="'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif" font-size="8.6" font-weight="700" letter-spacing="1.6" fill="currentColor" text-anchor="middle"><textPath href="#s-bot" startOffset="50%">POSSIBILITY</textPath></text><text x="57" y="70" text-anchor="middle" font-family="'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif" font-size="34" font-weight="800" fill="currentColor">P</text><text x="73" y="54" text-anchor="middle" font-family="'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif" font-size="17" font-weight="800" fill="currentColor">3</text><text x="60" y="85" text-anchor="middle" font-family="'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif" font-size="6.6" font-weight="700" letter-spacing="1.4" fill="currentColor">DUADESK</text></svg><div><b style="color:#fff">DuaDesk</b> · P³ · Present, Purpose, Possibility<br>AI prepares. People decide.</div></div>
  <div><a href="tel:+919899573717">+91 98995 73717</a> · <a href="mailto:ashish@ashishduacorporation.com">ashish@ashishduacorporation.com</a> · <a href="/index.html">www.duadesk.com</a><br>© 2026 DuaDesk · Ashish Dua Consulting Corporation</div>
 </div></footer>
+<script>
+/* AI Leaders: live roles board and the apply form */
+(function(){
+  var API='/api/ai-leaders', ROLES=[], current='general';
+  var $=function(id){return document.getElementById(id);};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function ago(d){if(!d)return '';var days=Math.floor((Date.now()-Date.parse(d))/864e5);return days<=0?'Added today':days===1?'Added yesterday':days<31?'Added '+days+' days ago':'Added '+new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short'});}
+  function card(r){
+    return '<article class="rcard"><div class="rtop"><span class="rkind '+(r.kind==='client'?'client':'market')+'">'+(r.kind==='client'?'Client search':'Market opportunity')+'</span><span class="rref">'+esc(r.ref)+'</span></div>'+
+      '<p class="rco">'+esc(r.company)+'</p><h3>'+esc(r.title)+'</h3>'+
+      '<div class="rmeta">'+[r.level,r.location||r.region,r.work_mode&&r.work_mode!=='Not stated'?r.work_mode:'',r.industry].filter(Boolean).map(function(x){return '<span>'+esc(x)+'</span>';}).join('')+'</div>'+
+      (r.summary?'<p class="rsum">'+esc(r.summary)+'</p>':'')+
+      (r.must_haves&&r.must_haves.length?'<ul class="rneeds">'+r.must_haves.slice(0,4).map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>':'')+
+      '<div class="rfoot"><small>'+esc(ago(r.found_at))+'</small><button class="btn world" type="button" data-apply="'+esc(r.ref)+'">Apply in confidence</button></div></article>';
+  }
+  function render(){
+    var g=$('fRegion').value, l=$('fLevel').value;
+    var rs=ROLES.filter(function(r){return (!g||r.region===g)&&(!l||r.level===l);});
+    $('rCount').textContent=rs.length+' of '+ROLES.length+' open role'+(ROLES.length===1?'':'s');
+    $('rGrid').innerHTML=rs.length?rs.map(card).join(''):'<p class="rmsg">No roles match these filters right now. Share your profile and we’ll match you as new roles open.</p>';
+  }
+  function fill(sel,vals){vals.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v;sel.appendChild(o);});}
+  function load(){
+    fetch(API+'?action=roles').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(j){
+      ROLES=j.roles||[];
+      if(!ROLES.length){$('rGrid').innerHTML='<p class="rmsg">New roles are being added. Share your profile now and we’ll match you automatically as roles open.</p>';return;}
+      var uniq=function(k){return ROLES.map(function(r){return r[k];}).filter(function(v,i,a){return v&&a.indexOf(v)===i;}).sort();};
+      fill($('fRegion'),uniq('region'));fill($('fLevel'),uniq('level'));$('rFilters').hidden=false;render();
+    }).catch(function(){$('rGrid').innerHTML='<p class="rmsg">The roles board is being set up. You can already share your profile, and we’ll match you as roles open.</p>';});
+  }
+  $('fRegion').addEventListener('change',render);$('fLevel').addEventListener('change',render);
+
+  /* the form */
+  var modal=$('aModal'), form=$('aForm'), last=null;
+  function open(ref){
+    current=ref||'general'; last=document.activeElement;
+    var r=ROLES.filter(function(x){return x.ref===current;})[0];
+    $('aTitle').textContent=r?'Apply for this role':'Share your profile';
+    $('aRole').textContent=r?r.title+' · '+r.company+' · '+r.ref:'For current and future AI leadership roles. We match you as roles open.';
+    $('aKick').textContent=r?'Apply in confidence':'In confidence';
+    form.hidden=false;$('aDone').hidden=true;$('aErr').textContent='';$('aSubmit').disabled=false;$('aSubmit').textContent='Send in confidence';
+    modal.hidden=false;document.body.style.overflow='hidden';setTimeout(function(){form.name.focus();},50);
+  }
+  function close(){modal.hidden=true;document.body.style.overflow='';if(last&&last.focus)last.focus();}
+  document.addEventListener('click',function(e){var b=e.target.closest('[data-apply]');if(b){e.preventDefault();open(b.getAttribute('data-apply'));}});
+  $('aClose').onclick=close;$('aCancel').onclick=close;$('aDoneClose').onclick=close;
+  modal.addEventListener('click',function(e){if(e.target===modal)close();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!modal.hidden)close();});
+  function readFile(f){return new Promise(function(ok,no){var r=new FileReader();r.onload=function(){ok(String(r.result).split(',')[1]);};r.onerror=no;r.readAsDataURL(f);});}
+  form.addEventListener('submit',function(e){
+    e.preventDefault();var err=$('aErr');err.textContent='';
+    var f=form.cv.files[0];
+    if(!form.name.value.trim())return err.textContent='Please enter your name.';
+    if(!/^\S+@\S+\.\S+$/.test(form.email.value.trim()))return err.textContent='Please enter a valid email address.';
+    if(!f)return err.textContent='Please attach your CV (PDF or Word).';
+    if(!/\.(pdf|docx)$/i.test(f.name))return err.textContent='Please attach your CV as a PDF or Word (.docx) file.';
+    if(f.size>3*1024*1024)return err.textContent='Please attach a CV under 3 MB.';
+    if(!form.consent.checked)return err.textContent='Please tick the box to agree to how we use your details.';
+    $('aSubmit').disabled=true;$('aSubmit').textContent='Sending…';
+    readFile(f).then(function(data){
+      var body={action:'apply',role:current,name:form.name.value,email:form.email.value,phone:form.phone.value,linkedin:form.linkedin.value.trim(),current_title:form.current_title.value,current_company:form.current_company.value,years:form.years.value,location:form.location.value,note:form.note.value,website:form.website.value,open_to_other:form.open_to_other.checked,consent:form.consent.checked,cv:{name:f.name,data:data}};
+      return fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||'Something went wrong. Please try again.');return j;});});
+    }).then(function(j){
+      if(j.id&&j.t)fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'match',id:j.id,t:j.t}),keepalive:true}).catch(function(){});
+      form.reset();form.open_to_other.checked=true;form.hidden=true;$('aDone').hidden=false;
+    }).catch(function(x){err.textContent=x.message||'Something went wrong. Please try again.';$('aSubmit').disabled=false;$('aSubmit').textContent='Send in confidence';});
+  });
+  load();
+})();
+</script>
 <script src="/dd-lang.js?v=3" defer></script>
 <script src="/dd-webinar-bar.js" defer></script>
 </body>
