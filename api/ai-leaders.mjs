@@ -431,8 +431,9 @@ ${people.map(p => `#${p.id}: ${p.current_title || ''} at ${p.current_company || 
 const RR = 'https://api.rocketreach.co';
 const RR_PATHS = {
   search: ['/v2/api/search', '/api/v2/person/search'],
-  reveal: ['/v2/api/lookupProfile', '/api/v2/person/lookup'],
-  status: ['/v2/api/checkStatus', '/api/v2/person/checkStatus'] };
+  reveal: ['/api/v2/person/lookup', '/v2/api/lookupProfile'],
+  status: ['/api/v2/person/checkStatus', '/v2/api/checkStatus'],
+  account: ['/api/v2/account/', '/v2/api/account'] };
 const HIRING_TITLES = ['Chief Human Resources Officer', 'CHRO', 'Chief People Officer', 'Global Head of Talent Acquisition', 'Head of Talent Acquisition', 'Head of Executive Search', 'Chief Technology Officer', 'Chief Information Officer', 'Chief Digital Officer', 'Chief Data Officer'];
 const LEADER_TITLES = ['Chief AI Officer', 'Chief Artificial Intelligence Officer', 'Chief Data and AI Officer', 'Head of AI', 'Head of Artificial Intelligence', 'Head of Generative AI', 'VP Artificial Intelligence', 'VP AI', 'Director of AI', 'Head of AI Platform', 'Head of Machine Learning'];
 const RR_PLACES = {
@@ -467,7 +468,7 @@ const rrPerson = x => ({ rr_id: Number(x.id), name: clean(x.name || [x.first_nam
   company: clean(x.current_employer, 160) || null, location: clean(x.location || [x.city, x.region, x.country_code || x.country].filter(Boolean).join(', '), 120) || null, linkedin_url: validUrl(x.linkedin_url) ? clean(x.linkedin_url, 300) : null });
 async function rrReveal(key, rrId) {
   let r = await rrReq(key, 'reveal', { query: '?id=' + enc(rrId) });
-  for (let k = 0; k < 4 && r && ['searching', 'progress', 'waiting', 'pending'].includes(String(r.status)); k++) {
+  for (let k = 0; k < 8 && r && ['searching', 'progress', 'waiting', 'pending', 'queued', 'not queued'].includes(String(r.status).toLowerCase()); k++) {
     await new Promise(x => setTimeout(x, +(process.env.RR_POLL_MS || 3000)));
     const st = await rrReq(key, 'status', { query: '?ids=' + enc(r.id || rrId) });
     r = Array.isArray(st) ? st[0] : (st.profiles ? st.profiles[0] : st);
@@ -562,6 +563,8 @@ async function rrRevealRow(table, id) {
   if (used >= s.limit) throw E(`Today's RocketReach limit (${s.limit} reveals) is used up. Change it in the webinar admin Settings.`, 429);
   const r = await rrReveal(s.key, row.rr_id);
   await sb('interactions', { method: 'POST', body: { kind: 'rr_lookup', data: { ail: table, id: row.id, status: r && r.status } }, prefer: 'return=minimal' });
+  const st = String(r && r.status || '').toLowerCase();
+  if (['searching', 'progress', 'waiting', 'pending', 'queued', 'not queued'].includes(st)) throw E('RocketReach is still looking this person up. Try Reveal again in a minute.', 202);
   const best = rrBest(r, table === 'ail_sourced'); // candidates: a personal email is fine; hiring contacts: work email only
   const [upd] = await sb(`${table}?id=eq.${row.id}`, { method: 'PATCH', body: { email: best.email, phone: best.phone, grade: best.grade, status: best.email || best.phone ? 'revealed' : 'no_email', revealed_at: new Date().toISOString(), linkedin_url: row.linkedin_url || (validUrl(r.linkedin_url) ? r.linkedin_url : null) }, prefer: 'return=representation' });
   return { row: upd, left: s.limit - used - 1 };
@@ -837,6 +840,7 @@ const admin = {
   async drafts_preview() { const d = await buildDrafts(); return { drafts: d.map(x => ({ ...x, mailto: mailtoLink(x) })), linkedin: await buildLinkedIn(d) }; },
   async rr_contacts(b) { if (b.refresh) await sb(`ail_contacts?role_id=eq.${+b.role_id}&revealed_at=is.null&status=eq.found`, { method: 'DELETE' }); const s = await rrSettings(); if (!s.key) throw E('Add your RocketReach API key in the webinar admin Settings first.'); const [r] = await sb(`ail_roles?select=id,ref,company,location&id=eq.${+b.role_id}`); if (!r) throw E('Role not found', 404); if (undisclosed(r.company)) throw E('The company is not named for this role, so there is no one to search for.'); return { found: await findContacts(r, s.key) }; },
   async rr_source(b) { const s = await rrSettings(); if (!s.key) throw E('Add your RocketReach API key in the webinar admin Settings first.'); const region = REGIONS.includes(b.region) ? b.region : REGIONS[0]; const r = await sourceLeaders(region, s.key); let fits = 0; if (ENV().AI_KEY) { try { fits = await fitSourced(); } catch (e) { r.note = 'Role suggestions need the AI: ' + e.message; } } return { ...r, fits }; },
+  async rr_account() { const s = await rrSettings(); if (!s.key) throw E('Not connected'); const a = await rrReq(s.key, 'account'); const pick = {}; for (const k of Object.keys(a || {})) if (/credit|lookup|plan|state|status|limit|remaining|balance/i.test(k)) pick[k] = a[k]; return { account: pick }; },
   async rr_fits() { return { suggested: await fitSourced() }; },
   async rr_reveal(b) { return rrRevealRow(b.list === 'sourced' ? 'ail_sourced' : 'ail_contacts', b.id); },
   async rr_status(b) { const t = b.list === 'sourced' ? 'ail_sourced' : 'ail_contacts'; if (!['found', 'revealed', 'no_email', 'contacted', 'dismissed'].includes(b.status)) throw E('Unknown status'); const [row] = await sb(`${t}?id=eq.${+b.id}`, { method: 'PATCH', body: { status: b.status }, prefer: 'return=representation' }); return { row }; },
