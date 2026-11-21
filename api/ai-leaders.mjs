@@ -618,6 +618,7 @@ const SIGN = `Warm regards,
 
 Ashish Dua
 Founder, DuaDesk · AI Leaders by DuaDesk
+Ashish Dua Consulting Corporation (Canada)
 ashish@ashishduacorporation.com · +91 98995 73717
 duadesk.com/ai-leaders`;
 const firstName = n => (clean(n, 120).split(' ')[0] || '').replace(/[^\p{L}\-']/gu, '') || 'there';
@@ -670,7 +671,7 @@ function contactDraft(c, r) {
 
 I noticed ${co} is hiring a ${r.title}${where}, and I would like to offer some help with that search.
 
-I am Ashish Dua, a Chartered Accountant with 30 years in enterprise technology, and I hold an Executive PG Certification in Generative AI and Machine Learning from IIT Roorkee. I was Head of IT at Microsoft India, Technical Director at KPMG India (where I built the Hyperion and BI practice), Assistant Vice President at Genpact and Project Manager at Honeywell, and I have led programmes for GE, Oracle and the United Nations across five regions.
+I am Ashish Dua, an enterprise technology leader with 30 years of experience, and I hold an Executive PG Certification in Generative AI and Machine Learning from IIT Roorkee. I was Head of IT at Microsoft India, Technical Director at KPMG India (where I built the Hyperion and BI practice), Assistant Vice President at Genpact and Project Manager at Honeywell, and I have led programmes for GE, Oracle and the United Nations across five regions. I am a Canadian citizen, and my firm, Ashish Dua Consulting Corporation, is registered in Canada.
 
 For the last three years I have been building AI myself. Under DuaDesk I have designed and shipped 13 live AI products, including:
 • AI CFO, with editions for India, the UAE, Saudi Arabia, Germany, the Netherlands and Japan
