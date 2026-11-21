@@ -653,22 +653,36 @@ const liJobs = place => `https://www.linkedin.com/jobs/search/?keywords=${encode
 const liPeople = q => `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(q)}`;
 const liClip = (t, n = 300) => t.length <= n ? t : t.slice(0, n - 1).replace(/[\s,.;:]+\S*$/, '') + '…';
 const short = s => String(s || '').replace(/^A /, 'a ').replace(/\s*\(.*?\)\s*/g, ' ').trim();
-const contactNote = (c, r) => liClip(`Hi ${firstName(c.name)}, I run AI Leaders by DuaDesk, a search practice for senior AI leaders. I saw ${r.company ? r.company.replace(/\s+(GmbH|AG|SE|Inc\.?|Ltd\.?|plc|& Co\.? KG|GmbH & Co\.? KG)\b.*$/i, '') : 'your team'} is hiring a ${r.title}. Happy to share a short, confidential slate of proven candidates if useful. Ashish Dua`);
+const contactNote = (c, r) => {
+  const head = `Hi ${firstName(c.name)}, I saw ${coName(r) || 'your team'} is hiring a ${r.title}. I'm Ashish Dua: ex-Head of IT, Microsoft India and KPMG Director, now building AI products at DuaDesk.`;
+  const full = `${head} I place AI leaders, assessed on what they have actually delivered. Happy to share a confidential slate.`;
+  return full.length <= 300 ? full : liClip(`${head} Happy to share a confidential slate.`);
+};
 const candidateNote = (p, r) => liClip(`Hi ${firstName(p.name)}, I'm running a confidential search for a ${r.title}${r.location ? ' in ' + r.location.split(',')[0] : ''} and your background stood out. Open to a short call? Ashish Dua, AI Leaders by DuaDesk`); // the role only, never the employer
 const applicantNote = (c, r) => liClip(`Hi ${firstName(c.name)}, thank you for applying for the ${r.title} role (${r.ref}). I'd like to talk it through with you; could we find 30 minutes this week? Ashish Dua, AI Leaders by DuaDesk`);
+const coName = r => String(r.company || '').replace(/\s*\|.*$/, '').replace(/\s+(GmbH\s*&\s*Co\.?\s*KG|GmbH|AG|SE|KGaA|Inc\.?|Ltd\.?|plc|LLC)\b\.?/gi, '').trim();
 function contactDraft(c, r) {
   const where = r.location ? ` in ${r.location.split(',')[0]}` : '';
+  const co = coName(r) || 'your company';
   return { kind: 'Hiring contact', table: 'ail_contacts', id: c.id, to: c.email, li: c.linkedin_url, note: contactNote(c, r), name: c.name, who: `${c.title || ''} · ${c.company || r.company || ''}`, about: `${r.ref} ${r.title}`,
-    subject: `Your ${r.title} search`,
+    subject: `Your ${r.title} search: AI leaders assessed by someone who builds AI`,
     body: `Dear ${firstName(c.name)},
 
-I noticed ${r.company || 'your company'} is looking for a ${r.title}${where}.
+I noticed ${co} is hiring a ${r.title}${where}, and I would like to offer some help with that search.
 
-I run AI Leaders by DuaDesk, a search practice focused only on senior AI leadership. We build AI products ourselves, for finance, procurement, audit and leadership teams, so we assess AI leaders on what they have actually delivered: systems in production, value created, teams built and risks managed.
+I am Ashish Dua, a Chartered Accountant with 30 years in enterprise technology. I was Head of IT at Microsoft India, Technical Director at KPMG India (where I built the Hyperion and BI practice), Assistant Vice President at Genpact and Head of Shared Services at Honeywell Middle East, and I have led programmes for GE, Oracle and the United Nations across five regions.
 
-If it would help, I would be glad to share a short, confidential slate of people who have done this role at scale, or simply compare notes on what the role needs to achieve in its first year.
+For the last three years I have been building AI myself. Under DuaDesk I have designed and shipped 13 live AI products, including:
+• AI CFO, with editions for India, the UAE, Saudi Arabia, Germany, the Netherlands and Japan
+• AI CPO for procurement and trade, Fixed Assets, and Dua Pramaan for AI-assisted audit
+• Dua Sarthi, an AI operating system for the CEO, and six AI command centres for banks and financial institutions
+I also hold an Executive PG in Generative AI and Machine Learning from IIT Roorkee.
 
-Would a 20-minute call next week be useful?
+That is why AI Leaders by DuaDesk works differently. Because I build these systems, I can turn your business goals into a precise brief for the role, and assess candidates on what they have actually delivered: AI in production, measurable value, teams built and risk governed. Most search firms stop at the CV; I can read the work behind it.
+
+If it would help, I would be glad to share a short, confidential slate of people who have done this role at scale, or simply spend 20 minutes on what the role must achieve in its first year.
+
+Would a call next week work for you?
 
 ${SIGN}
 
@@ -837,6 +851,7 @@ const admin = {
   },
   async cron_now() { return cronRun(); },
   async auto_reveals(b) { const n = Math.max(0, Math.min(20, Math.round(+b.value) || 0)); await sb('settings?on_conflict=key', { method: 'POST', body: [{ key: 'ail_auto_reveals', value: String(n) }], prefer: 'resolution=merge-duplicates,return=minimal' }); return { value: n }; },
+  async brief_now() { const d = await buildDrafts(); const l = await buildLinkedIn(d); await digest({ matched: 0, radar: null, pool: [], closed: 0, contacts: 0, sourced: null, sourced_fits: 0, errors: [] }, d, l); return { drafts: d.length, linkedin: l.length }; },
   async drafts_preview() { const d = await buildDrafts(); return { drafts: d.map(x => ({ ...x, mailto: mailtoLink(x) })), linkedin: await buildLinkedIn(d) }; },
   async rr_contacts(b) { if (b.refresh) await sb(`ail_contacts?role_id=eq.${+b.role_id}&revealed_at=is.null&status=eq.found`, { method: 'DELETE' }); const s = await rrSettings(); if (!s.key) throw E('Add your RocketReach API key in the webinar admin Settings first.'); const [r] = await sb(`ail_roles?select=id,ref,company,location&id=eq.${+b.role_id}`); if (!r) throw E('Role not found', 404); if (undisclosed(r.company)) throw E('The company is not named for this role, so there is no one to search for.'); return { found: await findContacts(r, s.key) }; },
   async rr_source(b) { const s = await rrSettings(); if (!s.key) throw E('Add your RocketReach API key in the webinar admin Settings first.'); const region = REGIONS.includes(b.region) ? b.region : REGIONS[0]; const r = await sourceLeaders(region, s.key); let fits = 0; if (ENV().AI_KEY) { try { fits = await fitSourced(); } catch (e) { r.note = 'Role suggestions need the AI: ' + e.message; } } return { ...r, fits }; },
