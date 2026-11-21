@@ -521,7 +521,7 @@ export default async function handler(req, res) {
       const q = new URL(req.url, 'http://x').searchParams;
       if ((q.get('action') || 'roles') !== 'roles') return send(res, 400, { error: 'Unknown action' });
       const rows = await sb('ail_roles?select=ref,title,level,industry,region,location,work_mode,summary,must_haves,company_masked,source,posted_on,found_at&status=eq.open&order=found_at.desc&limit=200');
-      return send(res, 200, { roles: rows.map(publicRole), updated: new Date().toISOString() }, 'public, s-maxage=300, stale-while-revalidate=600');
+      return send(res, 200, { roles: rows.map(publicRole), updated: new Date().toISOString() }, 'public, max-age=0, s-maxage=60, stale-while-revalidate=30');
     }
     if (req.method !== 'POST') return send(res, 405, { error: 'GET or POST only' });
     const b = await readBody(req);

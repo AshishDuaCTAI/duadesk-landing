@@ -468,7 +468,7 @@ h4.sub{margin:0 0 10px;font-size:12px;letter-spacing:1.6px;text-transform:upperc
   }
   function fill(sel,vals){vals.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v;sel.appendChild(o);});}
   function load(){
-    fetch(API+'?action=roles').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(j){
+    fetch(API+'?action=roles',{cache:'no-cache'}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(j){
       ROLES=j.roles||[];
       if(!ROLES.length){$('rGrid').innerHTML='<p class="rmsg">New roles are being added. Share your profile now and we’ll match you automatically as roles open.</p>';return;}
       var uniq=function(k){return ROLES.map(function(r){return r[k];}).filter(function(v,i,a){return v&&a.indexOf(v)===i;}).sort();};

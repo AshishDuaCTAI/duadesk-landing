@@ -187,7 +187,7 @@ function appCard(a){
 }
 document.addEventListener('change',function(e){var t=e.target;
   if(t.dataset.st)call('app_update',{id:+t.dataset.st,status:t.value}).then(function(){var a=D.apps.filter(function(x){return x.id===+t.dataset.st;})[0];if(a)a.status=t.value;msg('Status saved.');}).catch(function(x){msg(x.message);});
-  if(t.dataset.rstatus)call('role_status',{id:+t.dataset.rstatus,status:t.value}).then(function(){load('Role updated. The public page refreshes within 5 minutes.');}).catch(function(x){msg(x.message);});
+  if(t.dataset.rstatus)call('role_status',{id:+t.dataset.rstatus,status:t.value}).then(function(){load('Role updated. The public page refreshes within a minute.');}).catch(function(x){msg(x.message);});
 });
 document.addEventListener('click',function(e){var t=e.target.closest('button');if(!t)return;
   if(t.dataset.cv){var w=window.open('about:blank','_blank');call('cv_link',{candidate_id:+t.dataset.cv}).then(function(j){w.location=j.url;}).catch(function(x){w.close();msg(x.message);});}
