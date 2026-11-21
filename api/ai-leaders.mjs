@@ -497,7 +497,11 @@ function rrPhone(p, mode) {
 }
 const digits = n => String(n || '').replace(/[^\d]/g, '');
 const telLink = n => 'tel:+' + digits(n);
-const waLink = n => 'https://wa.me/' + digits(n);
+const waLink = (n, text) => 'https://wa.me/' + digits(n) + (text ? '?text=' + encodeURIComponent(text) : '');
+// short WhatsApp messages, opened ready to send (the role only for candidates, never the employer)
+const city = r => r.location ? String(r.location).split(',')[0].trim() : '';
+const waCandidate = (p, r) => `Hi ${firstName(p.name)}, this is Ashish Dua from AI Leaders by DuaDesk, a search practice only for senior AI leadership roles. I'm running a confidential search for ${aOr(r.title)} ${r.title}${city(r) ? ` in ${city(r)}` : ''} (ref ${r.ref}), and your background stood out. I've also sent you an email with the details.\n\nA little about me: I build AI myself (13 live AI products at DuaDesk), and before that I was Head of IT at Microsoft India and Technical Director at KPMG India.\n\nWould you be open to a 20-minute call this week? If this isn't of interest, just let me know and I won't message again.`;
+const waContact = (c, r) => `Hi ${firstName(c.name)}, this is Ashish Dua from AI Leaders by DuaDesk. I emailed you about your ${r.title} search${city(r) ? ` in ${city(r)}` : ''}. We focus only on senior AI leadership roles and assess candidates on what they have actually delivered; I build AI myself (ex-Head of IT, Microsoft India). I'd be glad to share a short, confidential slate of proven candidates.\n\nWould a 20-minute call next week suit you? If it isn't relevant, just let me know and I won't follow up.`;
 const companyKey = c => String(c || '').toLowerCase().replace(/&/g, ' and ').replace(/\b(pvt|private|ltd|limited|llp|inc|co|kg|ag|se|gmbh|plc|company|corp|corporation|group|the)\b\.?/g, ' ').replace(/[^a-z0-9]+/g, ' ').trim();
 function sameCompany(a, b) {
   const x = companyKey(a), y = companyKey(b); if (!x || !y) return false;
@@ -729,7 +733,7 @@ const coName = r => String(r.company || '').replace(/\s*\|.*$/, '').replace(/\s+
 function contactDraft(c, r) {
   const where = r.location ? ` in ${r.location.split(',')[0]}` : '';
   const co = coName(r) || 'your company';
-  return { kind: 'Hiring contact', table: 'ail_contacts', id: c.id, to: c.email, phone: c.phone, phone_type: c.phone_type, li: c.linkedin_url, note: contactNote(c, r), name: c.name, who: `${c.title || ''} · ${c.company || r.company || ''}`, about: `${r.ref} ${r.title}`,
+  return { kind: 'Hiring contact', table: 'ail_contacts', id: c.id, to: c.email, phone: c.phone, phone_type: c.phone_type, wa: waContact(c, r), li: c.linkedin_url, note: contactNote(c, r), name: c.name, who: `${c.title || ''} · ${c.company || r.company || ''}`, about: `${r.ref} ${r.title}`,
     subject: `${r.title}: a shortlist of proven AI leaders`,
     ...fmt(`Dear ${firstName(c.name)},
 
@@ -756,7 +760,7 @@ P.S. If this is not relevant, just let me know and I will not follow up.`) };
 }
 function candidateDraft(p, r, fit) { // the role only, never the employer's name
   const at = [p.title, p.company].filter(Boolean).join(' at ');
-  return { kind: 'Possible candidate', table: 'ail_sourced', id: p.id, to: p.email, phone: p.phone, phone_type: p.phone_type, li: p.linkedin_url, note: candidateNote(p, r), name: p.name, who: `${p.title || ''} · ${p.company || ''}`, about: `${r.ref} ${r.title} (fit ${fit.score}/100)`,
+  return { kind: 'Possible candidate', table: 'ail_sourced', id: p.id, to: p.email, phone: p.phone, phone_type: p.phone_type, wa: waCandidate(p, r), li: p.linkedin_url, note: candidateNote(p, r), name: p.name, who: `${p.title || ''} · ${p.company || ''}`, about: `${r.ref} ${r.title} (fit ${fit.score}/100)`,
     subject: `A confidential ${r.title} role`,
     ...fmt(`Dear ${firstName(p.name)},
 
@@ -818,11 +822,11 @@ async function buildLinkedIn(emailDrafts) {
     if (!roles.has(c.role_id) || covered.has(c.role_id)) continue;
     const cur = best.get(c.role_id); if (!cur || HIRE_RANK(c.title) < HIRE_RANK(cur.title)) best.set(c.role_id, c);
   }
-  const out = [...best.values()].slice(0, 10).map(c => { const r = roles.get(c.role_id); return { kind: 'Hiring contact', table: 'ail_contacts', id: c.id, li: c.linkedin_url, phone: c.phone, phone_type: c.phone_type, name: c.name, who: `${c.title || ''} · ${c.company || ''}`, about: `${r.ref} ${r.title}`, note: contactNote(c, r) }; });
+  const out = [...best.values()].slice(0, 10).map(c => { const r = roles.get(c.role_id); return { kind: 'Hiring contact', table: 'ail_contacts', id: c.id, li: c.linkedin_url, phone: c.phone, phone_type: c.phone_type, wa: waContact(c, r), name: c.name, who: `${c.title || ''} · ${c.company || ''}`, about: `${r.ref} ${r.title}`, note: contactNote(c, r) }; });
   const emailed = new Set(emailDrafts.filter(d => d.table === 'ail_sourced').map(d => d.id));
   const people = (await sb('ail_sourced?select=*&linkedin_url=not.is.null&email=is.null&li_drafted_at=is.null&status=in.(found,no_email)&fits=not.is.null&limit=300'))
     .filter(p => !emailed.has(p.id)).map(p => [p, (p.fits || []).filter(f => byRef.has(f.ref)).sort((x, y) => y.score - x.score)[0]]).filter(([, f]) => f && f.score >= 60).sort((x, y) => y[1].score - x[1].score).slice(0, 10);
-  for (const [p, f] of people) { const r = byRef.get(f.ref); out.push({ kind: 'Possible candidate', table: 'ail_sourced', id: p.id, li: p.linkedin_url, phone: p.phone, phone_type: p.phone_type, name: p.name, who: `${p.title || ''} · ${p.company || ''}`, about: `${r.ref} ${r.title} (fit ${f.score}/100)`, note: candidateNote(p, r) }); }
+  for (const [p, f] of people) { const r = byRef.get(f.ref); out.push({ kind: 'Possible candidate', table: 'ail_sourced', id: p.id, li: p.linkedin_url, phone: p.phone, phone_type: p.phone_type, wa: waCandidate(p, r), name: p.name, who: `${p.title || ''} · ${p.company || ''}`, about: `${r.ref} ${r.title} (fit ${f.score}/100)`, note: candidateNote(p, r) }); }
   return out;
 }
 /* Outlook: put each draft straight into Ashish's Drafts folder (Microsoft Graph, the "DuaDesk Webinars" app; needs the Mail.ReadWrite application permission) */
@@ -864,7 +868,7 @@ const owaLink = d => `https://outlook.office.com/mail/deeplink/compose?to=${enco
 const mailtoLink = d => `mailto:${encodeURIComponent(d.to)}?subject=${encodeURIComponent(d.subject)}&body=${encodeURIComponent(d.body.replace(/\n/g, '\r\n'))}`;
 // an Outlook-ready draft file: X-Unsent makes Outlook open it as a new message ready to send
 const emlFile = d => Buffer.from(`To: ${d.name ? `"${String(d.name).replace(/"/g, '')}" ` : ''}<${d.to}>\r\nSubject: =?UTF-8?B?${Buffer.from(d.subject).toString('base64')}?=\r\nX-Unsent: 1\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${Buffer.from(d.body.replace(/\n/g, '\r\n')).toString('base64').replace(/.{76}/g, '$&\r\n')}\r\n`).toString('base64');
-const phoneLine = d => d.phone ? `<div style="font-size:13px;margin:2px 0 4px">📞 <a href="${esc(telLink(d.phone))}" style="color:#1f1d2b;text-decoration:none"><b>${esc(d.phone)}</b></a>${d.phone_type && d.phone_type !== 'other' ? ` <span style="color:#7a7394">(${esc(d.phone_type)})</span>` : ''}${d.phone_type !== 'work' ? ` · <a href="${esc(waLink(d.phone))}" style="color:#1a8f4c;font-weight:700">WhatsApp</a>` : ''}</div>` : '';
+const phoneLine = d => d.phone ? `<div style="font-size:13px;margin:2px 0 4px">📞 <a href="${esc(telLink(d.phone))}" style="color:#1f1d2b;text-decoration:none"><b>${esc(d.phone)}</b></a>${d.phone_type && d.phone_type !== 'other' ? ` <span style="color:#7a7394">(${esc(d.phone_type)})</span>` : ''}${d.phone_type !== 'work' ? ` · <a href="${esc(waLink(d.phone, d.wa))}" style="color:#1a8f4c;font-weight:700">${d.wa ? 'WhatsApp (message ready, just press Send)' : 'WhatsApp'}</a>` : ''}</div>` : '';
 async function digest(out, drafts = [], lis = []) {
   const { OWNER, SITE } = ENV();
   const newRoles = await sb(`ail_roles?select=ref,title,company,company_masked,location,source_url,source&status=eq.open&found_at=gte.${new Date(Date.now() - 26 * 3600000).toISOString()}&order=found_at.desc&limit=50`); // every role added since yesterday's brief: by the radar, by Claude's morning research or by hand
