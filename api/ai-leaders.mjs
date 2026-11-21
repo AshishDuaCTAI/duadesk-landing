@@ -435,7 +435,11 @@ const RR_PATHS = {
   status: ['/api/v2/person/checkStatus', '/v2/api/checkStatus'],
   account: ['/api/v2/account/', '/v2/api/account'] };
 const HIRING_TITLES = ['Chief Human Resources Officer', 'CHRO', 'Chief People Officer', 'Global Head of Talent Acquisition', 'Head of Talent Acquisition', 'Head of Executive Search', 'Chief Technology Officer', 'Chief Information Officer', 'Chief Digital Officer', 'Chief Data Officer'];
-const LEADER_TITLES = ['Chief AI Officer', 'Chief Artificial Intelligence Officer', 'Chief Data and AI Officer', 'Head of AI', 'Head of Artificial Intelligence', 'Head of Generative AI', 'VP Artificial Intelligence', 'VP AI', 'Director of AI', 'Head of AI Platform', 'Head of Machine Learning'];
+const LEADER_TITLES = ['Chief AI Officer', 'Chief Artificial Intelligence Officer', 'Chief Data and AI Officer', 'Head of AI', 'Head of Artificial Intelligence', 'Head of Generative AI', 'Head of AI Platform', 'Head of Machine Learning', 'Head of Data Science',
+  'VP Artificial Intelligence', 'VP AI', 'Vice President AI', 'VP Machine Learning', 'VP Data Science', 'AVP Artificial Intelligence', 'AVP AI', 'Assistant Vice President AI', 'AVP Data Science',
+  'Director of AI', 'Director Artificial Intelligence', 'Director Machine Learning', 'Director Data Science', 'Director Generative AI', 'Senior Director AI',
+  'Senior Manager AI', 'Senior Manager Artificial Intelligence', 'Senior Manager Machine Learning', 'Senior Manager Data Science', 'AI Manager', 'Manager Artificial Intelligence', 'Machine Learning Manager',
+  'AI Lead', 'Generative AI Lead', 'Lead AI', 'Principal AI', 'AI Practice Lead']; // leadership pipeline: heads, VPs, AVPs, directors, senior managers, managers and leads
 const RR_PLACES = {
   'India': ['India'], 'Germany, the Netherlands and wider Europe': ['Germany', 'Netherlands', 'Switzerland', 'France'], 'the United Kingdom': ['United Kingdom'],
   'the UAE and Saudi Arabia': ['United Arab Emirates', 'Saudi Arabia'], 'Singapore, Japan and Asia-Pacific': ['Singapore', 'Japan', 'Australia'], 'the United States and Canada': ['United States', 'Canada'] };
@@ -521,18 +525,23 @@ async function findContacts(role, key) {
   return rows.length;
 }
 // AI leaders in a region (free search, a page at a time)
-async function sourceLeaders(region, key) {
+async function sourceLeaders(region, key, pages = 2) {
   const places = RR_PLACES[region] || ['India'];
-  const qkey = 'ail|src|' + sha(region).slice(0, 16);
-  const [prev] = await sb(`rr_searched?select=*&key=eq.${qkey}`);
-  const start = prev && prev.next_start ? prev.next_start : 1;
-  if (start > 2000) return { region, found: 0, added: 0, note: 'All results for this region have been seen.' };
-  const data = await rrReq(key, 'search', { body: { query: { current_title: LEADER_TITLES, location: places }, order_by: 'popularity', page_size: 25, start } });
-  const people = rrProfiles(data).map(rrPerson).filter(p => p.name);
-  const rows = people.length ? await sb('ail_sourced?on_conflict=rr_id', { method: 'POST', body: people.map(p => ({ ...p, region })), prefer: 'resolution=ignore-duplicates,return=representation' }) : [];
-  const pg = data.pagination || {};
-  await sb('rr_searched?on_conflict=key', { method: 'POST', body: [{ key: qkey, found: ((prev && prev.found) || 0) + people.length, next_start: people.length ? (pg.next || start + 25) : 2001, searched_at: new Date().toISOString() }], prefer: 'resolution=merge-duplicates,return=minimal' });
-  return { region, found: people.length, added: rows.length };
+  const qkey = 'ail|src2|' + sha(region).slice(0, 16); // src2: the wider title list starts from page 1
+  let found = 0, added = 0;
+  for (let n = 0; n < pages; n++) {
+    const [prev] = await sb(`rr_searched?select=*&key=eq.${qkey}`);
+    const start = prev && prev.next_start ? prev.next_start : 1;
+    if (start > 2000) return { region, found, added, note: 'All results for this region have been seen.' };
+    const data = await rrReq(key, 'search', { body: { query: { current_title: LEADER_TITLES, location: places }, order_by: 'popularity', page_size: 25, start } });
+    const people = rrProfiles(data).map(rrPerson).filter(p => p.name);
+    const rows = people.length ? await sb('ail_sourced?on_conflict=rr_id', { method: 'POST', body: people.map(p => ({ ...p, region })), prefer: 'resolution=ignore-duplicates,return=representation' }) : [];
+    const pg = data.pagination || {};
+    await sb('rr_searched?on_conflict=key', { method: 'POST', body: [{ key: qkey, found: ((prev && prev.found) || 0) + people.length, next_start: people.length ? (pg.next || start + 25) : 2001, searched_at: new Date().toISOString() }], prefer: 'resolution=merge-duplicates,return=minimal' });
+    found += people.length; added += rows.length;
+    if (!people.length) break;
+  }
+  return { region, found, added };
 }
 // which open roles each newly sourced leader may fit (AI, from title, employer and location only)
 async function fitSourced(limit = 40) {
@@ -659,7 +668,11 @@ const contactNote = (c, r) => {
   const full = `${head} Having built AI products myself (ex-Head of IT, Microsoft India), I assess candidates on what they have delivered. Happy to share a confidential slate.`;
   return full.length <= 300 ? full : liClip(`${head} Happy to share a confidential slate of proven candidates.`);
 };
-const candidateNote = (p, r) => liClip(`Hi ${firstName(p.name)}, I'm running a confidential search for a ${r.title}${r.location ? ' in ' + r.location.split(',')[0] : ''} and your background stood out. Open to a short call? Ashish Dua, AI Leaders by DuaDesk`); // the role only, never the employer
+const candidateNote = (p, r) => { // the role only, never the employer
+  const base = `Hi ${firstName(p.name)}, I'm running a confidential search for a ${r.title}${r.location ? ' in ' + r.location.split(',')[0] : ''} and your background stood out.`;
+  const full = `${base} I build AI products myself (ex-Head of IT, Microsoft India), so I understand the work. Open to a short call? Ashish Dua, AI Leaders by DuaDesk`;
+  return full.length <= 300 ? full : liClip(`${base} Open to a short call? Ashish Dua, AI Leaders by DuaDesk`);
+};
 const applicantNote = (c, r) => liClip(`Hi ${firstName(c.name)}, thank you for applying for the ${r.title} role (${r.ref}). I'd like to talk it through with you; could we find 30 minutes this week? Ashish Dua, AI Leaders by DuaDesk`);
 const coName = r => String(r.company || '').replace(/\s*\|.*$/, '').replace(/\s+(GmbH\s*&\s*Co\.?\s*KG|GmbH|AG|SE|KGaA|Inc\.?|Ltd\.?|plc|LLC)\b\.?/gi, '').trim();
 function contactDraft(c, r) {
@@ -693,7 +706,9 @@ function candidateDraft(p, r, fit) {
 
 I run AI Leaders by DuaDesk, a search practice that focuses only on senior AI leadership roles. ${at ? `Your work as ${at} stood out to me, and ` : ''}I am working on a confidential search for a ${r.title}${r.location ? `, based in ${r.location},` : ''} that I think could be a strong fit for your background.
 
-${r.summary ? `The role in brief: ${r.summary}\n\n` : ''}If you are open to a conversation, I would be glad to share more in confidence. You can also see the role (reference ${r.ref}) at duadesk.com/ai-leaders.
+${r.summary ? `The role in brief: ${r.summary}\n\n` : ''}A little about me: I build AI myself. Over the last three years I have designed and shipped 13 live AI products at DuaDesk, across finance, procurement, audit and banking. Before that I led enterprise technology as Head of IT at Microsoft India and Technical Director at KPMG India, and I hold an Executive PG Certification in Generative AI and Machine Learning from IIT Roorkee. So I understand the work you have done, and I can present it to employers for what it is: real delivery, not just a title. I am a Canadian citizen, and we work through my firm, Ashish Dua Consulting Corporation, registered in Canada.
+
+If you are open to a conversation, I would be glad to share more in confidence. You can also see the role (reference ${r.ref}) at duadesk.com/ai-leaders.
 
 Would you have 20 minutes for a call this week or next?
 
