@@ -654,7 +654,7 @@ const liPeople = q => `https://www.linkedin.com/search/results/people/?keywords=
 const liClip = (t, n = 300) => t.length <= n ? t : t.slice(0, n - 1).replace(/[\s,.;:]+\S*$/, '') + '…';
 const short = s => String(s || '').replace(/^A /, 'a ').replace(/\s*\(.*?\)\s*/g, ' ').trim();
 const contactNote = (c, r) => {
-  const head = `Hi ${firstName(c.name)}, I saw ${coName(r) || 'your team'} is hiring a ${r.title}. I'm Ashish Dua: ex-Head of IT, Microsoft India and KPMG Director, now building AI products at DuaDesk.`;
+  const head = `Hi ${firstName(c.name)}, I saw ${coName(r) || 'your team'} is hiring a ${r.title}. I'm Ashish Dua: ex-Head of IT, Microsoft India and KPMG Director, IIT Roorkee-certified in GenAI, now building AI products at DuaDesk.`;
   const full = `${head} I place AI leaders, assessed on what they have actually delivered. Happy to share a confidential slate.`;
   return full.length <= 300 ? full : liClip(`${head} Happy to share a confidential slate.`);
 };
@@ -670,13 +670,12 @@ function contactDraft(c, r) {
 
 I noticed ${co} is hiring a ${r.title}${where}, and I would like to offer some help with that search.
 
-I am Ashish Dua, a Chartered Accountant with 30 years in enterprise technology. I was Head of IT at Microsoft India, Technical Director at KPMG India (where I built the Hyperion and BI practice), Assistant Vice President at Genpact and Head of Shared Services at Honeywell Middle East, and I have led programmes for GE, Oracle and the United Nations across five regions.
+I am Ashish Dua, a Chartered Accountant with 30 years in enterprise technology, and I hold an Executive PG Certification in Generative AI and Machine Learning from IIT Roorkee. I was Head of IT at Microsoft India, Technical Director at KPMG India (where I built the Hyperion and BI practice), Assistant Vice President at Genpact and Project Manager at Honeywell, and I have led programmes for GE, Oracle and the United Nations across five regions.
 
 For the last three years I have been building AI myself. Under DuaDesk I have designed and shipped 13 live AI products, including:
 • AI CFO, with editions for India, the UAE, Saudi Arabia, Germany, the Netherlands and Japan
 • AI CPO for procurement and trade, Fixed Assets, and Dua Pramaan for AI-assisted audit
 • Dua Sarthi, an AI operating system for the CEO, and six AI command centres for banks and financial institutions
-I also hold an Executive PG in Generative AI and Machine Learning from IIT Roorkee.
 
 That is why AI Leaders by DuaDesk works differently. Because I build these systems, I can turn your business goals into a precise brief for the role, and assess candidates on what they have actually delivered: AI in production, measurable value, teams built and risk governed. Most search firms stop at the CV; I can read the work behind it.
 
