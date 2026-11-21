@@ -655,9 +655,9 @@ const liPeople = q => `https://www.linkedin.com/search/results/people/?keywords=
 const liClip = (t, n = 300) => t.length <= n ? t : t.slice(0, n - 1).replace(/[\s,.;:]+\S*$/, '') + '…';
 const short = s => String(s || '').replace(/^A /, 'a ').replace(/\s*\(.*?\)\s*/g, ' ').trim();
 const contactNote = (c, r) => {
-  const head = `Hi ${firstName(c.name)}, I saw ${coName(r) || 'your team'} is hiring a ${r.title}. I'm Ashish Dua: ex-Head of IT, Microsoft India and KPMG Director, IIT Roorkee-certified in GenAI, now building AI products at DuaDesk.`;
-  const full = `${head} I place AI leaders, assessed on what they have actually delivered. Happy to share a confidential slate.`;
-  return full.length <= 300 ? full : liClip(`${head} Happy to share a confidential slate.`);
+  const head = `Hi ${firstName(c.name)}, I saw ${coName(r) || 'your team'} is hiring a ${r.title}. I run AI Leaders by DuaDesk, a search practice only for senior AI leadership roles.`;
+  const full = `${head} Having built AI products myself (ex-Head of IT, Microsoft India), I assess candidates on what they have delivered. Happy to share a confidential slate.`;
+  return full.length <= 300 ? full : liClip(`${head} Happy to share a confidential slate of proven candidates.`);
 };
 const candidateNote = (p, r) => liClip(`Hi ${firstName(p.name)}, I'm running a confidential search for a ${r.title}${r.location ? ' in ' + r.location.split(',')[0] : ''} and your background stood out. Open to a short call? Ashish Dua, AI Leaders by DuaDesk`); // the role only, never the employer
 const applicantNote = (c, r) => liClip(`Hi ${firstName(c.name)}, thank you for applying for the ${r.title} role (${r.ref}). I'd like to talk it through with you; could we find 30 minutes this week? Ashish Dua, AI Leaders by DuaDesk`);
@@ -666,23 +666,20 @@ function contactDraft(c, r) {
   const where = r.location ? ` in ${r.location.split(',')[0]}` : '';
   const co = coName(r) || 'your company';
   return { kind: 'Hiring contact', table: 'ail_contacts', id: c.id, to: c.email, li: c.linkedin_url, note: contactNote(c, r), name: c.name, who: `${c.title || ''} · ${c.company || r.company || ''}`, about: `${r.ref} ${r.title}`,
-    subject: `Your ${r.title} search: AI leaders assessed by someone who builds AI`,
+    subject: `${r.title}: a shortlist of proven AI leaders`,
     body: `Dear ${firstName(c.name)},
 
-I noticed ${co} is hiring a ${r.title}${where}, and I would like to offer some help with that search.
+I saw that ${co} is hiring a ${r.title}${where}. I run AI Leaders by DuaDesk, a search practice that focuses only on senior AI leadership roles, and I would like to help you fill it.
 
-I am Ashish Dua, an enterprise technology leader with 30 years of experience, and I hold an Executive PG Certification in Generative AI and Machine Learning from IIT Roorkee. I was Head of IT at Microsoft India, Technical Director at KPMG India (where I built the Hyperion and BI practice), Assistant Vice President at Genpact and Project Manager at Honeywell, and I have led programmes for GE, Oracle and the United Nations across five regions. I am a Canadian citizen, and my firm, Ashish Dua Consulting Corporation, is registered in Canada.
+Roles like this are hard to hire for. Many candidates have AI on their CV; far fewer have taken AI into production, shown measurable value, built a team and kept it well governed. That is what we look for, and how we work:
+• Role first: we start by agreeing what the ${r.title} must achieve in the first 12 to 24 months.
+• Evidence, not titles: every candidate is assessed on systems delivered, value created, teams built and risk managed.
+• A short, confidential slate, with a written view of each candidate's strengths and risks.
+• Reach across India, Europe, the Middle East and North America, including strong people who are not actively looking.
 
-For the last three years I have been building AI myself. Under DuaDesk I have designed and shipped 13 live AI products, including:
-• AI CFO, with editions for India, the UAE, Saudi Arabia, Germany, the Netherlands and Japan
-• AI CPO for procurement and trade, Fixed Assets, and Dua Pramaan for AI-assisted audit
-• Dua Sarthi, an AI operating system for the CEO, and six AI command centres for banks and financial institutions
+What makes our assessment different is that I build AI myself. Over the last three years I have designed and shipped 13 live AI products at DuaDesk, across finance, procurement, audit and banking. Before that I led enterprise technology as Head of IT at Microsoft India and Technical Director at KPMG India, and I hold an Executive PG Certification in Generative AI and Machine Learning from IIT Roorkee. So when a candidate describes their work, I can tell real delivery from slideware.
 
-That is why AI Leaders by DuaDesk works differently. Because I build these systems, I can turn your business goals into a precise brief for the role, and assess candidates on what they have actually delivered: AI in production, measurable value, teams built and risk governed. Most search firms stop at the CV; I can read the work behind it.
-
-If it would help, I would be glad to share a short, confidential slate of people who have done this role at scale, or simply spend 20 minutes on what the role must achieve in its first year.
-
-Would a call next week work for you?
+Would a 20-minute call next week be useful to talk through the role? There is no commitment in that first conversation.
 
 ${SIGN}
 
