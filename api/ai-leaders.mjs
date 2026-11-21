@@ -749,6 +749,37 @@ async function buildLinkedIn(emailDrafts) {
   for (const [p, f] of people) { const r = byRef.get(f.ref); out.push({ kind: 'Possible candidate', table: 'ail_sourced', id: p.id, li: p.linkedin_url, name: p.name, who: `${p.title || ''} · ${p.company || ''}`, about: `${r.ref} ${r.title} (fit ${f.score}/100)`, note: candidateNote(p, r) }); }
   return out;
 }
+/* Outlook: put each draft straight into Ashish's Drafts folder (Microsoft Graph, the "DuaDesk Webinars" app; needs the Mail.ReadWrite application permission) */
+const MS = () => ({ tenant: process.env.MS_TENANT_ID || '', client: process.env.MS_CLIENT_ID || '', secret: process.env.MS_CLIENT_SECRET || '',
+  login: process.env.MS_LOGIN_BASE || 'https://login.microsoftonline.com', graph: process.env.MS_GRAPH_BASE || 'https://graph.microsoft.com/v1.0',
+  mailbox: process.env.AIL_DRAFTS_MAILBOX || process.env.AIL_OWNER_EMAIL || process.env.WEBINAR_OWNER_EMAIL || 'ashish@ashishduacorporation.com' });
+let msTok = { v: '', exp: 0 };
+async function msGraph(path, { method = 'GET', body } = {}) {
+  const m = MS(); if (!m.tenant || !m.client || !m.secret) throw E('Microsoft 365 is not connected (MS_TENANT_ID, MS_CLIENT_ID, MS_CLIENT_SECRET).', 503);
+  if (!msTok.v || Date.now() > msTok.exp - 60000) {
+    const r = await fetch(`${m.login}/${encodeURIComponent(m.tenant)}/oauth2/v2.0/token`, { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ client_id: m.client, client_secret: m.secret, scope: 'https://graph.microsoft.com/.default', grant_type: 'client_credentials' }).toString(), signal: AbortSignal.timeout(15000) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.access_token) throw E('Microsoft sign-in failed: ' + String(j.error_description || j.error || r.status).split('\r\n')[0].slice(0, 160), 502);
+    msTok = { v: j.access_token, exp: Date.now() + (+j.expires_in || 3600) * 1000 };
+  }
+  const res = await fetch(m.graph + path, { method, headers: { Authorization: 'Bearer ' + msTok.v, ...(body ? { 'content-type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(20000) });
+  const j = res.status === 204 ? {} : await res.json().catch(() => ({}));
+  if (!res.ok) { const msg = (j.error && j.error.message) || res.status; throw E(res.status === 403 || /access is denied|insufficient privileges|authorization/i.test(String(msg)) ? 'Outlook drafts need the Mail.ReadWrite permission on the DuaDesk Webinars app (with admin consent).' : 'Outlook: ' + String(msg).slice(0, 200), res.status === 403 ? 403 : 502); }
+  return j;
+}
+async function outlookDrafts(drafts) {
+  const out = { created: 0, error: null };
+  if (!drafts.length) return out;
+  const box = encodeURIComponent(MS().mailbox);
+  for (const d of drafts) {
+    try {
+      await msGraph(`/users/${box}/messages`, { method: 'POST', body: { subject: d.subject, body: { contentType: 'Text', content: d.body }, toRecipients: [{ emailAddress: { address: d.to, ...(d.name ? { name: d.name } : {}) } }], categories: ['AI Leaders'] } });
+      out.created++;
+    } catch (e) { out.error = e.message; if (e.status === 403 || e.status === 503) break; }
+  }
+  return out;
+}
 // Outlook on the web: opens a new message in the signed-in Microsoft 365 mailbox, filled in and ready to send
 const owaLink = d => `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(d.to)}&subject=${encodeURIComponent(d.subject)}&body=${encodeURIComponent(d.body)}`;
 const mailtoLink = d => `mailto:${encodeURIComponent(d.to)}?subject=${encodeURIComponent(d.subject)}&body=${encodeURIComponent(d.body.replace(/\n/g, '\r\n'))}`;
@@ -759,7 +790,10 @@ async function digest(out, drafts = [], lis = []) {
   const newRoles = await sb(`ail_roles?select=ref,title,company,company_masked,location,source_url,source&status=eq.open&found_at=gte.${new Date(Date.now() - 26 * 3600000).toISOString()}&order=found_at.desc&limit=50`); // every role added since yesterday's brief: by the radar, by Claude's morning research or by hand
   const openRoles = (await sb('ail_roles?select=id&status=eq.open&limit=1000')).length;
   const newApps = (await sb(`ail_applications?select=id&created_at=gte.${new Date(Date.now() - 86400000).toISOString()}&limit=1000`)).length;
+  const ol = await outlookDrafts(drafts).catch(e => ({ created: 0, error: e.message }));
+  const inOutlook = drafts.length && ol.created === drafts.length;
   const draftHtml = drafts.length ? `<h2 style="font:700 18px Georgia,serif;margin:18px 0 6px">${drafts.length} draft email${drafts.length === 1 ? '' : 's'} ready</h2>
+${inOutlook ? `<p style="margin:0 0 10px;padding:10px 12px;background:#e8f5ec;border-radius:8px;color:#1e5b33"><b>All ${drafts.length} are already in your Outlook Drafts folder</b> (category <b>AI Leaders</b>). In Outlook, open <b>Drafts</b>, click a draft, check it and click <b>Send</b>.</p>` : (ol.error ? `<p style="margin:0 0 10px;padding:10px 12px;background:#fff4e0;border-radius:8px;color:#7a4a00">${ol.created ? `${ol.created} of ${drafts.length} drafts were put in your Outlook Drafts folder. ` : ''}Could not put ${ol.created ? 'the rest' : 'them'} in Outlook: ${esc(ol.error)} Use the buttons or attached files below for now.</p>` : '')}
 <p style="font-size:13px;color:#7a7394;margin:0 0 10px">Click <b>Open in Outlook</b>: a new message opens in Outlook on the web (signed in as ashish@ashishduacorporation.com), already addressed and written. Check it and click <b>Send</b>. <b>Open in mail app</b> does the same in your computer's email app, if one is set up. Each draft is also attached as a file. Nothing has been sent.</p>
 ${drafts.map((d, i) => `<div style="border:1px solid #e4def7;border-radius:10px;padding:12px 14px;margin:0 0 10px">
 <div style="font-size:12px;color:#6b4fe0;font-weight:700;text-transform:uppercase;letter-spacing:1px">${i + 1}. ${esc(d.kind)} · ${esc(d.about)}</div>
@@ -793,8 +827,8 @@ ${draftHtml}
 ${liHtml}
 ${out.errors.length ? `<b>Needs a look</b>${ul(out.errors)}` : ''}
 <p style="margin:16px 0 0"><a href="${esc(SITE)}/ai-leaders/admin/" style="display:inline-block;background:#8b6cff;color:#fff;text-decoration:none;border-radius:999px;padding:10px 18px;font-weight:700">Open the AI Leaders desk</a></p>`);
-  const attachments = drafts.map((d, i) => ({ filename: `${String(i + 1).padStart(2, '0')} ${String(d.name || 'draft').replace(/[^\w\- ]+/g, '').slice(0, 40)}.eml`, content: emlFile(d) }));
-  const sent = await mail({ to: OWNER, subject: `AI Leaders morning brief: ${drafts.length} email draft${drafts.length === 1 ? '' : 's'}, ${lis.length} LinkedIn, ${newRoles.length} new role${newRoles.length === 1 ? '' : 's'}`, html, attachments, idem: 'ail-brief-' + new Date(Date.now() + 5.5 * 3600000).toISOString().slice(0, 10) + '-' + sha(html).slice(0, 16) }); // same content is never sent twice; changed content always goes out
+  const attachments = inOutlook ? [] : drafts.map((d, i) => ({ filename: `${String(i + 1).padStart(2, '0')} ${String(d.name || 'draft').replace(/[^\w\- ]+/g, '').slice(0, 40)}.eml`, content: emlFile(d) }));
+  const sent = await mail({ to: OWNER, subject: `AI Leaders morning brief: ${drafts.length} email draft${drafts.length === 1 ? '' : 's'}${inOutlook ? ' in your Outlook Drafts' : ''}, ${lis.length} LinkedIn, ${newRoles.length} new role${newRoles.length === 1 ? '' : 's'}`, html, attachments, idem: 'ail-brief-' + new Date(Date.now() + 5.5 * 3600000).toISOString().slice(0, 10) + '-' + sha(html).slice(0, 16) }); // same content is never sent twice; changed content always goes out
   if (sent) {
     const now = new Date().toISOString();
     for (const d of drafts) await sb(`${d.table}?id=eq.${d.id}`, { method: 'PATCH', body: d.table === 'ail_applications' ? { drafted_at: now } : { drafted_at: now, li_drafted_at: now } }).catch(() => {});
@@ -854,6 +888,7 @@ const admin = {
   async cron_now() { return cronRun(); },
   async auto_reveals(b) { const n = Math.max(0, Math.min(20, Math.round(+b.value) || 0)); await sb('settings?on_conflict=key', { method: 'POST', body: [{ key: 'ail_auto_reveals', value: String(n) }], prefer: 'resolution=merge-duplicates,return=minimal' }); return { value: n }; },
   async brief_now() { const d = await buildDrafts(); const l = await buildLinkedIn(d); const sent = await digest({ matched: 0, radar: null, pool: [], closed: 0, contacts: 0, sourced: null, sourced_fits: 0, errors: [] }, d, l); return { sent: !!sent, id: sent && sent.id, drafts: d.length, linkedin: l.length }; },
+  async outlook_test() { const f = await msGraph(`/users/${encodeURIComponent(MS().mailbox)}/mailFolders/drafts?$select=displayName,totalItemCount`); return { ok: true, mailbox: MS().mailbox, folder: f.displayName, items: f.totalItemCount }; },
   async drafts_preview() { const d = await buildDrafts(); return { drafts: d.map(x => ({ ...x, mailto: mailtoLink(x), owa: owaLink(x) })), linkedin: await buildLinkedIn(d) }; },
   async rr_contacts(b) { if (b.refresh) await sb(`ail_contacts?role_id=eq.${+b.role_id}&revealed_at=is.null&status=eq.found`, { method: 'DELETE' }); const s = await rrSettings(); if (!s.key) throw E('Add your RocketReach API key in the webinar admin Settings first.'); const [r] = await sb(`ail_roles?select=id,ref,company,location&id=eq.${+b.role_id}`); if (!r) throw E('Role not found', 404); if (undisclosed(r.company)) throw E('The company is not named for this role, so there is no one to search for.'); return { found: await findContacts(r, s.key) }; },
   async rr_source(b) { const s = await rrSettings(); if (!s.key) throw E('Add your RocketReach API key in the webinar admin Settings first.'); const region = REGIONS.includes(b.region) ? b.region : REGIONS[0]; const r = await sourceLeaders(region, s.key); let fits = 0; if (ENV().AI_KEY) { try { fits = await fitSourced(); } catch (e) { r.note = 'Role suggestions need the AI: ' + e.message; } } return { ...r, fits }; },
