@@ -686,7 +686,7 @@ function mdHtml(src) {
   return `<div style="font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:11pt;line-height:1.45;color:#1f1d2b">${out.join('')}</div>`;
 }
 const fmt = src => ({ body: mdText(src), html: mdHtml(src) });
-const aOr = t => /^[aeiou]/i.test(String(t || '').trim()) ? 'an' : 'a';
+const aOr = t => /^([aeiou]|(MD|SVP|EVP|MBA|SME|LLM|ML|NLP|R&D|HR|SAP)\b)/i.test(String(t || '').trim()) ? 'an' : 'a';
 const firstName = n => (clean(n, 120).split(' ')[0] || '').replace(/[^\p{L}\-']/gu, '') || 'there';
 const HIRE_RANK = t => /talent|recruit|executive search/i.test(t || '') ? 0 : /chro|human|people|\bhr\b|personal/i.test(t || '') ? 1 : /technology|cto|information|cio|digital|data/i.test(t || '') ? 2 : 3;
 async function autoSettings() {
@@ -732,29 +732,49 @@ const candidateNote = (p, r) => { // the role only, never the employer
 };
 const applicantNote = (c, r) => liClip(`Hi ${firstName(c.name)}, thank you for applying for the ${r.title} role (${r.ref}). I'd like to talk it through with you; could we find 30 minutes this week? Ashish Dua, AI Leaders by DuaDesk`);
 const coName = r => String(r.company || '').replace(/\s*\|.*$/, '').replace(/\s+(GmbH\s*&\s*Co\.?\s*KG|GmbH|AG|SE|KGaA|Inc\.?|Ltd\.?|plc|LLC)\b\.?/gi, '').trim();
-function contactDraft(c, r) {
+const roleLine = r => `**${r.title}**${r.location ? ` (${r.location.split(',')[0]})` : ''}`;
+// one email per person: a hiring contact who owns several open roles gets them all in one message
+function contactDraft(c, rs, rows, before) {
+  rs = [].concat(rs); rows = rows || [c];
+  const r = rs[0], many = rs.length > 1;
   const where = r.location ? ` in ${r.location.split(',')[0]}` : '';
   const co = coName(r) || 'your company';
-  return { kind: 'Hiring contact', table: 'ail_contacts', id: c.id, to: c.email, phone: c.phone, phone_type: c.phone_type, wa: waContact(c, r), li: c.linkedin_url, note: contactNote(c, r), name: c.name, who: `${c.title || ''} · ${c.company || r.company || ''}`, about: `${r.ref} ${r.title}`,
-    subject: `${r.title}: a shortlist of proven AI leaders`,
+  const base = { kind: 'Hiring contact', table: 'ail_contacts', id: c.id, ids: rows.map(x => x.id), role_ids: rs.map(x => x.id), to: c.email, phone: c.phone, phone_type: c.phone_type, wa: waContact(c, r), li: c.linkedin_url, note: contactNote(c, r), name: c.name, who: `${c.title || ''} · ${c.company || r.company || ''}`, about: rs.map(x => `${x.ref} ${x.title}`).join(' · ') };
+  const hiring = many ? `**${co} is hiring for several senior AI roles**:
+${rs.map(x => '• ' + roleLine(x)).join('\n')}` : `**${co} is hiring ${aOr(r.title)} ${r.title}**${where}.`;
+  if (before) return { ...base, // they have heard from Ashish already: a short note about the new role(s), not the full introduction again
+    subject: many ? `${rs.length} more senior AI roles at ${co}: a shortlist of proven AI leaders` : `${r.title}: a shortlist of proven AI leaders`,
     ...fmt(`Dear ${firstName(c.name)},
 
-I saw that **${co} is hiring ${aOr(r.title)} ${r.title}**${where}. I run **AI Leaders by DuaDesk**, a search practice that focuses only on senior AI leadership roles, and I would like to help you fill it.
+I wrote to you earlier from **AI Leaders by DuaDesk**. I have since seen that ${many ? hiring : `${co} is also hiring ${aOr(r.title)} **${r.title}**${where}.`}
 
-## About the role
-Roles like this are hard to hire for. Many candidates have AI on their CV; far fewer have **taken AI into production, shown measurable value, built a team and kept it well governed**. That is what we look for.
+I would be glad to help with ${many ? 'these' : 'this one'} too: a short, confidential slate of candidates assessed on what they have actually delivered in AI, with a written view of each one's strengths and risks.
+
+Would a **20-minute call next week** be useful? There is no commitment in that first conversation.
+
+${SIGN}
+
+P.S. If this is not relevant, just let me know and I will not follow up.`) };
+  return { ...base,
+    subject: many ? `Your senior AI roles at ${co}: a shortlist of proven AI leaders` : `${r.title}: a shortlist of proven AI leaders`,
+    ...fmt(`Dear ${firstName(c.name)},
+
+I saw that ${hiring}${many ? '\n\n' : ' '}I run **AI Leaders by DuaDesk**, a search practice that focuses only on senior AI leadership roles, and I would like to help you fill ${many ? 'them' : 'it'}.
+
+## About the role${many ? 's' : ''}
+Roles like ${many ? 'these' : 'this'} are hard to hire for. Many candidates have AI on their CV; far fewer have **taken AI into production, shown measurable value, built a team and kept it well governed**. That is what we look for.
 
 ## How we work
-• **Role first:** we start by agreeing what the ${r.title} must achieve in the first 12 to 24 months.
+• **Role first:** we start by agreeing what ${many ? 'each role' : `the ${r.title}`} must achieve in the first 12 to 24 months.
 • **Evidence, not titles:** every candidate is assessed on systems delivered, value created, teams built and risk managed.
-• **A short, confidential slate**, with a written view of each candidate's strengths and risks.
+• **A short, confidential slate**${many ? ' for each role' : ''}, with a written view of each candidate's strengths and risks.
 • **Global reach:** India, Europe, the Middle East and North America, including strong people who are not actively looking and leaders open to relocation.
 
 ## About AI Leaders by DuaDesk
 What makes our assessment different is that **I build AI myself**. Over the last three years I have designed and shipped **13 live AI products at DuaDesk**, across finance, procurement, audit and banking. Before that I led enterprise technology as **Head of IT at Microsoft India** and **Technical Director at KPMG India**, and I hold an **Executive PG Certification in Generative AI and Machine Learning from IIT Roorkee**. So when a candidate describes their work, I can tell real delivery from slideware. I am a Canadian citizen, and we work through my firm, **Ashish Dua Consulting Corporation, registered in Canada**.
 
 ## Next step
-Would a **20-minute call next week** be useful to talk through the role? There is no commitment in that first conversation.
+Would a **20-minute call next week** be useful to talk through ${many ? 'the roles' : 'the role'}? There is no commitment in that first conversation.
 
 ${SIGN}
 
@@ -801,8 +821,20 @@ async function buildDrafts() {
   const roles = new Map((await sb('ail_roles?select=id,ref,title,company,company_masked,location,summary,status&limit=1000')).map(r => [r.id, r]));
   const byRef = new Map([...roles.values()].map(r => [r.ref, r]));
   const out = [];
-  for (const c of await sb('ail_contacts?select=*&revealed_at=not.is.null&drafted_at=is.null&email=not.is.null&status=eq.revealed&limit=20')) {
-    const r = roles.get(c.role_id); if (r && r.status === 'open') out.push(Object.assign(contactDraft(c, r), { role_id: c.role_id }));
+  const person = c => c.hiring_contact_id ? 'h' + c.hiring_contact_id : 'e' + String(c.email || '').trim().toLowerCase();
+  const groups = new Map();
+  for (const c of await sb('ail_contacts?select=*&revealed_at=not.is.null&drafted_at=is.null&email=not.is.null&status=eq.revealed&order=created_at&limit=100')) {
+    const r = roles.get(c.role_id); if (!r || r.status !== 'open') continue;
+    const g = groups.get(person(c)) || { rows: [], roles: [] }; groups.set(person(c), g);
+    g.rows.push(c); if (!g.roles.some(x => x.id === r.id)) g.roles.push(r);
+  }
+  // anyone already emailed about another role gets a short follow-up instead of the full introduction
+  const done = await sb('ail_contacts?select=hiring_contact_id,email&drafted_at=not.is.null&limit=2000').catch(() => []);
+  const emailedBefore = new Set(done.flatMap(x => [x.hiring_contact_id && 'h' + x.hiring_contact_id, x.email && 'e' + String(x.email).trim().toLowerCase()].filter(Boolean)));
+  for (const [k, g] of [...groups].slice(0, 20)) {
+    const c = g.rows.find(x => x.email) || g.rows[0];
+    const before = emailedBefore.has(k) || g.rows.some(x => x.email && emailedBefore.has('e' + String(x.email).trim().toLowerCase()));
+    out.push(Object.assign(contactDraft(c, g.roles, g.rows, before), { role_id: c.role_id }));
   }
   for (const p of await sb('ail_sourced?select=*&revealed_at=not.is.null&drafted_at=is.null&email=not.is.null&status=eq.revealed&limit=20')) {
     const fit = (p.fits || []).filter(f => byRef.has(f.ref) && byRef.get(f.ref).status === 'open').sort((x, y) => y.score - x.score)[0];
@@ -818,13 +850,15 @@ async function buildLinkedIn(emailDrafts) {
   const roles = new Map((await sb('ail_roles?select=id,ref,title,company,company_masked,location,status&status=eq.open&limit=1000')).map(r => [r.id, r]));
   const byRef = new Map([...roles.values()].map(r => [r.ref, r]));
   const covered = new Set([...(await sb('ail_contacts?select=role_id&or=(drafted_at.not.is.null,li_drafted_at.not.is.null)&limit=1000')).map(x => x.role_id),
-    ...emailDrafts.filter(d => d.table === 'ail_contacts').map(d => d.role_id)]);
+    ...emailDrafts.filter(d => d.table === 'ail_contacts').flatMap(d => d.role_ids || [d.role_id])]);
   const best = new Map();
   for (const c of await sb('ail_contacts?select=*&linkedin_url=not.is.null&revealed_at=is.null&li_drafted_at=is.null&status=eq.found&limit=300')) {
     if (!roles.has(c.role_id) || covered.has(c.role_id)) continue;
     const cur = best.get(c.role_id); if (!cur || HIRE_RANK(c.title) < HIRE_RANK(cur.title)) best.set(c.role_id, c);
   }
-  const out = [...best.values()].slice(0, 10).map(c => { const r = roles.get(c.role_id); return { kind: 'Hiring contact', table: 'ail_contacts', id: c.id, li: c.linkedin_url, phone: c.phone, phone_type: c.phone_type, wa: waContact(c, r), name: c.name, who: `${c.title || ''} · ${c.company || ''}`, about: `${r.ref} ${r.title}`, note: contactNote(c, r) }; });
+  const byPerson = new Map(); // the same person can be the best contact for several roles: one LinkedIn note for all of them
+  for (const c of best.values()) { const k = c.hiring_contact_id ? 'h' + c.hiring_contact_id : 'l' + c.linkedin_url; const g = byPerson.get(k) || []; g.push(c); byPerson.set(k, g); }
+  const out = [...byPerson.values()].slice(0, 10).map(g => { const c = g[0], r = roles.get(c.role_id); return { kind: 'Hiring contact', table: 'ail_contacts', id: c.id, ids: g.map(x => x.id), li: c.linkedin_url, phone: c.phone, phone_type: c.phone_type, wa: waContact(c, r), name: c.name, who: `${c.title || ''} · ${c.company || ''}`, about: g.map(x => `${roles.get(x.role_id).ref} ${roles.get(x.role_id).title}`).join(' · '), note: contactNote(c, r) }; });
   const emailed = new Set(emailDrafts.filter(d => d.table === 'ail_sourced').map(d => d.id));
   const people = (await sb('ail_sourced?select=*&linkedin_url=not.is.null&email=is.null&li_drafted_at=is.null&status=in.(found,no_email)&fits=not.is.null&limit=300'))
     .filter(p => !emailed.has(p.id)).map(p => [p, (p.fits || []).filter(f => byRef.has(f.ref)).sort((x, y) => y.score - x.score)[0]]).filter(([, f]) => f && f.score >= 60).sort((x, y) => y[1].score - x[1].score).slice(0, 10);
@@ -917,8 +951,9 @@ ${out.errors.length ? `<b>Needs a look</b>${ul(out.errors)}` : ''}
   const sent = await mail({ to: OWNER, subject: `AI Leaders morning brief: ${drafts.length} email draft${drafts.length === 1 ? '' : 's'}${inOutlook ? ' in your Outlook Drafts' : ''}, ${lis.length} LinkedIn, ${newRoles.length} new role${newRoles.length === 1 ? '' : 's'}`, html, attachments, idem: 'ail-brief-' + new Date(Date.now() + 5.5 * 3600000).toISOString().slice(0, 10) + '-' + sha(html).slice(0, 16) }); // same content is never sent twice; changed content always goes out
   if (sent) {
     const now = new Date().toISOString();
-    for (const d of drafts) await sb(`${d.table}?id=eq.${d.id}`, { method: 'PATCH', body: d.table === 'ail_applications' ? { drafted_at: now } : { drafted_at: now, li_drafted_at: now } }).catch(() => {});
-    for (const d of lis) await sb(`${d.table}?id=eq.${d.id}`, { method: 'PATCH', body: { li_drafted_at: now } }).catch(() => {});
+    const idq = d => (d.ids && d.ids.length > 1) ? `id=in.(${d.ids.map(Number).join(',')})` : `id=eq.${d.id}`;
+    for (const d of drafts) await sb(`${d.table}?${idq(d)}`, { method: 'PATCH', body: d.table === 'ail_applications' ? { drafted_at: now } : { drafted_at: now, li_drafted_at: now } }).catch(() => {});
+    for (const d of lis) await sb(`${d.table}?${idq(d)}`, { method: 'PATCH', body: { li_drafted_at: now } }).catch(() => {});
   }
   return sent;
 }
